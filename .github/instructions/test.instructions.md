@@ -247,6 +247,10 @@ applyTo: "test/**/*.cs"
 
 ## Test Methods
 
+- **Test names should accurately describe the expected behavior of the target**.
+  - Say _rethrows_ when the target throws the existing exception with its stack trace restarted, as with `throw ex;`.
+    Say _propagates_ when it preserves the original stack trace, as with `throw;`, `ExceptionDispatchInfo.Throw`.
+
 - **Test names should form valid English sentences when read together with the class names**.
   For example `TraceTest.Constructor.ThrowsArgumentNullExceptionWhenTypeIsNull`.
   - _Describe the SUT's behavior, not the test mechanics_.
@@ -262,7 +266,7 @@ applyTo: "test/**/*.cs"
   - Inheritance alone is not a separate logical aspect and shouldn't be tested separately.
 
 - **Order test methods so that collapsed definitions form description of the SUT**, mirroring its doc
-  comments and implementation.
+  comments and implementation. These rules are for _ordering_ tests, not for _creating_ or _keeping_ them.
   - Place tests describing default/most common behavior first.
     They serve as an executable equivalent of the `<summary>`.
   - Place tests of inputs, edge cases and outputs next. 
@@ -395,8 +399,11 @@ applyTo: "test/**/*.cs"
   ```
 
 - **Generate Test Inputs**
-  Avoid hard-coded test inputs and use `Fuzzy` to generate them instead. See [fuzzy.instructions.md](fuzzy.instructions.md) 
-  for API details.
+  Avoid test inputs SUT may handle specifically.
+  - _Use `Fuzzy` to generate test values of common types_. See [fuzzy.instructions.md](fuzzy.instructions.md) for API details.
+  - _Define distinct test types instead of reusing existing types to test polymorphic or generic code_. E.g.
+    - Instead of reusing `InvalidOperationException` to test exception propagation, create a nested `TestException` class.
+    - Instead of reusing `int` and `string` to test collections, create nested `TestKey` and `TestValue` classes or structs.
 
 - **Test argument validation logic** - it's part of SUT's API.
   - _Create explicit tests for missing argument validation_ that can cause `NullReferenceException`, etc. in the consuming
@@ -409,7 +416,7 @@ applyTo: "test/**/*.cs"
     was invoked and rules out easy common mistakes, such as missing the empty-string check when testing only with `null`,
     or missing the `null` check when testing only with `string.Empty`.
 
-- **Use strongest xUnit assertions available**.
+- **Use strongest assertions available**.
   - _Prefer `Assert.Same` over `Assert.Equal`_ when asserting on unique test instances that neither SUT nor test logic replace.
   - _Prefer Collection/String/Span/Etc. `Assert` methods over `Assert.True`_.
 
@@ -522,15 +529,16 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Reveals intent**: Each test should accurately represent behavior of the SUT. A test that appears to verify a distinct
   code path but actually exercises the same logic as another test misrepresents what the SUT does.
 - **Minimize duplication**: 
-  - Don't write a test whose failure conditions overlap with another test.
-  - If one test can never fail without the other also failing, one of these tests duplicates the other. Make them specific
-    enough to fail independently or remove.
+  - If one test can never fail without another also failing, check whether it adds independent coverage.
+  - Make tests more specific when they are intended to verify distinct behavior, so they can fail independently.
+  - _Remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only verifies
+    a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker test.
+  - Combine assertions when they describe the same single logical aspect of the same target; keep distinct branches separate.
   - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenFooDiffers` cannot
     fail unless the corresponding `Equals_T` test also fails — delete the caller variant and trust the callee's tests.
     Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation logic_.
 - **Reduce tests to fewest elements**: 
-  - Remove tests that cannot fail independently.
   - Before writing a test for a branch or guard, verify that the branch is reachable independently of the paths already covered.
   - Don't create tests for consistency, parity or structural symmetry. API design principles don't apply to tests.
 
@@ -577,6 +585,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.
     - The _Don't test what SUT doesn't do_ rule doesn't apply to bugs caused by code missing from SUT.
+    - Don't create explicit bug tests for bugs in code outside of this repo.
+    - Verify that bug fixes make bug tests pass.
   - **Don't create explicit tests for unfixed bugs in callee code** - the _Don't test what SUT doesn't do_ rule still applies
     to callee bugs. E.g. SUT passing an argument to a callee that dereferences it without a `null` guard, is a bug in the
     callee. It's out of scope for SUT and should have an explicit test in the callee's test suite instead.

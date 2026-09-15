@@ -68,7 +68,7 @@ namespace Microsoft.ServiceFabric.Common
             KeyValueStoreReplicaCopyMode? copyMode = default(KeyValueStoreReplicaCopyMode?),
             KeyValueStoreReplicaCopyModeReason? copyModeReason = default(KeyValueStoreReplicaCopyModeReason?))
             : base(
-                Common.KeyValueStoreProviderKind.Ese)
+                Common.KeyValueStoreProviderKind.ESE)
         {
             this.PrimaryEpoch = primaryEpoch;
             this.PrimaryLastOperationSequenceNumber = primaryLastOperationSequenceNumber;

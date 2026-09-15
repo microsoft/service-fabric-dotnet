@@ -21,7 +21,7 @@ namespace Microsoft.ServiceFabric.Common
         Ese,
 
         /// <summary>
-        /// Transactional store provider. Copy details are not currently populated for TStore-backed replicas.
+        /// Copy details are not currently populated for TStore-backed replicas.
         /// </summary>
         TStore,
     }

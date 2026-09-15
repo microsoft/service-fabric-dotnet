@@ -19,11 +19,6 @@ namespace Microsoft.ServiceFabric.Common
         /// </summary>
         /// <param name="kind">The storage provider backing the key value store replica. Determines which copy detail
         /// type is populated during replica build.
-        /// - Unknown - The provider kind has not been determined.
-        /// - Ese - Extensible Storage Engine. Copy details are available via ProviderCopyDetail including
-        /// copy type, mode, and format version information.
-        /// - TStore - Transactional store provider. Copy details are not currently populated for
-        /// TStore-backed replicas.
         /// </param>
         protected KeyValueStoreProviderCopyDetail(
             KeyValueStoreProviderKind? kind)
@@ -35,11 +30,6 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// Gets the storage provider backing the key value store replica. Determines which copy detail
         /// type is populated during replica build.
-        /// - Unknown - The provider kind has not been determined.
-        /// - Ese - Extensible Storage Engine. Copy details are available via ProviderCopyDetail including
-        /// copy type, mode, and format version information.
-        /// - TStore - Transactional store provider. Copy details are not currently populated for
-        /// TStore-backed replicas.
         /// </summary>
         public KeyValueStoreProviderKind? Kind { get; }
     }

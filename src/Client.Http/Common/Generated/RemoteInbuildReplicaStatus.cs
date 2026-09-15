@@ -11,12 +11,7 @@ namespace Microsoft.ServiceFabric.Common
     /// <summary>
     /// Represents the status of an inbuild replica from the primary replicator's perspective.
     /// An inbuild replica is a secondary replica that is being built from the primary through a copy process.
-    /// This tracks the progress and state of that build operation through phases:
-    /// CopyContext (get initial state of the inbuild secondary),
-    /// CopyState (get current state of the primary at the start of the copy),
-    /// Copy (make decisions on the type and mode of copy and transfer data),
-    /// CopyCatchup (catch up on operations received by the primary since the start of the copy),
-    /// and CopyComplete (build finished).
+    /// This tracks the progress and state of that build operation across its inbuild phases.
     /// </summary>
     public partial class RemoteInbuildReplicaStatus
     {
@@ -28,9 +23,7 @@ namespace Microsoft.ServiceFabric.Common
         /// CopyContext, CopyState, Copy, CopyCatchup, and CopyComplete.
         /// . Possible values include: 'CopyContext', 'CopyState', 'Copy', 'CopyCatchup', 'CopyComplete'
         /// 
-        /// The phase of the inbuild process while a secondary replica is brought up to date with the
-        /// primary's state, from initial context exchange through data transfer and catch-up to build
-        /// completion.
+        /// The phase of the inbuild process as a secondary replica is brought up to date with the primary's state.
         /// 
         /// </param>
         /// <param name="copyContextPhase">The sub-phase within the CopyContext phase. Only relevant when InbuildPhase is
@@ -38,9 +31,7 @@ namespace Microsoft.ServiceFabric.Common
         /// Tracks the initial connection establishment and copy state retrieval from the secondary.
         /// . Possible values include: 'EstablishConnection', 'GetCopyContext'
         /// 
-        /// The sub-phase within the initial CopyContext phase of the inbuild process, progressing from
-        /// creating the replication channel to collecting secondary-side state metadata. This metadata is
-        /// used by the primary to decide whether copy can be incremental or must be full.
+        /// The sub-phase within the initial CopyContext phase of the inbuild process.
         /// 
         /// </param>
         /// <param name="lastCopySequenceNumber">The last sequence number that has been quorum committed when the primary
@@ -107,9 +98,7 @@ namespace Microsoft.ServiceFabric.Common
         /// CopyContext, CopyState, Copy, CopyCatchup, and CopyComplete.
         /// . Possible values include: 'CopyContext', 'CopyState', 'Copy', 'CopyCatchup', 'CopyComplete'
         /// 
-        /// The phase of the inbuild process while a secondary replica is brought up to date with the
-        /// primary's state, from initial context exchange through data transfer and catch-up to build
-        /// completion.
+        /// The phase of the inbuild process as a secondary replica is brought up to date with the primary's state.
         /// </summary>
         public InbuildReplicaPhase? InbuildPhase { get; }
 
@@ -118,9 +107,7 @@ namespace Microsoft.ServiceFabric.Common
         /// Tracks the initial connection establishment and copy state retrieval from the secondary.
         /// . Possible values include: 'EstablishConnection', 'GetCopyContext'
         /// 
-        /// The sub-phase within the initial CopyContext phase of the inbuild process, progressing from
-        /// creating the replication channel to collecting secondary-side state metadata. This metadata is
-        /// used by the primary to decide whether copy can be incremental or must be full.
+        /// The sub-phase within the initial CopyContext phase of the inbuild process.
         /// </summary>
         public InbuildReplicaCopyContextPhase? CopyContextPhase { get; }
 

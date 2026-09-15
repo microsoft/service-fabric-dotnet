@@ -16,8 +16,8 @@ namespace Microsoft.ServiceFabric.Common
         EstablishConnection,
 
         /// <summary>
-        /// The primary retrieves secondary copy context (for example epoch and last operation sequence number) to determine
-        /// the required copy strategy.
+        /// The primary retrieves secondary copy context ( epoch and last operation sequence number) to determine the required
+        /// copy strategy.
         /// </summary>
         GetCopyContext,
     }

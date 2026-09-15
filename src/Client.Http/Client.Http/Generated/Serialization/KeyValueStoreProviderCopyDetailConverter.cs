@@ -41,7 +41,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             }
 
             var propValue = reader.ReadValueAsString();
-            if (propValue.Equals("Ese", StringComparison.OrdinalIgnoreCase))
+            if (propValue.Equals("ESE", StringComparison.OrdinalIgnoreCase))
             {
                 obj = KeyValueStoreEseReplicaCopyDetailConverter.GetFromJsonProperties(reader);
             }
@@ -61,7 +61,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
         internal static void Serialize(JsonWriter writer, KeyValueStoreProviderCopyDetail obj)
         {
             var kind = obj.Kind;
-            if (kind.Equals(KeyValueStoreProviderKind.Ese))
+            if (kind.Equals(KeyValueStoreProviderKind.ESE))
             {
                 KeyValueStoreEseReplicaCopyDetailConverter.Serialize(writer, (KeyValueStoreEseReplicaCopyDetail)obj);
             }

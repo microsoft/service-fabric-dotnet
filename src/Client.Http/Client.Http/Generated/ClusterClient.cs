@@ -884,7 +884,7 @@ namespace Microsoft.ServiceFabric.Client.Http
         }
 
         /// <inheritdoc />
-        public Task<PagedData<CapacityReleaseEstimate>> GetCapacityReleaseEstimationAsync(
+        public Task<PagedData<CapacityReleaseEstimate>> GetCapacityReleaseEstimateAsync(
             ContinuationToken continuationToken = default(ContinuationToken),
             long? maxResults = 0,
             long? serverTimeout = 60,
@@ -893,7 +893,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             maxResults?.ThrowIfLessThan("maxResults", 0);
             serverTimeout?.ThrowIfOutOfInclusiveRange("serverTimeout", 1, 4294967295);
             var requestId = Guid.NewGuid().ToString();
-            var url = "$/GetCapacityReleaseEstimation";
+            var url = "$/GetCapacityReleaseEstimate";
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.

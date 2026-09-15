@@ -13,8 +13,8 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// <summary>
     /// Gets projected used capacity relative to cluster total capacity for each metric at each capacity release level.
     /// </summary>
-    [Cmdlet(VerbsCommon.Get, "SFCapacityReleaseEstimation")]
-    public partial class GetCapacityReleaseEstimationCmdlet : CommonCmdletBase
+    [Cmdlet(VerbsCommon.Get, "SFCapacityReleaseEstimate")]
+    public partial class GetCapacityReleaseEstimateCmdlet : CommonCmdletBase
     {
         /// <summary>
         /// Gets or sets MaxResults. The maximum number of results to be returned as part of the paged queries. This parameter
@@ -40,7 +40,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             var continuationToken = default(ContinuationToken);
             do
             {
-                var result = this.ServiceFabricClient.Cluster.GetCapacityReleaseEstimationAsync(
+                var result = this.ServiceFabricClient.Cluster.GetCapacityReleaseEstimateAsync(
                     continuationToken: continuationToken,
                     maxResults: this.MaxResults,
                     serverTimeout: this.ServerTimeout,

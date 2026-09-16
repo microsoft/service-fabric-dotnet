@@ -10,7 +10,7 @@ namespace Microsoft.ServiceFabric.Common
 
     /// <summary>
     /// Base type for provider-specific key value store copy details during replica build.
-    /// The Kind property determines the storage provider (for example, Ese) for this copy detail.
+    /// The Kind property determines the storage provider for this copy detail.
     /// </summary>
     public abstract partial class KeyValueStoreProviderCopyDetail
     {

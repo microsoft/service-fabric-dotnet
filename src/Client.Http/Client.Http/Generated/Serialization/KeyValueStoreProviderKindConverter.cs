@@ -32,7 +32,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             }
             else if (string.Compare(value, "ESE", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                obj = KeyValueStoreProviderKind.Ese;
+                obj = KeyValueStoreProviderKind.ESE;
             }
             else if (string.Compare(value, "TStore", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -54,7 +54,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 case KeyValueStoreProviderKind.Unknown:
                     writer.WriteStringValue("Unknown");
                     break;
-                case KeyValueStoreProviderKind.Ese:
+                case KeyValueStoreProviderKind.ESE:
                     writer.WriteStringValue("ESE");
                     break;
                 case KeyValueStoreProviderKind.TStore:

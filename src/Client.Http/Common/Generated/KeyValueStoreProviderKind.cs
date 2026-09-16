@@ -18,7 +18,7 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// Extensible Storage Engine. Copy details are available via ProviderCopyDetail.
         /// </summary>
-        Ese,
+        ESE,
 
         /// <summary>
         /// Copy details are not currently populated for TStore-backed replicas.

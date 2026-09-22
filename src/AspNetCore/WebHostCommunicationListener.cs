@@ -10,10 +10,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.ServiceFabric.Constants;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace Microsoft.ServiceFabric.Services.Communication.AspNetCore
 {
+    [Obsolete(AspDepr008.Message)]
     internal class WebHostCommunicationListener : ICommunicationListener
     {
         private readonly Func<string, AspNetCoreCommunicationListener, IWebHost> build;

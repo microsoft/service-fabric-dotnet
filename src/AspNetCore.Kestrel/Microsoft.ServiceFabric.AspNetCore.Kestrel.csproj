@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Microsoft.ServiceFabric.Services.Communication.AspNetCore</RootNamespace>
-    <TargetFrameworks>net462;net8.0</TargetFrameworks>
     <Description>Kestrel-based communication listener for ASP.NET Core applications on Service Fabric.</Description>
   </PropertyGroup>
   <Import Project="..\..\properties\service_fabric_managed_common.props" />
@@ -13,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore\Microsoft.ServiceFabric.AspNetCore.csproj" />
+    <ProjectReference Include="..\Constants\Microsoft.ServiceFabric.Constants.csproj" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="SR.resx" StronglyTypedLanguage="CSharp" />

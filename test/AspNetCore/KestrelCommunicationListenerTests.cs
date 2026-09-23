@@ -104,7 +104,9 @@ namespace Microsoft.ServiceFabric.AspNetCore.Tests
         {
             if (hostType == "WebHost")
             {
+#pragma warning disable CS0618 // Test obsolete IWebHost APIs until they are removed
                 return new KestrelCommunicationListener(context, endpointName, (uri, listen) => this.IWebHostBuildFunc(uri, listen));
+#pragma warning restore CS0618
             }
             else
             {

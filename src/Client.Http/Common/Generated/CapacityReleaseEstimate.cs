@@ -20,7 +20,7 @@ namespace Microsoft.ServiceFabric.Common
         /// <param name="level">The capacity release scenario whose projected impact this estimate represents. Possible values
         /// include: 'None', 'Minor', 'Major'
         /// 
-        /// The level of capacity release applied to the cluster.
+        /// The capacity release level for the cluster.
         /// </param>
         /// <param name="metricName">The cluster metric being projected.</param>
         /// <param name="usedCapacity">The projected used capacity for the metric if the capacity release level were
@@ -30,8 +30,8 @@ namespace Microsoft.ServiceFabric.Common
         public CapacityReleaseEstimate(
             CapacityReleaseLevel? level,
             string metricName,
-            long? usedCapacity,
-            long? totalCapacity)
+            string usedCapacity,
+            string totalCapacity)
         {
             level.ThrowIfNull(nameof(level));
             metricName.ThrowIfNull(nameof(metricName));
@@ -47,7 +47,7 @@ namespace Microsoft.ServiceFabric.Common
         /// Gets the capacity release scenario whose projected impact this estimate represents. Possible values include:
         /// 'None', 'Minor', 'Major'
         /// 
-        /// The level of capacity release applied to the cluster.
+        /// The capacity release level for the cluster.
         /// </summary>
         public CapacityReleaseLevel? Level { get; }
 
@@ -59,12 +59,12 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// Gets the projected used capacity for the metric if the capacity release level were applied.
         /// </summary>
-        public long? UsedCapacity { get; }
+        public string UsedCapacity { get; }
 
         /// <summary>
         /// Gets the cluster total capacity for the metric. This value is not projected and does not depend on the capacity
         /// release level.
         /// </summary>
-        public long? TotalCapacity { get; }
+        public string TotalCapacity { get; }
     }
 }

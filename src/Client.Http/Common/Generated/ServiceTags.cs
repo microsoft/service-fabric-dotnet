@@ -9,7 +9,7 @@ namespace Microsoft.ServiceFabric.Common
     using System.Collections.Generic;
 
     /// <summary>
-    /// Wrapper for service tags - TagsRequiredToPlace, TagsRequiredToRun and ServiceTags.
+    /// Wrapper for service tags - TagsRequiredToPlace and TagsRequiredToRun.
     /// </summary>
     public partial class ServiceTags
     {
@@ -18,12 +18,10 @@ namespace Microsoft.ServiceFabric.Common
         /// </summary>
         public ServiceTags(
             IEnumerable<string> tagsRequiredToPlace = default(IEnumerable<string>),
-            IEnumerable<string> tagsRequiredToRun = default(IEnumerable<string>),
-            IEnumerable<string> tags = default(IEnumerable<string>))
+            IEnumerable<string> tagsRequiredToRun = default(IEnumerable<string>))
         {
             this.TagsRequiredToPlace = tagsRequiredToPlace;
             this.TagsRequiredToRun = tagsRequiredToRun;
-            this.Tags = tags;
         }
 
         /// <summary>
@@ -33,9 +31,5 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// </summary>
         public IEnumerable<string> TagsRequiredToRun { get; }
-
-        /// <summary>
-        /// </summary>
-        public IEnumerable<string> Tags { get; }
     }
 }

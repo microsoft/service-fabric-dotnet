@@ -44,8 +44,6 @@ namespace Microsoft.ServiceFabric.Common
         /// - ServiceDnsName - Indicates the ServiceDnsName property is set. The value is 131072.
         /// - ServiceTags TagsRequiredToPlace - Indicates the TagsRequiredToPlace property is set. The value is 1048576.
         /// - ServiceTags TagsRequiredToRun - Indicates the TagsRequiredToRun property is set. The value is 2097152.
-        /// - ServiceTags - Indicates the ServiceTags (the per-service tag list used for notification filtering) property is
-        /// set. The value is 134217728.
         /// - CapacityReleaseAction - Indicates the CapacityReleaseAction property is set. The value is 268435456.
         /// </param>
         /// <param name="placementConstraints">The placement constraints as a string. Placement constraints are boolean

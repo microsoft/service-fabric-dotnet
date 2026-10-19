@@ -35,8 +35,8 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
         {
             var level = default(CapacityReleaseLevel?);
             var metricName = default(string);
-            var usedCapacity = default(long?);
-            var totalCapacity = default(long?);
+            var usedCapacity = default(string);
+            var totalCapacity = default(string);
 
             do
             {
@@ -51,11 +51,11 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 }
                 else if (string.Compare("UsedCapacity", propName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    usedCapacity = reader.ReadValueAsLong();
+                    usedCapacity = reader.ReadValueAsString();
                 }
                 else if (string.Compare("TotalCapacity", propName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    totalCapacity = reader.ReadValueAsLong();
+                    totalCapacity = reader.ReadValueAsString();
                 }
                 else
                 {
@@ -82,8 +82,8 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             writer.WriteStartObject();
             writer.WriteProperty(obj.Level, "Level", CapacityReleaseLevelConverter.Serialize);
             writer.WriteProperty(obj.MetricName, "MetricName", JsonWriterExtensions.WriteStringValue);
-            writer.WriteProperty(obj.UsedCapacity, "UsedCapacity", JsonWriterExtensions.WriteLongValue);
-            writer.WriteProperty(obj.TotalCapacity, "TotalCapacity", JsonWriterExtensions.WriteLongValue);
+            writer.WriteProperty(obj.UsedCapacity, "UsedCapacity", JsonWriterExtensions.WriteStringValue);
+            writer.WriteProperty(obj.TotalCapacity, "TotalCapacity", JsonWriterExtensions.WriteStringValue);
             writer.WriteEndObject();
         }
     }

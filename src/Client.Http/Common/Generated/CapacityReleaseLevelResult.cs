@@ -18,7 +18,7 @@ namespace Microsoft.ServiceFabric.Common
         /// </summary>
         /// <param name="level">The current capacity release level. Possible values include: 'None', 'Minor', 'Major'
         /// 
-        /// The level of capacity release applied to the cluster.
+        /// The capacity release level for the cluster.
         /// </param>
         public CapacityReleaseLevelResult(
             CapacityReleaseLevel? level)
@@ -30,7 +30,7 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// Gets the current capacity release level. Possible values include: 'None', 'Minor', 'Major'
         /// 
-        /// The level of capacity release applied to the cluster.
+        /// The capacity release level for the cluster.
         /// </summary>
         public CapacityReleaseLevel? Level { get; }
     }

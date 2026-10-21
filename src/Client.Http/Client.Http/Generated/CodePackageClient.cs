@@ -209,5 +209,166 @@ namespace Microsoft.ServiceFabric.Client.Http
 
             return this.httpClient.SendAsyncGetResponse(RequestFunc, url, ContainerApiResponseConverter.Deserialize, requestId, cancellationToken);
         }
+
+        /// <inheritdoc />
+        public Task<CodePackagePatchResult> CreateCodePackagePatchAsync(
+            CodePackagePatchCreateDescription codePackagePatchCreateDescription,
+            long? serverTimeout = 1800,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            codePackagePatchCreateDescription.ThrowIfNull(nameof(codePackagePatchCreateDescription));
+            serverTimeout?.ThrowIfOutOfInclusiveRange("serverTimeout", 1, 4294967295);
+            var requestId = Guid.NewGuid().ToString();
+            var url = "CodePackagePatches/$/Create";
+            var queryParams = new List<string>();
+            
+            // Append to queryParams if not null.
+            serverTimeout?.AddToQueryParameters(queryParams, $"timeout={serverTimeout}");
+            queryParams.Add("api-version=11.11");
+            url += "?" + string.Join("&", queryParams);
+            
+            string content;
+            using (var sw = new StringWriter())
+            {
+                CodePackagePatchCreateDescriptionConverter.Serialize(new JsonTextWriter(sw), codePackagePatchCreateDescription);
+                content = sw.ToString();
+            }
+
+            HttpRequestMessage RequestFunc()
+            {
+                var request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    Content = new StringContent(content, Encoding.UTF8),
+                };
+                request.Content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
+                return request;
+            }
+
+            return this.httpClient.SendAsyncGetResponse(RequestFunc, url, CodePackagePatchResultConverter.Deserialize, requestId, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task<CodePackagePatchResult> DeleteCodePackagePatchAsync(
+            string patchId,
+            CodePackagePatchDeleteDescription codePackagePatchDeleteDescription = default(CodePackagePatchDeleteDescription),
+            long? serverTimeout = 60,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            patchId.ThrowIfNull(nameof(patchId));
+            serverTimeout?.ThrowIfOutOfInclusiveRange("serverTimeout", 1, 4294967295);
+            var requestId = Guid.NewGuid().ToString();
+            var url = "CodePackagePatches/{patchId}/$/Delete";
+            url = url.Replace("{patchId}", Uri.EscapeDataString(patchId));
+            var queryParams = new List<string>();
+            
+            // Append to queryParams if not null.
+            serverTimeout?.AddToQueryParameters(queryParams, $"timeout={serverTimeout}");
+            queryParams.Add("api-version=11.11");
+            url += "?" + string.Join("&", queryParams);
+            
+            string content;
+            using (var sw = new StringWriter())
+            {
+                if (codePackagePatchDeleteDescription != default(CodePackagePatchDeleteDescription))
+                {
+                    CodePackagePatchDeleteDescriptionConverter.Serialize(new JsonTextWriter(sw), codePackagePatchDeleteDescription);
+                }
+
+                content = sw.ToString();
+            }
+
+            HttpRequestMessage RequestFunc()
+            {
+                var request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    Content = new StringContent(content, Encoding.UTF8),
+                };
+                request.Content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
+                return request;
+            }
+
+            return this.httpClient.SendAsyncGetResponse(RequestFunc, url, CodePackagePatchResultConverter.Deserialize, requestId, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task<CodePackagePatchResult> GetCodePackagePatchInfoListAsync(
+            string patchIdFilter = default(string),
+            string serviceName = default(string),
+            string codePackageName = default(string),
+            string codePackageVersion = default(string),
+            PartitionId partitionId = default(PartitionId),
+            string nodes = default(string),
+            long? serverTimeout = 60,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            serverTimeout?.ThrowIfOutOfInclusiveRange("serverTimeout", 1, 4294967295);
+            var requestId = Guid.NewGuid().ToString();
+            var url = "CodePackagePatches";
+            var queryParams = new List<string>();
+            
+            // Append to queryParams if not null.
+            patchIdFilter?.AddToQueryParameters(queryParams, $"PatchId={patchIdFilter}");
+            serviceName?.AddToQueryParameters(queryParams, $"ServiceName={serviceName}");
+            codePackageName?.AddToQueryParameters(queryParams, $"CodePackageName={codePackageName}");
+            codePackageVersion?.AddToQueryParameters(queryParams, $"CodePackageVersion={codePackageVersion}");
+            partitionId?.AddToQueryParameters(queryParams, $"PartitionId={partitionId.ToString()}");
+            nodes?.AddToQueryParameters(queryParams, $"Nodes={nodes}");
+            serverTimeout?.AddToQueryParameters(queryParams, $"timeout={serverTimeout}");
+            queryParams.Add("api-version=11.11");
+            url += "?" + string.Join("&", queryParams);
+            
+            HttpRequestMessage RequestFunc()
+            {
+                var request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Get,
+                };
+                return request;
+            }
+
+            return this.httpClient.SendAsyncGetResponse(RequestFunc, url, CodePackagePatchResultConverter.Deserialize, requestId, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task<CodePackagePatchResult> GetCodePackagePatchInfoAsync(
+            string patchId,
+            string serviceName = default(string),
+            string codePackageName = default(string),
+            string codePackageVersion = default(string),
+            PartitionId partitionId = default(PartitionId),
+            string nodes = default(string),
+            long? serverTimeout = 60,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            patchId.ThrowIfNull(nameof(patchId));
+            serverTimeout?.ThrowIfOutOfInclusiveRange("serverTimeout", 1, 4294967295);
+            var requestId = Guid.NewGuid().ToString();
+            var url = "CodePackagePatches/{patchId}";
+            url = url.Replace("{patchId}", Uri.EscapeDataString(patchId));
+            var queryParams = new List<string>();
+            
+            // Append to queryParams if not null.
+            serviceName?.AddToQueryParameters(queryParams, $"ServiceName={serviceName}");
+            codePackageName?.AddToQueryParameters(queryParams, $"CodePackageName={codePackageName}");
+            codePackageVersion?.AddToQueryParameters(queryParams, $"CodePackageVersion={codePackageVersion}");
+            partitionId?.AddToQueryParameters(queryParams, $"PartitionId={partitionId.ToString()}");
+            nodes?.AddToQueryParameters(queryParams, $"Nodes={nodes}");
+            serverTimeout?.AddToQueryParameters(queryParams, $"timeout={serverTimeout}");
+            queryParams.Add("api-version=11.11");
+            url += "?" + string.Join("&", queryParams);
+            
+            HttpRequestMessage RequestFunc()
+            {
+                var request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Get,
+                };
+                return request;
+            }
+
+            return this.httpClient.SendAsyncGetResponse(RequestFunc, url, CodePackagePatchResultConverter.Deserialize, requestId, cancellationToken);
+        }
     }
 }

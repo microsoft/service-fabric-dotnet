@@ -18,7 +18,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <summary>
         /// Initializes a new instance of the <see cref="Int64MeterProvider"/> class.
         /// </summary>
-        /// <param name="serviceContext">The Service Fabric ServiceContext provides system dimensions to the native meter provider.</param>
+        /// <param name="serviceContext">The Service Fabric ServiceContext whose partition, service and application identify the recorded values (fixed dimensions).</param>
         internal Int64MeterProvider(ServiceContext serviceContext = null) : base(serviceContext) { }
 
         /// <summary>

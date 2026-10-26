@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 {
-    public class MeterProviderTest : IDisposable
+    public class MeterProviderTest : FabricTelemetryDllFixture
     {
         static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
@@ -29,8 +29,6 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
             typeof(ComInstrumentProvider).Field<Func<IFabricMeterProvider2>>().Set(() => fabricMeterProvider);
             sut = new Mock<MeterProvider<int>>(serviceContext).Object;
         }
-
-        public virtual void Dispose() => typeof(ComInstrumentProvider).Field<Func<IFabricMeterProvider2>>().Set(NativeTelemetry.FabricCreateMeterProvider);
 
         public class Constructor : MeterProviderTest
         {

@@ -43,7 +43,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
                 fixedDimensionValues = [];
             }
 
-            instrumentProvider = new ComInstrumentProvider(fixedDimensionNames, fixedDimensionValues);
+            instrumentProvider = MetricsBackendSelector.CreateInstrumentProvider(fixedDimensionNames, fixedDimensionValues);
         }
 
         protected IInstrument CreateInstrument(string metricNamespace, string metricName, string[] variableDimensionNames) =>

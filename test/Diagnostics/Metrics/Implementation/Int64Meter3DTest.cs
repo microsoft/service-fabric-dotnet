@@ -21,7 +21,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
         // Test fixture
         static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-        public Int64Meter3DTest() => sut = new Int64Meter3D(fabricMeter);
+        public Int64Meter3DTest() => sut = new Int64Meter3D(new ComInstrument(fabricMeter));
 
         public class Class : Int64Meter3DTest
         {
@@ -29,7 +29,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
             public void InvokesBaseWithGivenArguments()
             {
                 var meter = (Meter)sut;
-                Assert.Same(fabricMeter, meter.Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, meter.Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
         }
 

@@ -13,5 +13,5 @@ applyTo: "**/*.cs"
 - Define native structs with `[StructLayout(LayoutKind.Sequential, Pack = 8)]` using only `IntPtr` and `uint` fields.
   Include an `IntPtr Reserved` field for future extensibility (allowing `_EX1`, `_EX2` extensions).
 - Use `GCHandle.Alloc(value, GCHandleType.Pinned)` + `stackalloc` to pin strings and build pointer arrays on the caller
-  side. See `Meter.RecordViaNative` and `MeterProvider.CreateNativeMeter` for the canonical pattern.
+  side. See `ComInstrument.RecordViaNative` and `ComInstrumentProvider.CreateNativeMeter` for the canonical pattern.
 - Do not use `PinCollection` for new code unless the interop call requires it for other reasons.

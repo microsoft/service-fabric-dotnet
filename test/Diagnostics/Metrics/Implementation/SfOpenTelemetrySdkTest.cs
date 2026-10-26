@@ -121,4 +121,53 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
             Assert.DoesNotContain(scope.Exporter.Points, p => p.MetricName == "Namespace.Foreign" + name);
         }
     }
+
+    public sealed class ForceFlush : SfOpenTelemetrySdkTest
+    {
+        [Fact]
+        public void TracesWarningForFirstIncompleteFlush()
+        {
+            using Int64MeterProvider provider = new();
+            IMeter<long> meter = provider.CreateMeter("Namespace", MetricsTestScope.UniqueName("IncompleteFlush"));
+            scope.Exporter.Fails = true;
+            try
+            {
+                meter.Record(1);
+                SfMetricsPipeline.ForceFlush();
+                meter.Record(2);
+                SfMetricsPipeline.ForceFlush();
+
+                TraceRecord warning = Assert.Single(scope.TracesOfType("OpenTelemetryMetricsFactory"), t => t.Level == MetricsTraceLevel.Warning);
+                Assert.Contains("did not complete for every Geneva collector (1 incomplete flush(es)", warning.Message);
+            }
+            finally
+            {
+                // A complete flush resets the process-wide throttle for the next test.
+                scope.Exporter.Fails = false;
+                SfMetricsPipeline.ForceFlush();
+            }
+        }
+
+        [Fact]
+        public void TracesInfoForFirstCompleteFlushAfterIncompleteOnes()
+        {
+            using Int64MeterProvider provider = new();
+            IMeter<long> meter = provider.CreateMeter("Namespace", MetricsTestScope.UniqueName("RecoveredFlush"));
+            scope.Exporter.Fails = true;
+            meter.Record(1);
+            SfMetricsPipeline.ForceFlush();
+            meter.Record(2);
+            SfMetricsPipeline.ForceFlush();
+            scope.Exporter.Fails = false;
+
+            meter.Record(3);
+            SfMetricsPipeline.ForceFlush();
+            meter.Record(4);
+            SfMetricsPipeline.ForceFlush();
+
+            TraceRecord info = Assert.Single(scope.TracesOfType("OpenTelemetryMetricsFactory"), t => t.Message.Contains("completed for every Geneva collector again"));
+            Assert.Equal(MetricsTraceLevel.Info, info.Level);
+            Assert.Contains("after 2 incomplete flush(es)", info.Message);
+        }
+    }
 }

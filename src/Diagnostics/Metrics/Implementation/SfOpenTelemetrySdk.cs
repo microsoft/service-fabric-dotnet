@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,8 @@ static class SfOpenTelemetrySdk
 
     // Replaced by tests to export to an in-memory exporter.
     internal static Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> CreateExporter = CreateGenevaExporter;
+
+    static readonly FailureTraceThrottle flushFailures = new();
 
     /// <summary>
     /// Returns the SDK meter provider, or null when no collector yields an exporter. Throws when the provider cannot be built.
@@ -100,11 +103,26 @@ static class SfOpenTelemetrySdk
     }
 
     /// <summary>
-    /// Exports everything recorded so far. Waits for all readers without a timeout, like the native ForceFlush.
+    /// Exports everything recorded so far. Waits for all readers without a timeout, like the native ForceFlush. A flush that
+    /// does not complete for every collector is traced, throttled; each collector's exporter traces its own failed exports.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static void ForceFlush(IDisposable provider) =>
-        _ = ((OpenTelemetryMeterProvider)provider).ForceFlush(Timeout.Infinite);
+    internal static void ForceFlush(IDisposable provider)
+    {
+        bool completed = ((OpenTelemetryMeterProvider)provider).ForceFlush(Timeout.Infinite);
+        long incompleteFlushes;
+        if (completed)
+        {
+            if (flushFailures.OnSuccess(out incompleteFlushes))
+                MetricsTrace.Info(TraceType, $"Managed metrics flush completed for every Geneva collector again after {incompleteFlushes} incomplete flush(es).");
+        }
+        else if (flushFailures.OnFailure(out incompleteFlushes))
+        {
+            MetricsTrace.Warning(
+                TraceType,
+                $"Managed metrics flush did not complete for every Geneva collector ({incompleteFlushes} incomplete flush(es) since the last such trace); failed exports are traced per collector.");
+        }
+    }
 
     static BaseExporter<Metric> CreateGenevaExporter(string connectionString, IReadOnlyDictionary<string, object> prepopulatedDimensions)
     {
@@ -112,6 +130,113 @@ static class SfOpenTelemetrySdk
         if (prepopulatedDimensions.Count > 0)
             options.PrepopulatedMetricDimensions = prepopulatedDimensions;
 
-        return new GenevaMetricExporter(options);
+        return new TracingGenevaMetricExporter(options, connectionString);
+    }
+
+    /// <summary>
+    /// The Geneva exporter reports a failed export only through its result and its own EventSource
+    /// (OpenTelemetry-Exporter-Geneva), so this subclass also traces it to the Service Fabric trace.
+    /// It subclasses rather than wraps the exporter, so the reader still sets the exporter's ParentProvider.
+    /// </summary>
+    sealed class TracingGenevaMetricExporter(GenevaMetricExporterOptions options, string collector) : GenevaMetricExporter(options)
+    {
+        readonly string collector = collector;
+        readonly FailureTraceThrottle failures = new();
+
+        public override ExportResult Export(in Batch<Metric> batch)
+        {
+            ExportResult result;
+            try
+            {
+                result = base.Export(batch);
+            }
+            catch (Exception e)
+            {
+                TraceFailure(e);
+                throw;
+            }
+
+            if (result != ExportResult.Success)
+                TraceFailure(null);
+            else if (failures.OnSuccess(out long failedExports))
+                MetricsTrace.Info(TraceType, $"Managed metrics export to Geneva collector '{collector}' succeeded again after {failedExports} failed export(s).");
+
+            return result;
+        }
+
+        void TraceFailure(Exception e)
+        {
+            if (failures.OnFailure(out long failedExports))
+            {
+                string error = e == null ? string.Empty : $" Error: {e}";
+                MetricsTrace.Warning(
+                    TraceType,
+                    $"Managed metrics export to Geneva collector '{collector}' failed ({failedExports} failed export(s) since the last such trace); points that were not sent are not retried. The exporter writes the reason for each point to the OpenTelemetry-Exporter-Geneva EventSource.{error}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Throttles traces of a repeating failure: the first failure is traced, then at most one trace per interval carries the
+    /// count since the previous trace, and the first success after failures is traced once. Exports run once a minute per
+    /// collector, so a count-based throttle (MetricsTrace.ShouldTraceOccurrence) would trace too rarely.
+    /// </summary>
+    sealed class FailureTraceThrottle
+    {
+        static readonly long intervalTimestampTicks = Stopwatch.Frequency * 300;
+
+        readonly object syncRoot = new();
+        long failuresSinceTrace;
+        long failuresSinceSuccess;
+        long nextTraceTimestamp;
+        bool failing;
+
+        /// <summary>
+        /// Counts a failure. Returns true when it is to be traced, with the number of failures since the previous trace.
+        /// </summary>
+        internal bool OnFailure(out long failuresSinceLastTrace)
+        {
+            lock (syncRoot)
+            {
+                Volatile.Write(ref failing, true);
+                failuresSinceSuccess++;
+                failuresSinceTrace++;
+
+                long now = Stopwatch.GetTimestamp();
+                if (now < nextTraceTimestamp)
+                {
+                    failuresSinceLastTrace = 0;
+                    return false;
+                }
+
+                failuresSinceLastTrace = failuresSinceTrace;
+                failuresSinceTrace = 0;
+                nextTraceTimestamp = now + intervalTimestampTicks;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Records a success. Returns true for the first success after failures, with the number of those failures.
+        /// </summary>
+        internal bool OnSuccess(out long failuresBeforeSuccess)
+        {
+            failuresBeforeSuccess = 0;
+            if (!Volatile.Read(ref failing))
+                return false;
+
+            lock (syncRoot)
+            {
+                if (!failing)
+                    return false;
+
+                failuresBeforeSuccess = failuresSinceSuccess;
+                failuresSinceSuccess = 0;
+                failuresSinceTrace = 0;
+                nextTraceTimestamp = 0;
+                Volatile.Write(ref failing, false);
+                return true;
+            }
+        }
     }
 }

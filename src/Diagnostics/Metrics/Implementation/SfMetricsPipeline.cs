@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
@@ -101,9 +102,20 @@ static class SfMetricsPipeline
         // Throws when System.Diagnostics.DiagnosticSource cannot be loaded.
         SfMeterRegistry.EnsureLoaded();
 
-        IDisposable sdkProvider = settings.GenevaConnectionStrings.Count > 0 ? BuildSdkProvider(settings) : null;
-        if (sdkProvider == null && settings.GenevaConnectionStrings.Count == 0)
+        IDisposable sdkProvider = null;
+        if (settings.GenevaConnectionStrings.Count > 0)
+        {
+            long buildStart = Stopwatch.GetTimestamp();
+            sdkProvider = BuildSdkProvider(settings);
+            long buildMilliseconds = (Stopwatch.GetTimestamp() - buildStart) * 1000 / Stopwatch.Frequency;
+            MetricsTrace.Info(
+                TraceType,
+                $"Building the OpenTelemetry SDK provider took {buildMilliseconds} ms inside the process-wide metrics initialization lock.");
+        }
+        else
+        {
             MetricsTrace.Info(TraceType, "No Geneva collector is configured; managed metrics are recorded but not exported.");
+        }
 
         return new State(metricsEnabled: true, sdkProvider);
     }

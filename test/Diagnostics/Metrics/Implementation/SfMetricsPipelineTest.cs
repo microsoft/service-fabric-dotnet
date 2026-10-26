@@ -81,5 +81,15 @@ public abstract class SfMetricsPipelineTest : IDisposable
                 _ = Assert.Single(scope.Exporters);
             }
         }
+
+        [Fact]
+        public void TracesHowLongBuildingTheSdkProviderTook()
+        {
+            using Int64MeterProvider provider = new();
+
+            Assert.Contains(
+                scope.TracesOfType("OpenTelemetryMetricsFactory"),
+                t => t.Level == MetricsTraceLevel.Info && t.Message.StartsWith("Building the OpenTelemetry SDK provider took ", StringComparison.Ordinal));
+        }
     }
 }

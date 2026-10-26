@@ -21,6 +21,11 @@ sealed class TestMetricExporter(string connectionString, IReadOnlyDictionary<str
     /// </summary>
     internal volatile Action BeforeExport;
 
+    /// <summary>
+    /// Makes exports fail, like a collector that cannot be reached.
+    /// </summary>
+    internal volatile bool Fails;
+
     readonly object sync = new();
     readonly List<ExportedPoint> points = [];
     int exportCount;
@@ -54,6 +59,6 @@ sealed class TestMetricExporter(string connectionString, IReadOnlyDictionary<str
                     points.Add(ExportedPoint.Capture(metric, in point));
         }
 
-        return ExportResult.Success;
+        return Fails ? ExportResult.Failure : ExportResult.Success;
     }
 }

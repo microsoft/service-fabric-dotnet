@@ -9,7 +9,8 @@ using System.Runtime.InteropServices;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Metrics settings of managed meter providers. Port of native MetricsConfig and MetricsSettings (FabricTelemetry).
+/// Metrics settings of managed meter providers. Port of native MetricsConfig and MetricsSettings (FabricTelemetry,
+/// src/prod/src/Telemetry/Native/config in the WindowsFabric repo); keep the two in sync.
 /// </summary>
 sealed class MetricsSettings
 {

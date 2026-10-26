@@ -24,7 +24,8 @@ static class GenevaCollectorRules
     internal static readonly bool IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
     /// <summary>
-    /// Port of native IsValidGenevaConnectionString (OpenTelemetryMetricsFactory.cpp). Keys are case-sensitive.
+    /// Port of native IsValidGenevaConnectionString (src/prod/src/Telemetry/Native/OpenTelemetryMetricsFactory.cpp in the
+    /// WindowsFabric repo); keep the two in sync. Keys are case-sensitive.
     /// Windows needs Account and Namespace and no Endpoint (ETW). Linux needs an Endpoint with the "unix" scheme.
     /// </summary>
     internal static bool IsValidConnectionString(string connectionString, bool isLinux)

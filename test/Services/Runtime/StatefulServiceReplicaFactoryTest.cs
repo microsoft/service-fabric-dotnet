@@ -21,7 +21,6 @@ public abstract class StatefulServiceReplicaFactoryTest
     readonly RuntimeContext runtimeContext;
     readonly Func<StatefulServiceContext, StatefulServiceBase> serviceFactory;
 
-    // Test fixture
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
     StatefulServiceReplicaFactoryTest()

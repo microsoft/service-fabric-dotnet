@@ -20,7 +20,6 @@ public abstract class StatelessServiceInstanceFactoryTest
     readonly RuntimeContext runtimeContext;
     readonly Func<StatelessServiceContext, StatelessService> serviceFactory;
 
-    // Test fixture
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
     StatelessServiceInstanceFactoryTest()

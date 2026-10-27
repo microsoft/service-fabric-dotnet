@@ -24,7 +24,7 @@ public abstract class StatefulServiceReplicaFactoryTest
     // Test fixture
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-    protected StatefulServiceReplicaFactoryTest()
+    StatefulServiceReplicaFactoryTest()
     {
         runtimeContext = Mock.Of<RuntimeContext>(ctx =>
             ctx.NodeContext == fuzzy.NodeContext() &&
@@ -75,7 +75,7 @@ public abstract class StatefulServiceReplicaFactoryTest
             };
 
             Mock.Get(serviceFactory)
-                .Setup(f => f(It.IsAny<StatefulServiceContext>()))
+                .Setup(_ => _(It.IsAny<StatefulServiceContext>()))
                 .Callback((StatefulServiceContext ctx) => actualServiceContext = ctx)
                 .Returns(service.Object);
         }
@@ -99,7 +99,7 @@ public abstract class StatefulServiceReplicaFactoryTest
         {
             IStatefulServiceReplica result = sut.CreateReplica(serviceTypeName, serviceName, initializationData, partitionId, replicaId);
 
-            var adapter = Assert.IsType<StatefulServiceReplicaAdapter>(result);
+            var adapter = (StatefulServiceReplicaAdapter)result;
             Assert.Same(service.Object, adapter.Field<IStatefulUserServiceReplica>().Value);
             Assert.Same(service.Object.Context, adapter.Field<StatefulServiceContext>().Value);
         }
@@ -108,7 +108,7 @@ public abstract class StatefulServiceReplicaFactoryTest
         public void ThrowsInvalidOperationExceptionWhenServiceFactoryReturnsNull()
         {
             Mock.Get(serviceFactory)
-                .Setup(f => f(It.IsAny<StatefulServiceContext>()))
+                .Setup(_ => _(It.IsAny<StatefulServiceContext>()))
                 .Returns((StatefulServiceBase)null);
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
@@ -123,13 +123,13 @@ public abstract class StatefulServiceReplicaFactoryTest
         public void DisposesRuntimeContext()
         {
             var codePackageContext = new Mock<ICodePackageActivationContext>();
-            var runtimeContext = new RuntimeContext();
-            runtimeContext.Field<ICodePackageActivationContext>().Set(codePackageContext.Object);
+            var runtime = new RuntimeContext();
+            runtime.Field<ICodePackageActivationContext>().Set(codePackageContext.Object);
 
-            var sut = new StatefulServiceReplicaFactory(runtimeContext, serviceFactory);
-            sut.Dispose();
+            var factory = new StatefulServiceReplicaFactory(runtime, serviceFactory);
+            factory.Dispose();
 
-            codePackageContext.Verify(c => c.Dispose(), Times.Once);
+            codePackageContext.Verify(_ => _.Dispose(), Times.Once);
         }
     }
 }

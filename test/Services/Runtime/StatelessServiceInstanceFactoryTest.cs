@@ -23,7 +23,7 @@ public abstract class StatelessServiceInstanceFactoryTest
     // Test fixture
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-    protected StatelessServiceInstanceFactoryTest()
+    StatelessServiceInstanceFactoryTest()
     {
         runtimeContext = Mock.Of<RuntimeContext>(ctx =>
             ctx.NodeContext == fuzzy.NodeContext() &&
@@ -69,7 +69,7 @@ public abstract class StatelessServiceInstanceFactoryTest
             service = new Mock<StatelessService>(fuzzy.StatelessServiceContext()) { DefaultValue = DefaultValue.Mock };
 
             Mock.Get(serviceFactory)
-                .Setup(f => f(It.IsAny<StatelessServiceContext>()))
+                .Setup(_ => _(It.IsAny<StatelessServiceContext>()))
                 .Callback((StatelessServiceContext ctx) => actualServiceContext = ctx)
                 .Returns(service.Object);
         }
@@ -93,7 +93,7 @@ public abstract class StatelessServiceInstanceFactoryTest
         {
             IStatelessServiceInstance result = sut.CreateInstance(serviceTypeName, serviceName, initializationData, partitionId, instanceId);
 
-            var adapter = Assert.IsType<StatelessServiceInstanceAdapter>(result);
+            var adapter = (StatelessServiceInstanceAdapter)result;
             Assert.Same(service.Object, adapter.Field<IStatelessUserServiceInstance>().Value);
             Assert.Same(service.Object.Context, adapter.Field<StatelessServiceContext>().Value);
         }
@@ -102,7 +102,7 @@ public abstract class StatelessServiceInstanceFactoryTest
         public void ThrowsInvalidOperationExceptionWhenServiceFactoryReturnsNull()
         {
             Mock.Get(serviceFactory)
-                .Setup(f => f(It.IsAny<StatelessServiceContext>()))
+                .Setup(_ => _(It.IsAny<StatelessServiceContext>()))
                 .Returns((StatelessService)null);
 
             var exception = Assert.Throws<InvalidOperationException>(() =>
@@ -117,13 +117,13 @@ public abstract class StatelessServiceInstanceFactoryTest
         public void DisposesRuntimeContext()
         {
             var codePackageContext = new Mock<ICodePackageActivationContext>();
-            var runtimeContext = new RuntimeContext();
-            runtimeContext.Field<ICodePackageActivationContext>().Set(codePackageContext.Object);
+            var runtime = new RuntimeContext();
+            runtime.Field<ICodePackageActivationContext>().Set(codePackageContext.Object);
 
-            var sut = new StatelessServiceInstanceFactory(runtimeContext, serviceFactory);
-            sut.Dispose();
+            var factory = new StatelessServiceInstanceFactory(runtime, serviceFactory);
+            factory.Dispose();
 
-            codePackageContext.Verify(c => c.Dispose(), Times.Once);
+            codePackageContext.Verify(_ => _.Dispose(), Times.Once);
         }
     }
 }

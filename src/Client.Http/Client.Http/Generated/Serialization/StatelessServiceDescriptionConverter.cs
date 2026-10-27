@@ -48,6 +48,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             var serviceDnsName = default(string);
             var scalingPolicies = default(IEnumerable<ScalingPolicyDescription>);
             var serviceTags = default(ServiceTags);
+            var capacityReleaseAction = default(CapacityReleaseAction?);
             var instanceCount = default(int?);
             var minInstanceCount = default(int?);
             var minInstancePercentage = default(int?);
@@ -55,6 +56,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             var instanceCloseDelayDurationSeconds = default(long?);
             var instanceLifecycleDescription = default(InstanceLifecycleDescription);
             var instanceRestartWaitDurationSeconds = default(long?);
+            var serviceOptions = default(int?);
 
             do
             {
@@ -119,6 +121,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 {
                     serviceTags = ServiceTagsConverter.Deserialize(reader);
                 }
+                else if (string.Compare("CapacityReleaseAction", propName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    capacityReleaseAction = CapacityReleaseActionConverter.Deserialize(reader);
+                }
                 else if (string.Compare("InstanceCount", propName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     instanceCount = reader.ReadValueAsInt();
@@ -147,6 +153,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 {
                     instanceRestartWaitDurationSeconds = reader.ReadValueAsLong();
                 }
+                else if (string.Compare("ServiceOptions", propName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    serviceOptions = reader.ReadValueAsInt();
+                }
                 else
                 {
                     reader.SkipPropertyValue();
@@ -170,13 +180,15 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 serviceDnsName: serviceDnsName,
                 scalingPolicies: scalingPolicies,
                 serviceTags: serviceTags,
+                capacityReleaseAction: capacityReleaseAction,
                 instanceCount: instanceCount,
                 minInstanceCount: minInstanceCount,
                 minInstancePercentage: minInstancePercentage,
                 flags: flags,
                 instanceCloseDelayDurationSeconds: instanceCloseDelayDurationSeconds,
                 instanceLifecycleDescription: instanceLifecycleDescription,
-                instanceRestartWaitDurationSeconds: instanceRestartWaitDurationSeconds);
+                instanceRestartWaitDurationSeconds: instanceRestartWaitDurationSeconds,
+                serviceOptions: serviceOptions);
         }
 
         /// <summary>
@@ -195,6 +207,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             writer.WriteProperty(obj.InstanceCount, "InstanceCount", JsonWriterExtensions.WriteIntValue);
             writer.WriteProperty(obj.DefaultMoveCost, "DefaultMoveCost", MoveCostConverter.Serialize);
             writer.WriteProperty(obj.ServicePackageActivationMode, "ServicePackageActivationMode", ServicePackageActivationModeConverter.Serialize);
+            writer.WriteProperty(obj.CapacityReleaseAction, "CapacityReleaseAction", CapacityReleaseActionConverter.Serialize);
             if (obj.ApplicationName != null)
             {
                 writer.WriteProperty(obj.ApplicationName, "ApplicationName", ApplicationNameConverter.Serialize);
@@ -273,6 +286,11 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             if (obj.InstanceRestartWaitDurationSeconds != null)
             {
                 writer.WriteProperty(obj.InstanceRestartWaitDurationSeconds, "InstanceRestartWaitDurationSeconds", JsonWriterExtensions.WriteLongValue);
+            }
+
+            if (obj.ServiceOptions != null)
+            {
+                writer.WriteProperty(obj.ServiceOptions, "ServiceOptions", JsonWriterExtensions.WriteIntValue);
             }
 
             writer.WriteEndObject();

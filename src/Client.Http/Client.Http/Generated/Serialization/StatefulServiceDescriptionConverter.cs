@@ -48,6 +48,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             var serviceDnsName = default(string);
             var scalingPolicies = default(IEnumerable<ScalingPolicyDescription>);
             var serviceTags = default(ServiceTags);
+            var capacityReleaseAction = default(CapacityReleaseAction?);
             var targetReplicaSetSize = default(int?);
             var minReplicaSetSize = default(int?);
             var hasPersistedState = default(bool?);
@@ -60,6 +61,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             var replicaLifecycleDescription = default(ReplicaLifecycleDescription);
             var auxiliaryReplicaCount = default(int?);
             var serviceSensitivityDescription = default(ServiceSensitivityDescription);
+            var serviceOptions = default(int?);
 
             do
             {
@@ -124,6 +126,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 {
                     serviceTags = ServiceTagsConverter.Deserialize(reader);
                 }
+                else if (string.Compare("CapacityReleaseAction", propName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    capacityReleaseAction = CapacityReleaseActionConverter.Deserialize(reader);
+                }
                 else if (string.Compare("TargetReplicaSetSize", propName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     targetReplicaSetSize = reader.ReadValueAsInt();
@@ -172,6 +178,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 {
                     serviceSensitivityDescription = ServiceSensitivityDescriptionConverter.Deserialize(reader);
                 }
+                else if (string.Compare("ServiceOptions", propName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    serviceOptions = reader.ReadValueAsInt();
+                }
                 else
                 {
                     reader.SkipPropertyValue();
@@ -195,6 +205,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 serviceDnsName: serviceDnsName,
                 scalingPolicies: scalingPolicies,
                 serviceTags: serviceTags,
+                capacityReleaseAction: capacityReleaseAction,
                 targetReplicaSetSize: targetReplicaSetSize,
                 minReplicaSetSize: minReplicaSetSize,
                 hasPersistedState: hasPersistedState,
@@ -206,7 +217,8 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 dropSourceReplicaOnMove: dropSourceReplicaOnMove,
                 replicaLifecycleDescription: replicaLifecycleDescription,
                 auxiliaryReplicaCount: auxiliaryReplicaCount,
-                serviceSensitivityDescription: serviceSensitivityDescription);
+                serviceSensitivityDescription: serviceSensitivityDescription,
+                serviceOptions: serviceOptions);
         }
 
         /// <summary>
@@ -227,6 +239,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             writer.WriteProperty(obj.HasPersistedState, "HasPersistedState", JsonWriterExtensions.WriteBoolValue);
             writer.WriteProperty(obj.DefaultMoveCost, "DefaultMoveCost", MoveCostConverter.Serialize);
             writer.WriteProperty(obj.ServicePackageActivationMode, "ServicePackageActivationMode", ServicePackageActivationModeConverter.Serialize);
+            writer.WriteProperty(obj.CapacityReleaseAction, "CapacityReleaseAction", CapacityReleaseActionConverter.Serialize);
             if (obj.ApplicationName != null)
             {
                 writer.WriteProperty(obj.ApplicationName, "ApplicationName", ApplicationNameConverter.Serialize);
@@ -320,6 +333,11 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             if (obj.ServiceSensitivityDescription != null)
             {
                 writer.WriteProperty(obj.ServiceSensitivityDescription, "ServiceSensitivityDescription", ServiceSensitivityDescriptionConverter.Serialize);
+            }
+
+            if (obj.ServiceOptions != null)
+            {
+                writer.WriteProperty(obj.ServiceOptions, "ServiceOptions", JsonWriterExtensions.WriteIntValue);
             }
 
             writer.WriteEndObject();

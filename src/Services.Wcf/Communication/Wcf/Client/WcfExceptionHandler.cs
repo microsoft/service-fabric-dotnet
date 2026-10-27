@@ -8,6 +8,8 @@ namespace Microsoft.ServiceFabric.Services.Communication.Wcf.Client
     using System;
     using System.ServiceModel;
     using System.ServiceModel.Security;
+    using System.Xml;
+    using System.Xml.Linq;
     using Microsoft.ServiceFabric.Services.Communication.Client;
 
     /// <summary>
@@ -82,12 +84,9 @@ namespace Microsoft.ServiceFabric.Services.Communication.Wcf.Client
     /// </remarks>
     public class WcfExceptionHandler : IExceptionHandler
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WcfExceptionHandler"/> class.
-        /// </summary>
-        public WcfExceptionHandler()
-        {
-        }
+        const string type = nameof(ServiceExceptionData.Type); // Used by DataContractSerializer, matches NetDataContractSerializer
+        static readonly XName dataContractSerializedType = (XNamespace)Constants.ServiceCommunicationNamespace + type;
+        static readonly XName netDataContractSerializedType = (XNamespace)"http://schemas.microsoft.com/2003/10/Serialization/" + type;
 
         /// <summary>
         /// Method that examines the exception and determines how that exception can be handled.
@@ -101,7 +100,8 @@ namespace Microsoft.ServiceFabric.Services.Communication.Wcf.Client
             OperationRetrySettings retrySettings,
             out ExceptionHandlingResult result)
         {
-            var e = exceptionInformation.Exception;
+            Exception e = (exceptionInformation ?? throw new ArgumentNullException(nameof(exceptionInformation))).Exception;
+            _ = retrySettings ?? throw new ArgumentNullException(nameof(retrySettings));
 
             // retry with resolve - these exceptions indicate a possible fail over
             if ((e is EndpointNotFoundException) ||
@@ -151,27 +151,22 @@ namespace Microsoft.ServiceFabric.Services.Communication.Wcf.Client
                 return true;
             }
 
-            var faultException = e as FaultException;
-            if (faultException != null)
+            var fault = e as FaultException;
+            if (fault != null &&
+                fault.Code.Name == WcfRemoteExceptionInformation.FaultCodeName &&
+                fault.Code.SubCode?.Name == WcfRemoteExceptionInformation.FaultSubCodeRetryName &&
+                TryParseExceptionId(fault.Reason, out string exceptionId))
             {
-                if (faultException.Code.Name == WcfRemoteExceptionInformation.FaultCodeName)
-                {
-                    var actualException = WcfRemoteExceptionInformation.ToException(faultException.Reason.ToString());
-
-                    if (faultException.Code.SubCode.Name == WcfRemoteExceptionInformation.FaultSubCodeRetryName)
-                    {
-                        result = new ExceptionHandlingRetryResult(
-                            actualException,
-                            false,
-                            retrySettings,
-                            retrySettings.DefaultMaxRetryCountForNonTransientErrors);
-                        return true;
-                    }
-                }
+                result = new ExceptionHandlingRetryResult(
+                    exceptionId,
+                    false,
+                    retrySettings,
+                    retrySettings.DefaultMaxRetryCountForNonTransientErrors);
+                return true;
             }
 
             // retry on all communication exceptions, including the protocol exceptions for default max retry
-            if ((faultException == null) && (e is CommunicationException))
+            if (fault == null && e is CommunicationException)
             {
                 result = new ExceptionHandlingRetryResult(
                     e,
@@ -183,6 +178,22 @@ namespace Microsoft.ServiceFabric.Services.Communication.Wcf.Client
 
             result = null;
             return false;
+        }
+
+        static bool TryParseExceptionId(FaultReason reason, out string exceptionId)
+        {
+            try
+            {
+                var xml = XDocument.Parse(reason.ToString());
+                exceptionId = xml.Root.Element(dataContractSerializedType)?.Value
+                    ?? xml.Root.Attribute(netDataContractSerializedType)?.Value; // Used by WcfGlobalErrorHandler before v12
+                return !string.IsNullOrWhiteSpace(exceptionId);
+            }
+            catch (XmlException)
+            {
+                exceptionId = null;
+                return false;
+            }
         }
     }
 }

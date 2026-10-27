@@ -8,12 +8,12 @@ using System.Fabric;
 
 namespace Microsoft.ServiceFabric.Services.Runtime;
 
-class StatefulServiceReplicaFactory : IStatefulServiceFactory, IDisposable
+sealed class StatefulServiceReplicaFactory : IStatefulServiceFactory, IDisposable
 {
     readonly Func<StatefulServiceContext, StatefulServiceBase> serviceFactory;
     readonly RuntimeContext runtimeContext;
 
-    public StatefulServiceReplicaFactory(
+    internal StatefulServiceReplicaFactory(
         RuntimeContext runtimeContext,
         Func<StatefulServiceContext, StatefulServiceBase> serviceFactory)
     {

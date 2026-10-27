@@ -111,8 +111,9 @@ public abstract class StatefulServiceReplicaFactoryTest
                 .Setup(f => f(It.IsAny<StatefulServiceContext>()))
                 .Returns((StatefulServiceBase)null);
 
-            Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 sut.CreateReplica(serviceTypeName, serviceName, initializationData, partitionId, replicaId));
+            Assert.Equal($"{nameof(serviceFactory)} returned null", exception.Message);
         }
     }
 

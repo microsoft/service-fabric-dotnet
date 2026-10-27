@@ -105,8 +105,9 @@ public abstract class StatelessServiceInstanceFactoryTest
                 .Setup(f => f(It.IsAny<StatelessServiceContext>()))
                 .Returns((StatelessService)null);
 
-            Assert.Throws<InvalidOperationException>(() =>
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 sut.CreateInstance(serviceTypeName, serviceName, initializationData, partitionId, instanceId));
+            Assert.Equal($"{nameof(serviceFactory)} returned null", exception.Message);
         }
     }
 

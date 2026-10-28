@@ -35,6 +35,9 @@ sealed class MetricsTestScope : IDisposable
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
     readonly Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createExporter = SfOpenTelemetrySdk.CreateExporter;
     readonly Func<Assembly, Version> readFileVersion = SfOpenTelemetrySdk.ReadFileVersion;
+#if !NET
+    readonly Func<string> getAssemblyFolder = OpenTelemetryAssemblyResolver.GetFolder;
+#endif
     readonly Action<MetricsTraceLevel, string, string> sink = MetricsTrace.Sink;
     readonly List<TestMetricExporter> exporters = [];
     readonly List<TraceRecord> traces = [];
@@ -48,6 +51,10 @@ sealed class MetricsTestScope : IDisposable
         };
 
         SfMetricsPipeline.ResetForTesting();
+#if !NET
+        // Keeps tests from loading assemblies of an installed Service Fabric runtime.
+        OpenTelemetryAssemblyResolver.GetFolder = static () => string.Empty;
+#endif
 
         _ = Source.Set(MetricsSettings.MetricsSection, MetricsBackendSelector.SettingKey, nameof(MetricsBackend.OpenTelemetry));
         if (withCollector)
@@ -109,6 +116,10 @@ sealed class MetricsTestScope : IDisposable
         SfMetricsPipeline.BuildSdkProvider = buildSdkProvider;
         SfOpenTelemetrySdk.CreateExporter = createExporter;
         SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
+#if !NET
+        OpenTelemetryAssemblyResolver.ResetForTesting();
+        OpenTelemetryAssemblyResolver.GetFolder = getAssemblyFolder;
+#endif
         MetricsBackendSelector.CreateSettingsSource = createSettingsSource;
         typeof(MetricsBackendSelector).Field<Lazy<MetricsBackend>>().Set(backend);
         MetricsTrace.Sink = sink;

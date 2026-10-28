@@ -99,6 +99,12 @@ static class SfMetricsPipeline
             return new State(metricsEnabled: false, sdkProvider: null);
         }
 
+#if !NET
+        // On .NET Framework an app built with older Service Fabric packages can run this library from the GAC without having its
+        // new dependencies, so missing ones are loaded from the Service Fabric runtime.
+        OpenTelemetryAssemblyResolver.Register();
+#endif
+
         // Throws when System.Diagnostics.DiagnosticSource cannot be loaded.
         SfMeterRegistry.EnsureLoaded();
 

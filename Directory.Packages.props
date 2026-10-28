@@ -18,15 +18,15 @@
     <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.3.9" /> <!-- M.ANC.H->2.3.0 -->
     <PackageVersion Include="Microsoft.AspNetCore.Server.HttpSys" Version="2.3.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.9" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.10" /> <!-- M.ANC.*->8.0.0; M.E.*->10.0.0; matches WindowsFabric -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.0" /> <!-- M.ANC.*->8.0.0; M.E.*->10.0.0; higher loads a 2nd copy in .NET Framework apps with their own O.* -->
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" /> <!-- M.ANC.S.K.C->4.6.0; M.E.*->4.6.3 -->
-    <PackageVersion Include="System.ValueTuple" Version="4.6.2" /> <!-- M.I.C->4.5.0; M.E.C.A->4.6.2 -->
+    <PackageVersion Include="System.ValueTuple" Version="4.6.1" /> <!-- M.I.C->4.5.0; M.E.*->4.6.1 -->
   </ItemGroup>
   <!-- Client.Http and Powershell.Http target netstandard2.0 -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or '$(TargetFramework)' == 'netstandard2.0'">
     <PackageVersion Include="Microsoft.Identity.Client" Version="4.83.3" />
     <PackageVersion Include="PowerShellStandard.Library" Version="5.1.1" />
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.10" /> <!-- M.I.C->6.0.1; O.A->10.0.0; matches WindowsFabric -->
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" /> <!-- M.I.C->6.0.1; O.A->10.0.0; higher loads a 2nd copy in .NET Framework apps with their own O.* -->
     <PackageVersion Include="YamlDotNet" Version="8.1.2" /> <!-- refs/*.dll->8.1.2 -->
   </ItemGroup>
 </Project>

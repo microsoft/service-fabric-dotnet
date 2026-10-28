@@ -159,7 +159,10 @@ namespace Microsoft.ServiceFabric.Services.Remoting.V2.Client
             // Workaround as NativeMessageStream doesn't suport multi read.
             long streamLength = stream.Length;
             var buffer = new byte[streamLength];
-            await stream.ReadAsync(buffer, 0, buffer.Length);
+            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+            if (bytesRead != streamLength)
+                throw new ArgumentException($"Unexpected bytes read {bytesRead} from stream with length {streamLength}.", nameof(stream));
+
             try
             {
                 RemoteException2 remoteException2 = this.DeserializeRemoteException2(buffer);

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
@@ -28,10 +29,37 @@ static class SfOpenTelemetrySdk
     const int ExportIntervalMilliseconds = 60000;
     const int ExportTimeoutMilliseconds = 30000;
 
+    // The Geneva exporter requires OpenTelemetry 1.15.3 or later, but every OpenTelemetry 1.x assembly has version 1.0.0.0, so on
+    // .NET Framework an app's older copy can load instead; only the file version tells them apart.
+    static readonly Version minimumOpenTelemetryVersion = new(1, 15, 3);
+
     // Replaced by tests to export to an in-memory exporter.
     internal static Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> CreateExporter = CreateGenevaExporter;
 
+    // Replaced by tests to simulate other OpenTelemetry versions.
+    internal static Func<Assembly, Version> ReadFileVersion = ReadAssemblyFileVersion;
+
     static readonly FailureTraceThrottle flushFailures = new();
+
+    /// <summary>
+    /// Throws when a loaded OpenTelemetry assembly is older than the Geneva exporter requires. Call before <see cref="Build"/>,
+    /// which may not even compile against an older OpenTelemetry.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static void EnsureSupportedVersion()
+    {
+        Assembly[] assemblies =
+            [typeof(Sdk).Assembly, typeof(Baggage).Assembly, typeof(OpenTelemetryDependencyInjectionMeterProviderBuilderExtensions).Assembly];
+        foreach (Assembly assembly in assemblies)
+        {
+            Version version = ReadFileVersion(assembly);
+            if (version != null && version < minimumOpenTelemetryVersion)
+            {
+                throw new NotSupportedException(
+                    $"{assembly.GetName().Name} {version} loaded from '{assembly.Location}' is older than OpenTelemetry {minimumOpenTelemetryVersion}, which the Geneva exporter requires.");
+            }
+        }
+    }
 
     /// <summary>
     /// Returns the SDK meter provider, or null when no collector yields an exporter. Throws when the provider cannot be built.
@@ -131,6 +159,20 @@ static class SfOpenTelemetrySdk
             options.PrepopulatedMetricDimensions = prepopulatedDimensions;
 
         return new TracingGenevaMetricExporter(options, connectionString);
+    }
+
+    static Version ReadAssemblyFileVersion(Assembly assembly)
+    {
+        try
+        {
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
+            return new Version(info.FileMajorPart, info.FileMinorPart, info.FileBuildPart, info.FilePrivatePart);
+        }
+        catch (Exception)
+        {
+            // An assembly without a file, such as one loaded from bytes, is not checked.
+            return null;
+        }
     }
 
     /// <summary>

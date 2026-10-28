@@ -106,6 +106,7 @@ static class SfMetricsPipeline
         if (settings.GenevaConnectionStrings.Count > 0)
         {
             long buildStart = Stopwatch.GetTimestamp();
+            SfOpenTelemetrySdk.EnsureSupportedVersion();
             sdkProvider = BuildSdkProvider(settings);
             long buildMilliseconds = (Stopwatch.GetTimestamp() - buildStart) * 1000 / Stopwatch.Frequency;
             MetricsTrace.Info(

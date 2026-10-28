@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Inspector;
 using OpenTelemetry;
@@ -33,6 +34,7 @@ sealed class MetricsTestScope : IDisposable
     readonly Func<MetricsSettings> loadSettings = SfMetricsPipeline.LoadSettings;
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
     readonly Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createExporter = SfOpenTelemetrySdk.CreateExporter;
+    readonly Func<Assembly, Version> readFileVersion = SfOpenTelemetrySdk.ReadFileVersion;
     readonly Action<MetricsTraceLevel, string, string> sink = MetricsTrace.Sink;
     readonly List<TestMetricExporter> exporters = [];
     readonly List<TraceRecord> traces = [];
@@ -106,6 +108,7 @@ sealed class MetricsTestScope : IDisposable
         SfMetricsPipeline.LoadSettings = loadSettings;
         SfMetricsPipeline.BuildSdkProvider = buildSdkProvider;
         SfOpenTelemetrySdk.CreateExporter = createExporter;
+        SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
         MetricsBackendSelector.CreateSettingsSource = createSettingsSource;
         typeof(MetricsBackendSelector).Field<Lazy<MetricsBackend>>().Set(backend);
         MetricsTrace.Sink = sink;

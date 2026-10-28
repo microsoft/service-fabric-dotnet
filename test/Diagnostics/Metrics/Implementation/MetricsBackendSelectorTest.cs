@@ -109,6 +109,18 @@ public abstract class MetricsBackendSelectorTest : IDisposable
         }
 
         [Fact]
+        public void IsComInteropAndTracesWarningWhenLoadedOpenTelemetryIsOlderThanGenevaExporterRequires()
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = _ => new Version(1, 9, 0, 1312);
+
+            Assert.Equal(MetricsBackend.ComInterop, MetricsBackendSelector.Backend);
+            Assert.Contains("1.9.0.1312", AssertWarningTrace().Message);
+            _ = AssertInfoTrace(MetricsBackend.ComInterop);
+            Assert.False(SfMetricsPipeline.MetricsEnabled);
+            Assert.Empty(scope.Exporters);
+        }
+
+        [Fact]
         public void ReadsSettingOnce()
         {
             int reads = 0;

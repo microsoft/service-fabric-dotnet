@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using OpenTelemetry;
 using Xunit;
 using DiagnosticsMeter = System.Diagnostics.Metrics.Meter;
 
@@ -120,6 +123,51 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
             _ = Assert.Single(scope.FlushAndGet("Namespace." + name));
             Assert.DoesNotContain(scope.Exporter.Points, p => p.MetricName == "Namespace.Foreign" + name);
         }
+    }
+
+    public sealed class EnsureSupportedVersion : SfOpenTelemetrySdkTest
+    {
+        [Theory]
+        [InlineData("OpenTelemetry")]
+        [InlineData("OpenTelemetry.Api")]
+        [InlineData("OpenTelemetry.Api.ProviderBuilderExtensions")]
+        public void ThrowsWhenAnOpenTelemetryAssemblyIsOlderThanGenevaExporterRequires(string assemblyName)
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = assembly =>
+                assembly.GetName().Name == assemblyName ? new Version(1, 15, 2, 9999) : new Version(1, 15, 3, 0);
+
+            NotSupportedException error = Assert.Throws<NotSupportedException>(SfOpenTelemetrySdk.EnsureSupportedVersion);
+
+            Assert.Contains($"{assemblyName} 1.15.2.9999 loaded from ", error.Message);
+        }
+
+        [Theory]
+        [InlineData("1.15.3.0")]
+        [InlineData("1.20.1.1")]
+        [InlineData(null)]
+        public void AcceptsRequiredNewerOrUnknownVersions(string version)
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = _ => version == null ? null : new Version(version);
+
+            SfOpenTelemetrySdk.EnsureSupportedVersion();
+        }
+    }
+
+    public sealed class ReadFileVersion : SfOpenTelemetrySdkTest
+    {
+        [Fact]
+        public void ReturnsAssemblyFileVersion()
+        {
+            Assembly openTelemetry = typeof(Sdk).Assembly;
+
+            Version version = SfOpenTelemetrySdk.ReadFileVersion(openTelemetry);
+
+            Assert.Equal(openTelemetry.GetCustomAttribute<AssemblyFileVersionAttribute>().Version, version.ToString());
+        }
+
+        [Fact]
+        public void ReturnsNullForAssemblyWithoutFile() =>
+            Assert.Null(SfOpenTelemetrySdk.ReadFileVersion(AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("NoFile"), AssemblyBuilderAccess.Run)));
     }
 
     public sealed class ForceFlush : SfOpenTelemetrySdkTest

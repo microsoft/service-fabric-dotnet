@@ -35,6 +35,7 @@ sealed class MetricsTestScope : IDisposable
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
     readonly Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createExporter = SfOpenTelemetrySdk.CreateExporter;
     readonly Func<Assembly, Version> readFileVersion = SfOpenTelemetrySdk.ReadFileVersion;
+    readonly Action loadGenevaExporter = SfOpenTelemetrySdk.LoadGenevaExporter;
 #if !NET
     readonly Func<string> getAssemblyFolder = OpenTelemetryAssemblyResolver.GetFolder;
 #endif
@@ -116,6 +117,7 @@ sealed class MetricsTestScope : IDisposable
         SfMetricsPipeline.BuildSdkProvider = buildSdkProvider;
         SfOpenTelemetrySdk.CreateExporter = createExporter;
         SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
+        SfOpenTelemetrySdk.LoadGenevaExporter = loadGenevaExporter;
 #if !NET
         OpenTelemetryAssemblyResolver.ResetForTesting();
         OpenTelemetryAssemblyResolver.GetFolder = getAssemblyFolder;

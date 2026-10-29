@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Fuzzy;
 using Inspector;
@@ -115,6 +116,19 @@ public abstract class MetricsBackendSelectorTest : IDisposable
 
             Assert.Equal(MetricsBackend.ComInterop, MetricsBackendSelector.Backend);
             Assert.Contains("1.9.0.1312", AssertWarningTrace().Message);
+            _ = AssertInfoTrace(MetricsBackend.ComInterop);
+            Assert.False(SfMetricsPipeline.MetricsEnabled);
+            Assert.Empty(scope.Exporters);
+        }
+
+        [Fact]
+        public void IsComInteropAndTracesWarningWhenGenevaExporterCannotBeLoaded()
+        {
+            FileNotFoundException error = new(fuzzy.String());
+            SfOpenTelemetrySdk.LoadGenevaExporter = () => throw error;
+
+            Assert.Equal(MetricsBackend.ComInterop, MetricsBackendSelector.Backend);
+            Assert.Contains(error.Message, AssertWarningTrace().Message);
             _ = AssertInfoTrace(MetricsBackend.ComInterop);
             Assert.False(SfMetricsPipeline.MetricsEnabled);
             Assert.Empty(scope.Exporters);

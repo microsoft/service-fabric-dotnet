@@ -39,15 +39,22 @@ static class SfOpenTelemetrySdk
     // Replaced by tests to simulate other OpenTelemetry versions.
     internal static Func<Assembly, Version> ReadFileVersion = ReadAssemblyFileVersion;
 
+    // Replaced by tests to simulate a Geneva exporter that cannot be loaded.
+    internal static Action LoadGenevaExporter = static () => GC.KeepAlive(typeof(TracingGenevaMetricExporter));
+
     static readonly FailureTraceThrottle flushFailures = new();
 
     /// <summary>
-    /// Throws when a loaded OpenTelemetry assembly is older than the Geneva exporter requires. Call before <see cref="Build"/>,
-    /// which may not even compile against an older OpenTelemetry.
+    /// Throws when the Geneva exporter cannot be loaded or a loaded OpenTelemetry assembly is older than the exporter requires. Call
+    /// before <see cref="Build"/>, which may not even compile against an older OpenTelemetry.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void EnsureSupportedVersion()
     {
+        // Loads the exporter outside Build's per-collector catch, so a missing or older Geneva falls back to COM interop instead
+        // of skipping every collector.
+        LoadGenevaExporter();
+
         Assembly[] assemblies =
             [typeof(Sdk).Assembly, typeof(Baggage).Assembly, typeof(OpenTelemetryDependencyInjectionMeterProviderBuilderExtensions).Assembly];
         foreach (Assembly assembly in assemblies)

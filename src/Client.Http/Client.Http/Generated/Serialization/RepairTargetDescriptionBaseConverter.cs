@@ -45,6 +45,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             {
                 obj = NodeRepairTargetDescriptionConverter.GetFromJsonProperties(reader);
             }
+            else if (propValue.Equals("External", StringComparison.OrdinalIgnoreCase))
+            {
+                obj = ExternalRepairTargetDescriptionConverter.GetFromJsonProperties(reader);
+            }
             else
             {
                 throw new InvalidOperationException("Unknown Kind.");
@@ -64,6 +68,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             if (kind.Equals(RepairTargetKind.Node))
             {
                 NodeRepairTargetDescriptionConverter.Serialize(writer, (NodeRepairTargetDescription)obj);
+            }
+            else if (kind.Equals(RepairTargetKind.External))
+            {
+                ExternalRepairTargetDescriptionConverter.Serialize(writer, (ExternalRepairTargetDescription)obj);
             }
             else
             {

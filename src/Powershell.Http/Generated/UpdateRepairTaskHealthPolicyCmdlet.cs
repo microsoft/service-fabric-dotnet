@@ -14,7 +14,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// Updates the health policy of the given repair task.
     /// </summary>
     [Cmdlet(VerbsData.Update, "SFRepairTaskHealthPolicy")]
-    public partial class UpdateRepairTaskHealthPolicyCmdlet : CommonCmdletBase
+    public partial class UpdateRepairTaskHealthPolicyCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets TaskId. The ID of the repair task to be updated.
@@ -55,7 +55,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             performPreparingHealthCheck: this.PerformPreparingHealthCheck,
             performRestoringHealthCheck: this.PerformRestoringHealthCheck);
 
-            var result = this.ServiceFabricClient.Repairs.UpdateRepairTaskHealthPolicyAsync(
+            var result = this.RepairClient.UpdateRepairTaskHealthPolicyAsync(
                 repairTaskUpdateHealthPolicyDescription: repairTaskUpdateHealthPolicyDescription,
                 cancellationToken: this.CancellationToken).GetAwaiter().GetResult();
 

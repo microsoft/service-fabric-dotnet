@@ -19,5 +19,11 @@ namespace Microsoft.ServiceFabric.Common
         /// The repair impact affects a set of Service Fabric nodes.
         /// </summary>
         Node,
+
+        /// <summary>
+        /// The repair impact is managed by an internal platform executor.
+        /// </summary>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        External,
     }
 }

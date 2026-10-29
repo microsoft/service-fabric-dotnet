@@ -3,26 +3,19 @@
 // Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Fabric.Interop;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 {
     abstract class MeterProvider<TValueType> : IMeterProvider<TValueType>
     {
-        readonly IReadOnlyCollection<string> fixedDimensionNames;
-        protected readonly IReadOnlyCollection<string> fixedDimensionValues;
-        IFabricMeterProvider2 fabricMeterProvider;
-
-        static Func<IFabricMeterProvider2> createFabricMeterProvider = NativeTelemetry.FabricCreateMeterProvider;
-        static Func<object, int> finalReleaseComObject = Utility.FinalReleaseComObject;
+        readonly IInstrumentProvider instrumentProvider;
 
         protected MeterProvider(ServiceContext serviceContext = null)
         {
-            fabricMeterProvider = createFabricMeterProvider();
+            IReadOnlyCollection<string> fixedDimensionNames;
+            IReadOnlyCollection<string> fixedDimensionValues;
 
             if (serviceContext != null)
             {
@@ -49,66 +42,14 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
                 fixedDimensionNames = [];
                 fixedDimensionValues = [];
             }
+
+            instrumentProvider = MetricsBackendSelector.CreateInstrumentProvider(fixedDimensionNames, fixedDimensionValues);
         }
 
-        bool IsDisposed() => fabricMeterProvider == null;
+        protected IInstrument CreateInstrument(string metricNamespace, string metricName, string[] variableDimensionNames) =>
+            instrumentProvider.CreateInstrument(metricNamespace, metricName, variableDimensionNames);
 
-        protected unsafe IFabricMeter CreateNativeMeter(string metricNamespace, string metricName, IEnumerable<string> variableDimensionNames)
-        {
-            if (IsDisposed())
-                throw new ObjectDisposedException(nameof(MeterProvider<>));
-
-            string[] allDimensionNames = [.. fixedDimensionNames, .. variableDimensionNames];
-            string[] fixedDimValues = [.. fixedDimensionValues];
-            int totalPins = 2 + allDimensionNames.Length + fixedDimValues.Length;
-
-            GCHandle* pins = stackalloc GCHandle[totalPins];
-            IntPtr* dimensionNamePtrs = stackalloc IntPtr[allDimensionNames.Length];
-            IntPtr* fixedValuePtrs = stackalloc IntPtr[fixedDimValues.Length];
-
-            try
-            {
-                int p = 0;
-                pins[p++] = GCHandle.Alloc(metricNamespace, GCHandleType.Pinned);
-                pins[p++] = GCHandle.Alloc(metricName, GCHandleType.Pinned);
-
-                for (int i = 0; i < allDimensionNames.Length; i++)
-                    pins[p++] = GCHandle.Alloc(allDimensionNames[i], GCHandleType.Pinned);
-
-                for (int i = 0; i < fixedDimValues.Length; i++)
-                    pins[p++] = GCHandle.Alloc(fixedDimValues[i], GCHandleType.Pinned);
-
-                for (int i = 0; i < allDimensionNames.Length; i++)
-                    dimensionNamePtrs[i] = pins[2 + i].AddrOfPinnedObject();
-
-                for (int i = 0; i < fixedDimValues.Length; i++)
-                    fixedValuePtrs[i] = pins[2 + allDimensionNames.Length + i].AddrOfPinnedObject();
-
-                FABRIC_METER_DESCRIPTION description;
-                description.Namespace = pins[0].AddrOfPinnedObject();
-                description.Name = pins[1].AddrOfPinnedObject();
-                description.TotalDimensionsCount = (uint)allDimensionNames.Length;
-                description.DimensionNames = (IntPtr)dimensionNamePtrs;
-                description.FixedDimensionCount = (uint)fixedDimValues.Length;
-                description.FixedDimensionValues = (IntPtr)fixedValuePtrs;
-                description.Reserved = IntPtr.Zero;
-
-                return fabricMeterProvider.CreateMeter2((IntPtr)(&description));
-            }
-            finally
-            {
-                Interop.Free(pins, totalPins);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (!IsDisposed())
-            {
-                finalReleaseComObject(fabricMeterProvider);
-                fabricMeterProvider = null;
-            }
-        }
+        public void Dispose() => instrumentProvider.Dispose();
 
         public abstract IMeter<TValueType> CreateMeter(string metricNamespace, string name);
         public abstract IMeter1D<TValueType> CreateMeter(string metricNamespace, string name, string dimension1Name);

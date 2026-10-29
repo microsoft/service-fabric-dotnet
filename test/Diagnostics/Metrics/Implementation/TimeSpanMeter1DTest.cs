@@ -21,7 +21,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
         // Test fixture
         static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-        public TimeSpanMeter1DTest() => sut = new TimeSpanMeter1D(fabricMeter);
+        public TimeSpanMeter1DTest() => sut = new TimeSpanMeter1D(new ComInstrument(fabricMeter));
 
         public class Class : TimeSpanMeter1DTest
         {
@@ -29,7 +29,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
             public void InvokesBaseWithGivenArguments()
             {
                 var meter = (Meter)sut;
-                Assert.Same(fabricMeter, meter.Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, meter.Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
         }
 

@@ -18,7 +18,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeSpanMeterProvider"/> class.
         /// </summary>
-        /// <param name="serviceContext">The Service Fabric ServiceContext provides system dimensions to the native meter provider.</param>
+        /// <param name="serviceContext">The Service Fabric ServiceContext whose partition, service and application identify the recorded values (fixed dimensions).</param>
         internal TimeSpanMeterProvider(ServiceContext serviceContext = null) : base(serviceContext) { }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <returns>A meter instance for recording timespan values without additional dimensions.</returns>
         public override IMeter<TimeSpan> CreateMeter(string metricNamespace, string name)
         {
-            return new TimeSpanMeter(CreateNativeMeter(metricNamespace, name, Array.Empty<string>()));
+            return new TimeSpanMeter(CreateInstrument(metricNamespace, name, Array.Empty<string>()));
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <returns>A meter instance for recording timespan values with one additional dimension.</returns>
         public override IMeter1D<TimeSpan> CreateMeter(string metricNamespace, string name, string dimension1)
         {
-            return new TimeSpanMeter1D(CreateNativeMeter(metricNamespace, name, new[] { dimension1 }));
+            return new TimeSpanMeter1D(CreateInstrument(metricNamespace, name, new[] { dimension1 }));
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <returns>A meter instance for recording timespan values with two additional dimensions.</returns>
         public override IMeter2D<TimeSpan> CreateMeter(string metricNamespace, string name, string dimension1, string dimension2)
         {
-            return new TimeSpanMeter2D(CreateNativeMeter(metricNamespace, name, new[] { dimension1, dimension2 }));
+            return new TimeSpanMeter2D(CreateInstrument(metricNamespace, name, new[] { dimension1, dimension2 }));
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
         /// <returns>A meter instance for recording timespan values with three additional dimensions.</returns>
         public override IMeter3D<TimeSpan> CreateMeter(string metricNamespace, string name, string dimension1, string dimension2, string dimension3)
         {
-            return new TimeSpanMeter3D(CreateNativeMeter(metricNamespace, name, new[] { dimension1, dimension2, dimension3 }));
+            return new TimeSpanMeter3D(CreateInstrument(metricNamespace, name, new[] { dimension1, dimension2, dimension3 }));
         }
     }
 }

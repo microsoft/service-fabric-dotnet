@@ -14,7 +14,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// Requests the cancellation of the given repair task.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Stop, "SFRepairTask")]
-    public partial class StopRepairTaskCmdlet : CommonCmdletBase
+    public partial class StopRepairTaskCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets TaskId. The ID of the repair task.
@@ -45,7 +45,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             version: this.Version,
             requestAbort: this.RequestAbort);
 
-            var result = this.ServiceFabricClient.Repairs.CancelRepairTaskAsync(
+            var result = this.RepairClient.CancelRepairTaskAsync(
                 repairTaskCancelDescription: repairTaskCancelDescription,
                 cancellationToken: this.CancellationToken).GetAwaiter().GetResult();
 

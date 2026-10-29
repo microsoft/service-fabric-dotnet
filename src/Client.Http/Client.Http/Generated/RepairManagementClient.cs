@@ -42,6 +42,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/CreateRepairTask";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");
@@ -77,6 +78,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/CancelRepairTask";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");
@@ -112,6 +114,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/DeleteRepairTask";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");
@@ -148,6 +151,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/GetRepairTaskList";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             taskIdFilter?.AddToQueryParameters(queryParams, $"TaskIdFilter={taskIdFilter}");
@@ -177,6 +181,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/ForceApproveRepairTask";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");
@@ -212,6 +217,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/UpdateRepairTaskHealthPolicy";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");
@@ -247,6 +253,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/UpdateRepairExecutionState";
             var queryParams = new List<string>();
+            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             queryParams.Add("api-version=6.0");

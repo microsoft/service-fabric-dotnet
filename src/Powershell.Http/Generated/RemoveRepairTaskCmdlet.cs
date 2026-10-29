@@ -14,7 +14,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// Deletes a completed repair task.
     /// </summary>
     [Cmdlet(VerbsCommon.Remove, "SFRepairTask")]
-    public partial class RemoveRepairTaskCmdlet : CommonCmdletBase
+    public partial class RemoveRepairTaskCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets TaskId. The ID of the completed repair task to be deleted.
@@ -46,7 +46,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
 
             if (((this.Force != null) && this.Force) || this.ShouldContinue(string.Empty, string.Empty))
             {
-                this.ServiceFabricClient.Repairs.DeleteRepairTaskAsync(
+                this.RepairClient.DeleteRepairTaskAsync(
                     repairTaskDeleteDescription: repairTaskDeleteDescription,
                     cancellationToken: this.CancellationToken).GetAwaiter().GetResult();
 

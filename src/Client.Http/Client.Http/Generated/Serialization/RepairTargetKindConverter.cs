@@ -34,6 +34,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             {
                 obj = RepairTargetKind.Node;
             }
+            else if (string.Compare(value, "External", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                obj = RepairTargetKind.External;
+            }
 
             return obj;
         }
@@ -52,6 +56,9 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                     break;
                 case RepairTargetKind.Node:
                     writer.WriteStringValue("Node");
+                    break;
+                case RepairTargetKind.External:
+                    writer.WriteStringValue("External");
                     break;
                 default:
                     throw new ArgumentException($"Invalid value {value.ToString()} for enum type RepairTargetKind");

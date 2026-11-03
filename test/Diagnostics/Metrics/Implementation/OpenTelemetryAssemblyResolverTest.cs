@@ -4,8 +4,11 @@
 #if !NET
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Inspector;
+using OpenTelemetry.Exporter.Geneva;
 using Xunit;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
@@ -55,6 +58,21 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
 
     public sealed class Resolve : OpenTelemetryAssemblyResolverTest
     {
+        // The app's copy: an assembly in the application base, newer than the requested version unless a test changes it.
+        static readonly Assembly appCopy = typeof(GenevaMetricExporter).Assembly;
+
+        readonly AssemblyName requested = new(appCopy.FullName) { Version = new Version(1, 0, 0, 0) };
+
+        [Fact]
+        public void ReturnsNewerAppCopyInsteadOfFile()
+        {
+            _ = SaveAssembly(requested.Version.ToString(), requested.Name);
+
+            Assert.Same(appCopy, OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+            // Also on the next request, after loading the app's copy.
+            Assert.Same(appCopy, OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+        }
+
         [Theory]
         [InlineData("1.2.3.4")]
         [InlineData("1.2.0.0")]
@@ -76,14 +94,52 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
         [Fact]
         public void ReturnsNullWithoutFile() =>
             Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, "Missing, Version=1.0.0.0"));
+
+        [Fact]
+        public void IgnoresAppCopyOfAssemblyMissingFromFolder() =>
+            Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+
+        [Fact]
+        public void IgnoresAppCopyWhileLoadingAppCopy()
+        {
+            _ = SaveAssembly("0.0.0.1", requested.Name);
+            var loadingAppCopy = typeof(OpenTelemetryAssemblyResolver).Field<bool>();
+            loadingAppCopy.Set(true);
+            try
+            {
+                Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+            }
+            finally
+            {
+                loadingAppCopy.Set(false);
+            }
+        }
+
+        [Fact]
+        public void IgnoresAppCopyThatIsNotNewer()
+        {
+            requested.Version = appCopy.GetName().Version;
+            _ = SaveAssembly("1.0.0.0", requested.Name);
+
+            Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+        }
+
+        [Fact]
+        public void IgnoresAppCopyWithAnotherPublicKeyToken()
+        {
+            requested.SetPublicKeyToken([.. requested.GetPublicKeyToken().Select(static b => (byte)~b)]);
+            _ = SaveAssembly("0.0.0.1", requested.Name);
+
+            Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+        }
     }
 
     /// <summary>
-    /// Saves an empty assembly with a name used by no other test to the folder and returns the name.
+    /// Saves an empty assembly with the given name, or a name used by no other test, to the folder and returns the name.
     /// </summary>
-    string SaveAssembly(string version)
+    string SaveAssembly(string version, string name = null)
     {
-        string name = MetricsTestScope.UniqueName("ResolverTest" + Guid.NewGuid().ToString("N"));
+        name ??= MetricsTestScope.UniqueName("ResolverTest" + Guid.NewGuid().ToString("N"));
         AssemblyBuilder assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(
             new AssemblyName(name) { Version = new Version(version) }, AssemblyBuilderAccess.Save, folder);
         _ = assembly.DefineDynamicModule(name, name + ".dll");

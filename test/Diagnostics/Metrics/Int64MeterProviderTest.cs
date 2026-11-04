@@ -44,9 +44,10 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
             public CreateMeter()
             {
                 sut = new Int64MeterProvider(serviceContext);
-                systemDimensionsNames = sut.Private().Field<IReadOnlyCollection<string>>().Value;
-                systemDimensionsValues = sut.Protected().Field<IReadOnlyCollection<string>>().Value;
-                sut.Field<IFabricMeterProvider2>().Set(fabricMeterProvider);
+                IInstrumentProvider instrumentProvider = sut.Field<IInstrumentProvider>().Value;
+                systemDimensionsNames = instrumentProvider.Field<IReadOnlyCollection<string>>("fixedDimensionNames").Value;
+                systemDimensionsValues = instrumentProvider.Field<IReadOnlyCollection<string>>("fixedDimensionValues").Value;
+                instrumentProvider.Field<IFabricMeterProvider2>().Set(fabricMeterProvider);
 
                 Mock.Get(fabricMeterProvider)
                     .Setup(x => x.CreateMeter2(It.IsAny<IntPtr>()))
@@ -78,7 +79,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
                 Assert.Equal(testMetric, actualName);
                 Assert.Equal(systemDimensionsNames, actualDimensionNames);
                 Assert.Equal(systemDimensionsValues, actualFixedDimensionValues);
-                Assert.Same(fabricMeter, ((Int64Meter)meter).Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, ((Int64Meter)meter).Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
 
             [Fact]
@@ -90,7 +91,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
                 Assert.Equal(testMetric, actualName);
                 Assert.Equal([.. systemDimensionsNames, testDimension1], actualDimensionNames);
                 Assert.Equal(systemDimensionsValues, actualFixedDimensionValues);
-                Assert.Same(fabricMeter, ((Int64Meter1D)meter1D).Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, ((Int64Meter1D)meter1D).Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
 
             [Fact]
@@ -102,7 +103,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
                 Assert.Equal(testMetric, actualName);
                 Assert.Equal([.. systemDimensionsNames, testDimension1, testDimension2], actualDimensionNames);
                 Assert.Equal(systemDimensionsValues, actualFixedDimensionValues);
-                Assert.Same(fabricMeter, ((Int64Meter2D)meter2D).Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, ((Int64Meter2D)meter2D).Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
 
             [Fact]
@@ -114,7 +115,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics
                 Assert.Equal(testMetric, actualName);
                 Assert.Equal([.. systemDimensionsNames, testDimension1, testDimension2, testDimension3], actualDimensionNames);
                 Assert.Equal(systemDimensionsValues, actualFixedDimensionValues);
-                Assert.Same(fabricMeter, ((Int64Meter3D)meter3D).Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, ((Int64Meter3D)meter3D).Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
         }
     }

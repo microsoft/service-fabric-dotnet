@@ -1,0 +1,81 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
+
+using System;
+using System.Fabric.Interop;
+using System.Runtime.InteropServices;
+
+namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
+
+/// <summary>
+/// Records the values of one meter with a native FabricTelemetry.dll meter, which clamps negative values.
+/// </summary>
+sealed class ComInstrument : IInstrument
+{
+    IFabricMeter fabricMeter;
+
+    static Func<object, int> finalReleaseComObject = Utility.FinalReleaseComObject;
+
+    internal ComInstrument(IFabricMeter fabricMeter) =>
+        this.fabricMeter = fabricMeter ?? throw new ArgumentNullException(nameof(fabricMeter));
+
+    void IInstrument.Record(long value) =>
+        RecordViaNative(value, 0, null, null, null);
+
+    void IInstrument.Record(long value, string dimension1Value) =>
+        RecordViaNative(value, 1, dimension1Value, null, null);
+
+    void IInstrument.Record(long value, string dimension1Value, string dimension2Value) =>
+        RecordViaNative(value, 2, dimension1Value, dimension2Value, null);
+
+    void IInstrument.Record(long value, string dimension1Value, string dimension2Value, string dimension3Value) =>
+        RecordViaNative(value, 3, dimension1Value, dimension2Value, dimension3Value);
+
+    void IDisposable.Dispose()
+    {
+        if (!IsDisposed())
+        {
+            finalReleaseComObject(fabricMeter);
+            fabricMeter = null;
+        }
+    }
+
+    bool IsDisposed() => fabricMeter == null;
+
+    unsafe void RecordViaNative(long value, int variableDimensionCount, string dimension1Value, string dimension2Value, string dimension3Value)
+    {
+        if (IsDisposed())
+            throw new ObjectDisposedException(nameof(Meter));
+        if (variableDimensionCount < 0 || variableDimensionCount > 3)
+            throw new ArgumentOutOfRangeException(nameof(variableDimensionCount));
+
+        GCHandle* dimensionPins = stackalloc GCHandle[variableDimensionCount];
+        IntPtr* dimensionValuesPointers = stackalloc IntPtr[variableDimensionCount];
+
+        try
+        {
+            int i = 0;
+
+            if (variableDimensionCount > 0)
+                dimensionPins[i++] = GCHandle.Alloc(dimension1Value, GCHandleType.Pinned);
+
+            if (variableDimensionCount > 1)
+                dimensionPins[i++] = GCHandle.Alloc(dimension2Value, GCHandleType.Pinned);
+
+            if (variableDimensionCount > 2)
+                dimensionPins[i++] = GCHandle.Alloc(dimension3Value, GCHandleType.Pinned);
+
+            for (i = 0; i < variableDimensionCount; i++)
+            {
+                // for strings, AddrOfPinnedObject() returns a pointer to the first character - https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.gchandle.addrofpinnedobject
+                dimensionValuesPointers[i] = dimensionPins[i].AddrOfPinnedObject();
+            }
+
+            fabricMeter.Record(value, (uint)variableDimensionCount, (IntPtr)dimensionValuesPointers);
+        }
+        finally
+        {
+            Interop.Free(dimensionPins, variableDimensionCount);
+        }
+    }
+}

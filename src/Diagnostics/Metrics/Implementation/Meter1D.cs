@@ -8,12 +8,12 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 {
     abstract class Meter1D : Meter
     {
-        internal Meter1D(IFabricMeter fabricMeter) : base(fabricMeter) { }
+        internal Meter1D(IInstrument instrument) : base(instrument) { }
 
         protected void Record(long value, string dimension1Value)
         {
             _ = dimension1Value ?? throw new ArgumentNullException(nameof(dimension1Value));
-            base.RecordViaNative(value, 1, dimension1Value, null, null);
+            Instrument.Record(value, dimension1Value);
         }
     }
 }

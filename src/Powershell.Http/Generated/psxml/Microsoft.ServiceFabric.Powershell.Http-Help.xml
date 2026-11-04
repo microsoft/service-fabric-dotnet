@@ -16172,6 +16172,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>New-SFBackupPolicy</maml:name>
@@ -16199,6 +16207,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>New-SFBackupPolicy</maml:name>
@@ -16216,6 +16232,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -16240,6 +16264,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -16265,6 +16297,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>New-SFBackupPolicy</maml:name>
@@ -16298,6 +16338,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>New-SFBackupPolicy</maml:name>
@@ -16321,6 +16369,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -16351,6 +16407,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
             </command:syntax>
@@ -16677,6 +16741,16 @@
                     <maml:name>bool?</maml:name>
                 </dev:type>
             </command:parameter>
+            <command:parameter required="false" position="28">
+          <maml:name>ValidationInterval</maml:name>
+          <maml:description>
+            <maml:para>Specifies how often backup validation runs. Supply a TimeSpan, for example (New-TimeSpan -Hours 2); it is sent as an ISO 8601 duration (PT2H). Required when Validation is Enabled and optional when Disabled. Supplying an interval alone does not change the Disabled flag.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true">TimeSpan</command:parameterValue>
+          <dev:type>
+            <maml:name>TimeSpan</maml:name>
+          </dev:type>
+        </command:parameter>
             </command:parameters>
     </command:command>
     <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
@@ -16874,6 +16948,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>Update-SFBackupPolicy</maml:name>
@@ -16901,6 +16983,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>Update-SFBackupPolicy</maml:name>
@@ -16918,6 +17008,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -16942,6 +17040,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -16967,6 +17073,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>Update-SFBackupPolicy</maml:name>
@@ -17000,6 +17114,14 @@
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
                 </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
+                </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
                     <maml:name>Update-SFBackupPolicy</maml:name>
@@ -17023,6 +17145,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
                 <command:syntaxItem>
@@ -17053,6 +17183,14 @@
                 </command:parameter>
                 <command:parameter required="false">
                         <maml:name>MinimumNumberOfBackups</maml:name>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>Validation</maml:name>
+                        <command:parameterValue required="true">BackupValidation</command:parameterValue>
+                </command:parameter>
+                <command:parameter required="false">
+                        <maml:name>ValidationInterval</maml:name>
+                        <command:parameterValue required="true">TimeSpan</command:parameterValue>
                 </command:parameter>
                 </command:syntaxItem>
             </command:syntax>
@@ -17391,6 +17529,16 @@
                     <maml:name>bool?</maml:name>
                 </dev:type>
             </command:parameter>
+            <command:parameter required="false" position="29">
+          <maml:name>ValidationInterval</maml:name>
+          <maml:description>
+            <maml:para>Specifies how often backup validation runs. Supply a TimeSpan, for example (New-TimeSpan -Hours 2); it is sent as an ISO 8601 duration (PT2H). Required when Validation is Enabled and optional when Disabled. Supplying an interval alone does not change the Disabled flag.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true">TimeSpan</command:parameterValue>
+          <dev:type>
+            <maml:name>TimeSpan</maml:name>
+          </dev:type>
+        </command:parameter>
             </command:parameters>
     </command:command>
     <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">

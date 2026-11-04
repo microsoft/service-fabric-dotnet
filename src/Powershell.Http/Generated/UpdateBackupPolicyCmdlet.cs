@@ -269,35 +269,43 @@ namespace Microsoft.ServiceFabric.Powershell.Http
         /// Possible values include: 'CLUSTER_DEFINED', 'ZIP', 'ZSTANDARD'
         /// </summary>
         [Parameter(Mandatory = false, Position = 25)]
-        public CompressionType? CompressionType { get; set; }
+        public CompressionType? CompressionType { get; set; } = Common.CompressionType.CLUSTER_DEFINED;
 
         /// <summary>
         /// Gets or sets QuickRecovery. Specifies the quick recovery strategy for this backup policy. Default is Disabled.
         /// Possible values include: 'Disabled', 'FromPrimary'
         /// </summary>
         [Parameter(Mandatory = false, Position = 26)]
-        public QuickRecovery? QuickRecovery { get; set; }
+        public QuickRecovery? QuickRecovery { get; set; } = Common.QuickRecovery.Disabled;
 
         /// <summary>
-        /// Gets or sets Validation. Specifies whether the backups taken need to be validated or not. Possible values include:
-        /// 'Disabled', 'Enabled'
+        /// Gets or sets Validation. Specifies whether the backups taken need to be validated or not. Default is Disabled.
+        /// Possible values include: 'Disabled', 'Enabled'
         /// </summary>
         [Parameter(Mandatory = false, Position = 27)]
-        public BackupValidation? Validation { get; set; }
+        public BackupValidation? Validation { get; set; } = Common.BackupValidation.Disabled;
+
+        /// <summary>
+        /// Gets or sets ValidationInterval. Specifies how often backup validation runs as an ISO 8601 duration, for example
+        /// PT10M, PT2H, or P1D.
+        /// Required when Validation is set to Enabled. Optional when Validation is Disabled.
+        /// </summary>
+        [Parameter(Mandatory = false, Position = 28)]
+        public TimeSpan? ValidationInterval { get; set; }
 
         /// <summary>
         /// Gets or sets ServerTimeout. The server timeout for performing the operation in seconds. This timeout specifies the
         /// time duration that the client is willing to wait for the requested operation to complete. The default value for
         /// this parameter is 60 seconds.
         /// </summary>
-        [Parameter(Mandatory = false, Position = 28)]
+        [Parameter(Mandatory = false, Position = 29)]
         public long? ServerTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets ValidateConnection. Specifies whether to validate the storage connection and credentials before
         /// creating or updating the backup policies.
         /// </summary>
-        [Parameter(Mandatory = false, Position = 29)]
+        [Parameter(Mandatory = false, Position = 30)]
         public bool? ValidateConnection { get; set; }
 
         /// <inheritdoc/>
@@ -369,7 +377,8 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             retentionPolicy: retentionPolicyDescription,
             compressionType: this.CompressionType,
             quickRecovery: this.QuickRecovery,
-            validation: this.Validation);
+            validation: this.Validation,
+            validationInterval: this.ValidationInterval);
 
             this.ServiceFabricClient.BackupRestore.UpdateBackupPolicyAsync(
                 backupPolicyDescription: backupPolicyDescription,

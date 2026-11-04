@@ -42,6 +42,7 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             var compressionType = default(CompressionType?);
             var quickRecovery = default(QuickRecovery?);
             var validation = default(BackupValidation?);
+            var validationInterval = default(TimeSpan?);
 
             do
             {
@@ -82,6 +83,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 {
                     validation = BackupValidationConverter.Deserialize(reader);
                 }
+                else if (string.Compare("ValidationInterval", propName, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    validationInterval = reader.ReadValueAsTimeSpan();
+                }
                 else
                 {
                     reader.SkipPropertyValue();
@@ -98,7 +103,8 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                 retentionPolicy: retentionPolicy,
                 compressionType: compressionType,
                 quickRecovery: quickRecovery,
-                validation: validation);
+                validation: validation,
+                validationInterval: validationInterval);
         }
 
         /// <summary>
@@ -121,6 +127,11 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             if (obj.RetentionPolicy != null)
             {
                 writer.WriteProperty(obj.RetentionPolicy, "RetentionPolicy", RetentionPolicyDescriptionConverter.Serialize);
+            }
+
+            if (obj.ValidationInterval != null)
+            {
+                writer.WriteProperty(obj.ValidationInterval, "ValidationInterval", JsonWriterExtensions.WriteTimeSpanValue);
             }
 
             writer.WriteEndObject();

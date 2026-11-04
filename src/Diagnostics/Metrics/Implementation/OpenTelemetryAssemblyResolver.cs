@@ -13,10 +13,13 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 /// <summary>
 /// Resolves assemblies of the OpenTelemetry backend that the app fails to load, such as OpenTelemetry, the Geneva exporter,
 /// System.Diagnostics.DiagnosticSource and Microsoft.Extensions, when the OpenTelemetry folder of the Service Fabric runtime
-/// has them: uses the app's own copy when it is newer than the requested version, and the folder's copy otherwise.
+/// has them: uses the app's own copy when it is newer than the requested version, and the folder's copy otherwise. It never
+/// loads a Geneva exporter next to the app's own.
 /// </summary>
 static class OpenTelemetryAssemblyResolver
 {
+    const string GenevaExporter = "OpenTelemetry.Exporter.Geneva";
+
     // Replaced by tests.
     internal static Func<string> GetFolder = static () => Path.Combine(FabricEnvironment.GetCodePath(), "OpenTelemetry");
 
@@ -53,7 +56,8 @@ static class OpenTelemetryAssemblyResolver
 
     /// <summary>
     /// Returns the app's copy of an assembly the folder has when the app's copy is newer than the requested version, otherwise
-    /// the assembly from its file in the folder, or null when the folder has no such file or only an older version.
+    /// the assembly from its file in the folder, or null when the folder has no such file or only an older version, or when
+    /// the app has its own copy of the Geneva exporter.
     /// </summary>
     internal static Assembly Resolve(string folder, string assemblyName)
     {
@@ -65,9 +69,14 @@ static class OpenTelemetryAssemblyResolver
                 return null;
 
             // The app's own code uses its newer copy; a second copy from the folder would share no types or state with it.
-            AssemblyName appCopy = loadingAppCopy ? null : FindNewerAppCopy(requested);
-            if (appCopy != null)
+            AssemblyName appCopy = loadingAppCopy ? null : FindAppCopy(requested);
+            if (appCopy != null && appCopy.Version > requested.Version)
                 return LoadAppCopy(appCopy);
+
+            // Two Geneva exporters register the same ETW provider, and .NET disables it for one of them, stopping the app's
+            // metrics or these. Failing to load makes the backend fall back to COM interop instead.
+            if (appCopy != null && string.Equals(requested.Name, GenevaExporter, StringComparison.OrdinalIgnoreCase))
+                return null;
 
             if (AssemblyName.GetAssemblyName(path).Version < requested.Version)
                 return null;
@@ -80,14 +89,14 @@ static class OpenTelemetryAssemblyResolver
         }
     }
 
-    static AssemblyName FindNewerAppCopy(AssemblyName requested)
+    static AssemblyName FindAppCopy(AssemblyName requested)
     {
         string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, requested.Name + ".dll");
         if (!File.Exists(path))
             return null;
 
         AssemblyName appCopy = AssemblyName.GetAssemblyName(path);
-        return appCopy.Version > requested.Version && HasSamePublicKeyToken(appCopy, requested) ? appCopy : null;
+        return HasSamePublicKeyToken(appCopy, requested) ? appCopy : null;
     }
 
     // Loads by name, like the app's own references, so the app's code and this library share it in either load order.

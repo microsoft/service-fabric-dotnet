@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Inspector;
+using Microsoft.Extensions.Configuration;
 using OpenTelemetry.Exporter.Geneva;
 using Xunit;
 
@@ -125,12 +126,36 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
         }
 
         [Fact]
+        public void ReturnsNullForGenevaExporterWhenAppCopyIsNotNewer()
+        {
+            requested.Version = new Version(appCopy.GetName().Version.Major + 1, 0, 0, 0);
+            _ = SaveAssembly(requested.Version.ToString(), requested.Name);
+
+            Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+        }
+
+        [Fact]
+        public void LoadsFileForOtherAssemblyWhenAppCopyIsNotNewer()
+        {
+            AssemblyName other = typeof(ConfigurationBuilder).Assembly.GetName();
+            other.Version = new Version(other.Version.Major + 1, 0, 0, 0);
+            _ = SaveAssembly(other.Version.ToString(), other.Name);
+
+            Assembly actual = OpenTelemetryAssemblyResolver.Resolve(folder, other.FullName);
+
+            Assert.Equal(Path.Combine(folder, other.Name + ".dll"), actual?.Location, ignoreCase: true);
+        }
+
+        [Fact]
         public void IgnoresAppCopyWithAnotherPublicKeyToken()
         {
             requested.SetPublicKeyToken([.. requested.GetPublicKeyToken().Select(static b => (byte)~b)]);
-            _ = SaveAssembly("0.0.0.1", requested.Name);
+            _ = SaveAssembly(requested.Version.ToString(), requested.Name);
 
-            Assert.Null(OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName));
+            Assembly actual = OpenTelemetryAssemblyResolver.Resolve(folder, requested.FullName);
+
+            Assert.NotSame(appCopy, actual);
+            Assert.Equal(requested.Name, actual?.GetName().Name);
         }
     }
 

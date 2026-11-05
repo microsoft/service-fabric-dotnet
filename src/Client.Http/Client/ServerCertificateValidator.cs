@@ -4,6 +4,7 @@
 // ------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -34,6 +35,20 @@ namespace Microsoft.ServiceFabric.Client
             slimRWLock.EnterWriteLock();
             this.remoteX509SecuritySettings = remoteX509SecuritySettings;
             slimRWLock.ExitWriteLock();
+        }
+
+        internal IReadOnlyCollection<string> GetServerCommonNames()
+        {
+            slimRWLock.EnterReadLock();
+            try
+            {
+                return Array.AsReadOnly(remoteX509SecuritySettings.RemoteX509Names?.Select(name => name?.Name).ToArray()
+                    ?? Array.Empty<string>());
+            }
+            finally
+            {
+                slimRWLock.ExitReadLock();
+            }
         }
 
         /// <summary>

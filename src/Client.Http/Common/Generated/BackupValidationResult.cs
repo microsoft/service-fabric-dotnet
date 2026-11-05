@@ -34,6 +34,6 @@ namespace Microsoft.ServiceFabric.Common
         /// <summary>
         /// Backup integrity validation failed because the backup data is corrupted or inconsistent.
         /// </summary>
-        IntegrityResultFailure,
+        IntegrityCheckFailure,
     }
 }

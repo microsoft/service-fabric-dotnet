@@ -21,7 +21,8 @@ namespace Microsoft.ServiceFabric.Common
         Success,
 
         /// <summary>
-        /// Checksum validation failed because the backup data integrity check did not match.
+        /// Checksum validation failed because the calculated checksum of the entire backup does not match the expected
+        /// checksum.
         /// </summary>
         ChecksumMismatchFailure,
 
@@ -29,5 +30,10 @@ namespace Microsoft.ServiceFabric.Common
         /// Backup chain validation failed because one or more backups in the chain are missing or corrupted.
         /// </summary>
         BackupChainMissingFailure,
+
+        /// <summary>
+        /// Backup integrity validation failed because the backup data is corrupted or inconsistent.
+        /// </summary>
+        IntegrityCheckFailure,
     }
 }

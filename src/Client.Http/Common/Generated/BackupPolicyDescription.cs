@@ -33,8 +33,12 @@ namespace Microsoft.ServiceFabric.Common
         /// Possible values include: 'CLUSTER_DEFINED', 'ZIP', 'ZSTANDARD'</param>
         /// <param name="quickRecovery">Specifies the quick recovery strategy for this backup policy. Default is Disabled.
         /// Possible values include: 'Disabled', 'FromPrimary'</param>
-        /// <param name="validation">Specifies whether the backups taken need to be validated or not. Possible values include:
-        /// 'Disabled', 'Enabled'</param>
+        /// <param name="validation">Specifies whether the backups taken need to be validated or not. Default is Disabled.
+        /// Possible values include: 'Disabled', 'Enabled'</param>
+        /// <param name="validationInterval">Specifies how often backup validation runs as an ISO 8601 duration, for example
+        /// PT10M, PT2H, or P1D.
+        /// Required when Validation is set to Enabled. Optional when Validation is Disabled.
+        /// </param>
         public BackupPolicyDescription(
             string name,
             bool? autoRestoreOnDataLoss,
@@ -42,15 +46,18 @@ namespace Microsoft.ServiceFabric.Common
             BackupScheduleDescription schedule,
             BackupStorageDescription storage,
             RetentionPolicyDescription retentionPolicy = default(RetentionPolicyDescription),
-            CompressionType? compressionType = default(CompressionType?),
-            QuickRecovery? quickRecovery = default(QuickRecovery?),
-            BackupValidation? validation = default(BackupValidation?))
+            CompressionType? compressionType = Common.CompressionType.CLUSTER_DEFINED,
+            QuickRecovery? quickRecovery = Common.QuickRecovery.Disabled,
+            BackupValidation? validation = Common.BackupValidation.Disabled,
+            TimeSpan? validationInterval = default(TimeSpan?))
         {
             name.ThrowIfNull(nameof(name));
             autoRestoreOnDataLoss.ThrowIfNull(nameof(autoRestoreOnDataLoss));
             maxIncrementalBackups.ThrowIfNull(nameof(maxIncrementalBackups));
             schedule.ThrowIfNull(nameof(schedule));
             storage.ThrowIfNull(nameof(storage));
+            if (validation == Common.BackupValidation.Enabled)
+                validationInterval.ThrowIfNull(nameof(validationInterval));
             maxIncrementalBackups?.ThrowIfOutOfInclusiveRange("maxIncrementalBackups", 0, 255);
             this.Name = name;
             this.AutoRestoreOnDataLoss = autoRestoreOnDataLoss;
@@ -61,6 +68,7 @@ namespace Microsoft.ServiceFabric.Common
             this.CompressionType = compressionType;
             this.QuickRecovery = quickRecovery;
             this.Validation = validation;
+            this.ValidationInterval = validationInterval;
         }
 
         /// <summary>
@@ -112,9 +120,15 @@ namespace Microsoft.ServiceFabric.Common
         public QuickRecovery? QuickRecovery { get; }
 
         /// <summary>
-        /// Gets specifies whether the backups taken need to be validated or not. Possible values include: 'Disabled',
-        /// 'Enabled'
+        /// Gets specifies whether the backups taken need to be validated or not. Default is Disabled. Possible values include:
+        /// 'Disabled', 'Enabled'
         /// </summary>
         public BackupValidation? Validation { get; }
+
+        /// <summary>
+        /// Gets specifies how often backup validation runs as an ISO 8601 duration, for example PT10M, PT2H, or P1D.
+        /// Required when Validation is set to Enabled. Optional when Validation is Disabled.
+        /// </summary>
+        public TimeSpan? ValidationInterval { get; }
     }
 }

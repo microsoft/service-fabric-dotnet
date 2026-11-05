@@ -42,6 +42,10 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
             {
                 obj = BackupValidationResult.BackupChainMissingFailure;
             }
+            else if (string.Compare(value, "IntegrityCheckFailure", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                obj = BackupValidationResult.IntegrityCheckFailure;
+            }
 
             return obj;
         }
@@ -66,6 +70,9 @@ namespace Microsoft.ServiceFabric.Client.Http.Serialization
                     break;
                 case BackupValidationResult.BackupChainMissingFailure:
                     writer.WriteStringValue("BackupChainMissingFailure");
+                    break;
+                case BackupValidationResult.IntegrityCheckFailure:
+                    writer.WriteStringValue("IntegrityCheckFailure");
                     break;
                 default:
                     throw new ArgumentException($"Invalid value {value.ToString()} for enum type BackupValidationResult");

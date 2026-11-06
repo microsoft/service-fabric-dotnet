@@ -90,6 +90,12 @@ namespace Microsoft.ServiceFabric.Powershell.Http
         public string[] ServerCertThumbprint { get; set; }
 
         /// <summary>
+        /// Gets or sets the switch to load the installed extended server certificate validator.
+        /// </summary>
+        [Parameter(Mandatory = false)]
+        public SwitchParameter UseExtendedServerValidation { get; set; }
+
+        /// <summary>
         /// Gets or sets client timeout in seconds used by underlying http client to wait before the request times out. The default value for
         /// this parameter is 90 seconds.
         /// </summary>
@@ -164,13 +170,14 @@ namespace Microsoft.ServiceFabric.Powershell.Http
 
             var builder = new ServiceFabricClientBuilder()
                 .UseEndpoints(ConnectionEndpoint.Select(e => new Uri(e)).ToArray());
+            RemoteX509SecuritySettings remoteX509SecuritySettings = null;
 
             // Configure Security
             if (WindowsCredential.IsPresent)
                 builder.UseWindowsSecurity();
             else if (X509Credential.IsPresent)
             {
-                var remoteX509SecuritySettings = GetServerX509SecuritySettings();
+                remoteX509SecuritySettings = GetServerX509SecuritySettings();
                 Func<CancellationToken, Task<SecuritySettings>> securitySettings;
                 if (ClientCertificate == null)
                 {
@@ -185,7 +192,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             }
             else if (AzureActiveDirectory.IsPresent)
             {
-                RemoteX509SecuritySettings remoteX509SecuritySettings = GetServerX509SecuritySettings();
+                remoteX509SecuritySettings = GetServerX509SecuritySettings();
                 Func<CancellationToken, Task<SecuritySettings>> securitySettings;
                 if (GetMetadata.IsPresent)
                     securitySettings = (ct) => Task.FromResult<SecuritySettings>(new AzureActiveDirectorySecuritySettings("DummyTokenToGetMetadata", remoteX509SecuritySettings));
@@ -201,7 +208,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             }
             else if (DSTS.IsPresent)
             {
-                var remoteX509SecuritySettings = GetServerX509SecuritySettings();
+                remoteX509SecuritySettings = GetServerX509SecuritySettings();
                 Func<CancellationToken, Task<SecuritySettings>> securitySettings =
                     (ct) => Task.FromResult<SecuritySettings>(new DstsClaimsSecuritySettings(CredentialsUtil.GetAccessTokenDstsAsync, remoteX509SecuritySettings));
                 builder.UseClaimsSecurity(securitySettings);
@@ -209,6 +216,14 @@ namespace Microsoft.ServiceFabric.Powershell.Http
 
             if (ClientTimeout != null)
                 builder.ConfigureClientSettings(settings => settings.ClientTimeout = TimeSpan.FromSeconds(ClientTimeout.Value));
+
+            if (UseExtendedServerValidation.IsPresent)
+            {
+                if (remoteX509SecuritySettings == null)
+                    throw new PSInvalidOperationException(Resource.ErrorExtendedServerValidationRequiresCertificateSecurity);
+
+                builder.UseExtendedServerValidation(ExtendedServerValidationLoader.Load());
+            }
 
             ServiceFabricHttpClient client = builder.BuildAsync(cancellationToken: CancellationToken).GetAwaiter().GetResult() as ServiceFabricHttpClient;
 

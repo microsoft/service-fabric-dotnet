@@ -40,7 +40,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 
             public Record()
             {
-                sut = new Mock<Meter1D>(fabricMeter).Object;
+                sut = new Mock<Meter1D>(new ComInstrument(fabricMeter)).Object;
                 sutMethod = sut.Protected().Method<Action<long, string>>();
 
                 // capture strings emitted to IFabricMeter.Record for assertion in tests

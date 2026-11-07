@@ -7,7 +7,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 {
     sealed class Int64Meter2D : Meter2D, IMeter2D<long>
     {
-        internal Int64Meter2D(IFabricMeter fabricMeter) : base(fabricMeter) { }
+        internal Int64Meter2D(IInstrument instrument) : base(instrument) { }
 
         void IMeter2D<long>.Record(long value, string dimension1Value, string dimension2Value)
         {

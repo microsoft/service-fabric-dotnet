@@ -9,7 +9,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 {
     sealed class TimeSpanMeter : Meter, IMeter<TimeSpan>
     {
-        internal TimeSpanMeter(IFabricMeter fabricMeter) : base(fabricMeter) { }
+        internal TimeSpanMeter(IInstrument instrument) : base(instrument) { }
 
         void IMeter<TimeSpan>.Record(TimeSpan value)
         {

@@ -27,7 +27,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 
         public MeterTest()
         {
-            sut = new Mock<Meter>(fabricMeter).Object;
+            sut = new Mock<Meter>(new ComInstrument(fabricMeter)).Object;
 
             // capture strings emitted to IFabricMeter.Record for assertion in tests
             Mock.Get(fabricMeter)
@@ -38,7 +38,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
         public class Constructor : MeterTest
         {
             [Fact]
-            public void ThrowsArgumentNullExceptionWhenFabricMeterIsNull()
+            public void ThrowsArgumentNullExceptionWhenInstrumentIsNull()
             {
                 var exception = Assert.Throws<TargetInvocationException>(() => new Mock<Meter>(null).Object);
                 _ = Assert.IsType<ArgumentNullException>(exception.InnerException);
@@ -47,7 +47,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
             [Fact]
             public void SetsFabricMeterField()
             {
-                Assert.Same(fabricMeter, sut.Field<IFabricMeter>().Value);
+                Assert.Same(fabricMeter, sut.Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
         }
 
@@ -75,10 +75,10 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 
             // Set the finalReleaseComObject delegate to a mock function, so we can verify that it was called in Dispose.
             public DisposeTest() =>
-                typeof(Meter).Field<Func<object, int>>().Set(finalReleaseComObject);
+                typeof(ComInstrument).Field<Func<object, int>>().Set(finalReleaseComObject);
 
             // Restore the original finalReleaseComObject delegate after the test, to avoid affecting other tests.
-            public void Dispose() => typeof(Meter).Field<Func<object, int>>().Set(Utility.FinalReleaseComObject);
+            public void Dispose() => typeof(ComInstrument).Field<Func<object, int>>().Set(Utility.FinalReleaseComObject);
 
             [Fact]
             public void ReleasesNativeFabricMeter()
@@ -86,7 +86,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
                 sut.Dispose();
 
                 Mock.Get(finalReleaseComObject).Verify(f => f(fabricMeter), Times.Once);
-                Assert.Null(sut.Private().Field<IFabricMeter>().Value);
+                Assert.Null(sut.Field<IInstrument>().Value.Field<IFabricMeter>().Value);
             }
 
             [Fact]
@@ -107,7 +107,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 
             readonly Method<Action<long, int, string, string, string>> sutMethod;
 
-            public RecordViaNative() => sutMethod = sut.Protected().Method<Action<long, int, string, string, string>>();
+            public RecordViaNative() => sutMethod = sut.Field<IInstrument>().Value.Method<Action<long, int, string, string, string>>();
 
 
             [Fact]

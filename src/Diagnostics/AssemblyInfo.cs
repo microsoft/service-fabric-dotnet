@@ -87,3 +87,9 @@ using static Microsoft.ServiceFabric.Constants.AssemblyInfo;
 // Making internals visible for DCA using Metrics
 [assembly: InternalsVisibleTo("FabricDCA" + PublicKey)]
 [assembly: InternalsVisibleTo("FabricDCA" + TestKey)]
+
+// Making internals visible for FabricDeployer metrics
+[assembly: InternalsVisibleTo("System.Fabric.Management" + PublicKey)]
+[assembly: InternalsVisibleTo("System.Fabric.Management" + TestKey)]
+[assembly: InternalsVisibleTo("System.Fabric.Management.Test" + PublicKey)]
+[assembly: InternalsVisibleTo("System.Fabric.Management.Test" + TestKey)]

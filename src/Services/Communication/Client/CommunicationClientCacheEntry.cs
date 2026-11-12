@@ -8,6 +8,7 @@ namespace Microsoft.ServiceFabric.Services.Communication.Client
     using System;
     using System.Fabric;
     using System.Globalization;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
 
     /// <summary>
@@ -33,6 +34,11 @@ namespace Microsoft.ServiceFabric.Services.Communication.Client
         // If this property is true, it means the cache entry is still in the cache. The cache clean up code sets
         // this to false before purging the entry from cache.
         private bool isInCache;
+
+        // The last failure to create and open the communication client, re-thrown to the requests that were waiting
+        // for the Semaphore when it occurred instead of repeating the attempt, and its Stopwatch timestamp.
+        internal ExceptionDispatchInfo CreationFailure;
+        internal long CreationFailureTimestamp;
 
         public CommunicationClientCacheEntry()
         {

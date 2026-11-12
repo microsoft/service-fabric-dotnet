@@ -5,9 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Fabric;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Diagnostics.Tracing;
@@ -401,6 +403,7 @@ namespace Microsoft.ServiceFabric.Services.Communication.Client
                     }
 
                     var endpoint = this.GetEndpoint(previousRsp, targetReplicaSelector);
+                    long waitStart = Stopwatch.GetTimestamp();
                     var cacheEntry =
                         await
                             this.GetAndLockClientCacheEntryAsync(
@@ -420,6 +423,22 @@ namespace Microsoft.ServiceFabric.Services.Communication.Client
                         // code path and the communication client was invalidated.
                         if (this.ShouldCreateNewClient(cacheEntry))
                         {
+                            // Rethrow a failure to create the client that occurred while this request was waiting instead of
+                            // repeating the attempt. It is unlikely to succeed, but likely to take as long for each request
+                            // waiting in line, e.g. when connecting to an address abandoned by a replica that moved.
+                            if (cacheEntry.CreationFailureTimestamp > waitStart)
+                            {
+                                ServiceTrace.Source.WriteInfoWithId(
+                                    TraceType,
+                                    requestId,
+                                    "{0} Not creating Client for connecting to ListenerName : {1} Address : {2} Role : {3}, creating it failed while waiting",
+                                    traceId,
+                                    listenerName,
+                                    cacheEntry.GetEndpoint(),
+                                    cacheEntry.Endpoint.Role);
+                                cacheEntry.CreationFailure.Throw();
+                            }
+
                             client = await this.CreateNewClientAsync(listenerName, requestId, previousRsp, cacheEntry, cancellationToken);
                             newClient = true;
                         }
@@ -518,10 +537,21 @@ namespace Microsoft.ServiceFabric.Services.Communication.Client
 
             cacheEntry.Rsp = previousRsp;
 
-            var client = await this.CreateClientAsync(cacheEntry.GetEndpoint(), cancellationToken);
+            TCommunicationClient client;
+            try
+            {
+                client = await this.CreateClientAsync(cacheEntry.GetEndpoint(), cancellationToken);
 
-            // Open the Client .
-            await this.OpenClient(client, cancellationToken);
+                // Open the Client .
+                await this.OpenClient(client, cancellationToken);
+            }
+            catch (Exception e) when (!cancellationToken.IsCancellationRequested)
+            {
+                // Failures caused by cancellation of this request say nothing about the endpoint to other requests.
+                cacheEntry.CreationFailure = ExceptionDispatchInfo.Capture(e);
+                cacheEntry.CreationFailureTimestamp = Stopwatch.GetTimestamp();
+                throw;
+            }
 
             cacheEntry.Client = client;
             client.ResolvedServicePartition = cacheEntry.Rsp;

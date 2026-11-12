@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net462</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>$(AssemblyName).Internal</PackageId>
     <Description>Internal transport layer for the Service Fabric .NET remoting infrastructure — not intended for direct consumption.</Description>

@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net462</TargetFrameworks>
     <RootNamespace>Microsoft.ServiceFabric.Data</RootNamespace>
     <Description>Extended Reliable Collections interfaces with ordinal string keys, versioned enumeration, and replicator configuration.</Description>
   </PropertyGroup>

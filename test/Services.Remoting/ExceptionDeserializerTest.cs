@@ -19,6 +19,7 @@ using Moq;
 using Fuzzy;
 using Inspector;
 using Xunit;
+using System.Threading;
 
 namespace Microsoft.ServiceFabric.Services.Remoting.Tests
 {
@@ -133,6 +134,22 @@ namespace Microsoft.ServiceFabric.Services.Remoting.Tests
         public class DeserializeRemoteExceptionAndThrowAsync : ExceptionDeserializerTest
         {
             readonly ExceptionDeserializer sut = ExceptionDeserializer.CreateDefault([]);
+
+            [Fact]
+            public async Task ThrowsArgumentExceptionIfStreamReadReturnsPartialResult()
+            {
+                Mock<Stream> stream = new();
+                int expectedLength = fuzzy.Int32().Between(10, 20);
+                _ = stream.Setup(_ => _.Length).Returns(expectedLength);
+                int unexpectedByteCount = expectedLength - fuzzy.Int32().Between(2, 3);
+                _ = stream.Setup(_ => _.ReadAsync(It.IsAny<byte[]>(), 0, expectedLength, CancellationToken.None)).ReturnsAsync(unexpectedByteCount);
+
+                var thrown = await Assert.ThrowsAsync<ArgumentException>(() => sut.DeserializeRemoteExceptionAndThrowAsync(stream.Object));
+
+                Assert.Equal("stream", thrown.ParamName);
+                Assert.Contains(expectedLength.ToString(), thrown.Message);
+                Assert.Contains(unexpectedByteCount.ToString(), thrown.Message);
+            }
 
             [Fact]
             public async Task ThrowsOriginalExceptionIfItIsKnownExceptionTypeAsync()

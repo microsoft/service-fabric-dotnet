@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net462</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <Import Project="..\..\properties\service_fabric_managed_common.props" />

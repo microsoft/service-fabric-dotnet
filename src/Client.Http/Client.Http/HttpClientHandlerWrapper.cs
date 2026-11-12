@@ -4,7 +4,10 @@
 // ------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.ServiceFabric.Common.Security;
 
 namespace Microsoft.ServiceFabric.Client.Http
@@ -12,13 +15,16 @@ namespace Microsoft.ServiceFabric.Client.Http
     sealed class HttpClientHandlerWrapper
     {
         readonly HttpClientHandler httpClientHandler;
+        readonly Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?> extendedServerValidation;
         ServerCertificateValidatorHttpWrapper serverCertValidator;
         SecurityType securityType;
         bool securityConfigured;
 
-        internal HttpClientHandlerWrapper(HttpClientHandler httpClientHandler)
+        internal HttpClientHandlerWrapper(HttpClientHandler httpClientHandler,
+            Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?> extendedServerValidation = null)
         {
             this.httpClientHandler = httpClientHandler;
+            this.extendedServerValidation = extendedServerValidation;
             securityConfigured = false;
         }
 
@@ -30,12 +36,16 @@ namespace Microsoft.ServiceFabric.Client.Http
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
+            if (extendedServerValidation != null && settings.SecurityType != SecurityType.Claims && settings.SecurityType != SecurityType.X509)
+                throw new InvalidOperationException(SR.ErrorExtendedServerValidationRequiresCertificateSecurity);
+
             securityType = settings.SecurityType;
 
             if (settings.SecurityType == SecurityType.Claims)
             {
                 var claimsSettings = (ClaimsSecuritySettings)settings;
-                serverCertValidator = new ServerCertificateValidatorHttpWrapper(claimsSettings.RemoteX509SecuritySettings);
+                serverCertValidator = new ServerCertificateValidatorHttpWrapper(claimsSettings.RemoteX509SecuritySettings,
+                    extendedServerValidation);
 
                 // If remote server cert validation fails, HttpClient throws HttpRequestException which has different exception information on full dotnet framework
                 // and dotnet core, so ServerCertificateValidatorHttpWrapper.ValidateServerCertificate throws AuthenticationException which allows ServiceFabricHttpClient to detect it and make decisions.
@@ -47,7 +57,8 @@ namespace Microsoft.ServiceFabric.Client.Http
                 if (!httpClientHandler.ClientCertificates.Contains(x509Settings.ClientCertificate))
                     httpClientHandler.ClientCertificates.Add(x509Settings.ClientCertificate);
 
-                serverCertValidator = new ServerCertificateValidatorHttpWrapper(x509Settings.RemoteX509SecuritySettings);
+                serverCertValidator = new ServerCertificateValidatorHttpWrapper(x509Settings.RemoteX509SecuritySettings,
+                    extendedServerValidation);
 
                 // If remote server cert validation fails, HttpClient throws HttpRequestException which has different exception information on full dotnet framework
                 // and dotnet core, so ServerCertificateValidatorHttpWrapper.ValidateServerCertificate throws AuthenticationException which allows ServiceFabricHttpClient to detect it and make decisions.

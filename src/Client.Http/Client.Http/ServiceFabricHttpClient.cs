@@ -9,8 +9,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Client.Exceptions;
@@ -32,6 +34,7 @@ namespace Microsoft.ServiceFabric.Client.Http
         readonly SemaphoreSlim refreshSecurityLockObj = new SemaphoreSlim(1, 1);
         readonly Random rand = new Random();
         readonly TimeSpan maxRetryInterval = TimeSpan.FromSeconds(2);
+        readonly Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?> extendedServerValidation;
         SecurityType securityType = SecurityType.None;
         HttpClient httpClient = null;
         HttpClientHandler innerHandler;
@@ -73,7 +76,9 @@ namespace Microsoft.ServiceFabric.Client.Http
                 delegateHandlers = (DelegatingHandler[])builder.Container[typeof(DelegatingHandler[])];
 
             refreshSecuritySettingsFunc = SecuritySettingsFunc;
-            httpClientHandlerWrapper = new HttpClientHandlerWrapper(innerHandler);
+            builder.Container.TryGetValue(typeof(Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?>), out object callback);
+            extendedServerValidation = (Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?>)callback;
+            httpClientHandlerWrapper = new HttpClientHandlerWrapper(innerHandler, extendedServerValidation);
             ClientTypeHeaderValue = Constants.ClientlibClientTypeHeaderValue;
     }
 
@@ -458,6 +463,9 @@ namespace Microsoft.ServiceFabric.Client.Http
                 securitySettings = await SecuritySettingsFunc.Invoke(cancellationToken);
 
             securityType = securitySettings?.SecurityType ?? SecurityType.None;
+
+            if (extendedServerValidation != null && securitySettings == null)
+                throw new InvalidOperationException(SR.ErrorExtendedServerValidationRequiresCertificateSecurity);
 
             // Validate Url scheme.
             var scheme = Uri.UriSchemeHttp;

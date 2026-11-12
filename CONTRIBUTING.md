@@ -79,6 +79,49 @@ dotnet pack
 ```
 NuGet packages and PowerShell modules are produced in `out/packages`.
 
+## Internal Repair Manager support
+
+Named External Repair Manager routing is an internal platform feature. It does not add REST paths or change
+`IRepairManagementClient` signatures. The internal `RepairManagementClient.ForService` factory returns an immutable,
+URI-bound client for the HTTP PowerShell friend assembly; arbitrary .NET applications cannot call this factory.
+The cluster connection's `Repairs` client always retains its original default target.
+
+The seven HTTP repair cmdlets accept a hidden, optional **string** parameter, `-ExternalRepairManagerServiceName`:
+`Get-SFRepairTaskList`, `New-SFRepairTask`, `Stop-SFRepairTask`, `New-SFApproveRepairTask`, `Remove-SFRepairTask`,
+`Update-SFRepairExecutionState`, and `Update-SFRepairTaskHealthPolicy`. These are not the runtime's
+`*-ServiceFabricRepairTask` cmdlets.
+
+```powershell
+$rm = 'fabric:/System/RepairManagerService/ext01'
+New-SFRepairTask -ExternalRepairManagerServiceName $rm -External `
+    -TaskId 'platform-repair-example' -State Created -Action 'External.RestartNode' -Version '0'
+Get-SFRepairTaskList -ExternalRepairManagerServiceName $rm -TaskIdFilter 'platform-repair-example'
+```
+
+Supply the exact configured `ServiceName`, without URL-encoding it. Names have the case-sensitive prefix
+`fabric:/System/RepairManagerService/` and one nonempty ASCII alphanumeric suffix. Omitting the parameter targets
+the original RM; an explicitly empty or invalid value fails rather than falling back.
+
+Service selection and task kind are independent. `-External` selects the internal External payload parameter set on
+create/update; `-ExternalImpactLevel RestartNode` supplies its impact when appropriate. Existing `-Node` parameters
+still work with either service target. The internal External models and converters preserve those tasks on read/update.
+The public kind enums have additive, IntelliSense-hidden `External` values; existing enum values are unchanged.
+
+All receiving HTTP gateways must support named routing before it is used. Older gateways can ignore an unknown
+selector and execute against the default RM; `api-version=6.0` is not a capability check. Neither the selector nor
+`DontShow` grants authorization. Requests retain their existing authentication and task-state requirements.
+Deletion remains `POST /$/DeleteRepairTask` and removes a completed task, not the service. There is no cross-instance
+fallback or task search. Carry the selector through every operation, even when task IDs match between instances.
+
+When regenerating the HTTP client or cmdlets, retain the seven query hooks, repair-only base class, External
+converter branches, and create/update parameter sets. The normal public Swagger inputs and generated public help
+remain unchanged; the named selector is specified by the opt-in private SF-Swagger augmentation.
+
+Run the `test/Client.Http` xUnit project in Release and the PowerShell regression script in
+`test/Powershell.Http/RepairManagement.Tests.ps1` against both module target frameworks before publishing.
+The CI workflow runs the xUnit project through the solution, PowerShell Core checks on Windows and Linux, and
+Windows PowerShell checks on Windows.
+
 ## Integrate
 
 You can build and test both Runtime and SDK packages locally.

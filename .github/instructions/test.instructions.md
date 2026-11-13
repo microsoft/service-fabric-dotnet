@@ -278,8 +278,9 @@ applyTo: "test/**/*.cs"
 - **Test names should form valid English sentences when read together with the class names**.
   For example `TraceTest.Constructor.ThrowsArgumentNullExceptionWhenTypeIsNull`.
   - _Describe the SUT's behavior, not the test mechanics_.
-  - _Refer to a SUT parameter by its name_. E.g. for `Equals(object obj)` write `ReturnsFalseWhenObjIsDifferent`. Parameter names
-    like `obj` that violate .NET Framework design guidelines should be rare enough that this shouldn't be a readability problem.
+  - _Refer to a SUT parameter by its name_. E.g. for `Equals(object obj)` write `ReturnsFalseWhenObjIsDifferent`. Parameter
+    names like `obj` that violate .NET Framework design guidelines should be rare enough that this shouldn't be a readability
+    problem.
     Note: _Test overrides and interface implementations through their declaring APIs_ modifies this rule.
 
 - **Each test method should verify a single logical aspect of a single member of the SUT**.

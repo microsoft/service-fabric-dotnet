@@ -460,7 +460,7 @@ applyTo: "test/**/*.cs"
   - Every `TargetFramework`.
 - **Reject new APIs that don't support this goal**.
 - **Improve existing APIs to reach this goal with SemVer restrictions on backward compatibility**.
-- **Create a separate test for each logical branch (statement or expression) in the body of the target member**.
+- **Create a separate test for each logical branch in the body of the target member**.
 - **Create tests for existing code even if it's stable and unlikely to change**.
   Tests explain and verify the current implementation, not just that future regressions will be caught.
 - **Don't test what SUT doesn't do**.

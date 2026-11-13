@@ -271,13 +271,13 @@ applyTo: "test/**/*.cs"
 ## Test Methods
 
 - **Test names should accurately describe the expected behavior of the target**.
+  - _Describe the SUT's behavior, not the test mechanics_.
   - Say _propagates_ when the caller receives the same exception instance, whether the target doesn't catch it or rethrows
     it with `throw;` or `ExceptionDispatchInfo.Throw`, as described by [CA2200](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2200).
     Mention stack trace preservation only when the test verifies `StackTrace`.
 
 - **Test names should form valid English sentences when read together with the class names**.
   For example `TraceTest.Constructor.ThrowsArgumentNullExceptionWhenTypeIsNull`.
-  - _Describe the SUT's behavior, not the test mechanics_.
   - _Refer to a SUT parameter by its name_. E.g. for `Equals(object obj)` write `ReturnsFalseWhenObjIsDifferent`. Parameter
     names like `obj` that violate .NET Framework design guidelines should be rare enough that this shouldn't be a readability
     problem.

@@ -21,7 +21,11 @@ description: "Make sure changes in the current branch pass review."
     - [ ] {target-file}
     ```
   - _If `TODO.md` already exists, check the prompt stored in it_
-    - If the stored prompt is the same, resume from the first unfinished file.
+    - If the stored prompt is the same, reconcile the stored list with target files and resume from the first unfinished file.
+      The `iterator` commits changes during the run and the user keeps working between runs, so the stored list may be stale.
+      - Append `- [ ] {target-file}` for target files missing from `TODO.md`.
+      - Flag entries for files missing from target files, i.e. reverted or deleted.
+        Replace `- [ ] {file}` with `- [x] {file}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to `- [x] {file}: ...` lines.
     - If the stored prompt is different, stop and ask what to do.
 - **Repeat for each target file, _one at a time_**.
   - _Print start note_: `[{files-finished + 1}/{total-files}] Finishing {target-file} ...`

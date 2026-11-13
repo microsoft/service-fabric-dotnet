@@ -3,6 +3,7 @@ description: "Sub-agent using latest GPT model"
 tools: [execute, read, search, skill, web]
 model: "GPT-6.1 Sol"
 modelPolicy: "required"
+reasoningEffort: "high"
 include-custom-instructions: true
 ---
 

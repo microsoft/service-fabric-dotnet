@@ -400,7 +400,7 @@ applyTo: "test/**/*.cs"
           [Fact]
           public void IsSetToGivenValue()
           {
-              int expected = fuzzy.Int32();
+              int expected = sut.Bar + fuzzy.SByte().Between(1, 5);
               sut.Bar = expected;
               Assert.Equal(expected, sut.Bar);
           }
@@ -411,7 +411,7 @@ applyTo: "test/**/*.cs"
           [Fact]
           public void IsSetToGivenValue()
           {
-              int expected = fuzzy.Int32();
+              int expected = sut.Baz + fuzzy.SByte().Between(1, 5);
               sut.Baz = expected;
               Assert.Equal(expected, sut.Baz);
           }

@@ -30,6 +30,7 @@ a sharing mechanism. -->
 - **Reconcile `TODO.md` with target files before each target and after the last one**.
   The `iterator` edits and commits other files while fixing findings and the user keeps working between runs, so the
   stored list may be stale.
+  - _Refresh target files by rerunning **Identify files modified in the current branch**_.
   - _`{blob}` means the output of `git hash-object {target}`_. It identifies file content, including uncommitted changes.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
   - _Record reviewed content of the target the `iterator` just finished, if any_. Append ` ({blob})` to its

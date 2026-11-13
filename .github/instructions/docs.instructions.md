@@ -177,5 +177,5 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 ### Bugs
 
 - Use XML doc comments to describe the intended behavior, not the buggy behavior.
-- For explicit bug-test policy, see `test.instructions.md`.
+- Create explicit bug tests as described in `test.instructions.md`.
 - Verify that bug fixes match the documented intended behavior.

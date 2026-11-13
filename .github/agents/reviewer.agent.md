@@ -104,9 +104,9 @@ include-custom-instructions: true
   - Elevate `💡 Suggestions` reported or voted `Agree` by multiple models to `⚠️ Should Fix`.
   - Follow the report format defined in `.github/skills/{skill}/SKILL.md`, where `{skill}` is the skill your prompt asks you
     to execute.
-  - Copy the `tester`'s commands and their pass/fail outcomes verbatim after the verdict summary, even when it has no
-    findings, so readers can tell passing tests from no relevant tests. Don't put them in the Detailed Assessment;
-    `pr-review` omits it from follow-up reviews.
+  - Copy the `tester`'s commands and their pass/fail outcomes verbatim after the verdict summary, even when it has no findings,
+    so readers can tell passing tests from no relevant tests. Don't put them in the Detailed Assessment; `pr-review` omits
+    it from follow-up reviews.
   - Finding format:
     - Prefix the finding title with the severity synthesized by the cross-check.
     - Include complete finding reports from authors, cross-check responses, authors' response to cross-check, and double-check

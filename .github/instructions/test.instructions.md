@@ -245,8 +245,8 @@ applyTo: "test/**/*.cs"
     test sub-classes, adding the `_` suffix to the test class name resolves the conflict.
     `public sealed class Dispose_ : FooTest`.
 
-- **Use IL names of operator methods for nested test classes**.
-  - E.g. `operator <()` -> `Op_LessThan`.
+- **Use IL names of operator methods, capitalized, for nested test classes**.
+  - E.g. `operator <()` (IL name `op_LessThan`) -> `Op_LessThan`.
   - For conversion operators, append `_{ParameterType}_To_{ReturnType}`.
     For example, given `OrdinalString` SUT and its test class `OrdinalStringTest` the
     `explicit operator string(OrdinalString value)` should have nested class `Op_Explicit_OrdinalString_To_String` and

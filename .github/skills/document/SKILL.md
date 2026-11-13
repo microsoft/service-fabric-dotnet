@@ -1,4 +1,5 @@
 ---
+name: document
 description: "Document public types in a given scope."
 argument-hint: "(type|namespace|project)"
 ---

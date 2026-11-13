@@ -37,6 +37,9 @@ include-custom-instructions: true
       > Independently assess the following findings raised by another reviewer. Do not assume the original finding is correct.
       > For each finding, read the cited code and applicable `.instructions.md` rules, state your reasoning, cite evidence,
       > and conclude with `Agree`, `Disagree` or `Abstain` if you're not confident.
+      > ***
+      > {Findings}
+      > ***
       > Note that I'm working on the following request.
       > ***
       > {your prompt}

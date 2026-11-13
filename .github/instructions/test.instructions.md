@@ -363,6 +363,10 @@ applyTo: "test/**/*.cs"
               other = new Foo { Bar = sut.Bar = fuzzy.Int32(), Baz = sut.Baz = fuzzy.Int32() };
 
           [Fact]
+          public void ReturnsTrueWhenBarAndBazAreSame() =>
+              Assert.True(sut.Equals(other));
+
+          [Fact]
           public void ReturnsFalseWhenBarIsDifferent()
           {
               other.Bar = sut.Bar + fuzzy.SByte().Between(1, 5);
@@ -375,10 +379,6 @@ applyTo: "test/**/*.cs"
               other.Baz = sut.Baz + fuzzy.SByte().Between(1, 5);
               Assert.False(sut.Equals(other));
           }
-
-          [Fact]
-          public void ReturnsTrueWhenBarAndBazAreSame() =>
-              Assert.True(sut.Equals(other));
       }
   }
   ```

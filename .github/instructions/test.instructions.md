@@ -588,7 +588,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   in tests and makes tests stronger. Example below is compressed to reduce space and meant to illustrate structure and
   naming, not formatting or comments.
   ```csharp
-  public class Foo : IEquatable<Foo>
+  public sealed class Foo : IEquatable<Foo>
   {
      public override bool Equals(object foo);
      public bool Equals(Foo foo);

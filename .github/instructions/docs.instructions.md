@@ -140,10 +140,12 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
   - Don't document the low-level implementation exceptions that can be thrown by callees. E.g. don't document `ArithmeticException`
     or its descendants.
   - For missing validations that allow low-level exceptions to escape, see [Bugs](#bugs).
-- Sort exceptions alphabetically by each element's opening line, not by type name, to reduce merge conflicts. This places
+- Sort exceptions by each element's opening line, not by type name, to reduce merge conflicts. This places
   `<exception cref="...">` sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>`
   sorted by full type name second.
-  - Keep each element on a single line when practical so users can re-sort them with _Sort Lines Ascending_.
+  - Sort the way VS Code's _Sort Lines Ascending_ does: compare letters first and use case only to break ties, e.g.
+    `InvalidOperationException` before `IOException`. Ordinal sorting produces a different order.
+  - Keep each element on a single line when practical so users can re-sort them with VS Code's _Sort Lines Ascending_.
   - When any element spans multiple lines, reorder complete elements without sorting their individual lines.
 - Don't document exceptions without evidence they are actually thrown, except when documenting intended behavior for a known
   bug demonstrated by an explicit bug test (see [Bugs](#bugs)). Symmetry with other APIs is irrelevant and doesn't justify

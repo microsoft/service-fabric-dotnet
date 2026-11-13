@@ -153,6 +153,7 @@ applyTo: "test/**/*.cs"
           public void EmitsErrorTextEvent()
           {
               sut.Error(message);
+
               Mock.Get(events).Verify(_ => _.ErrorText(traceId, type.Name, message), Times.Once);
               Mock.Get(events).Verify(_ => _.ErrorText(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                   Times.Once);

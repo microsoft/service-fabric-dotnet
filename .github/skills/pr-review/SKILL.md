@@ -51,10 +51,18 @@ Incorporate the PR description, labels, linked issues, author information, and e
 - **Build a thread inventory**: For each unresolved and resolved thread, record the file, line, severity, what was
   requested, the thread ID, the root comment's numeric ID, and whether it is resolved or unresolved. This is your
   verification checklist. Replies in §6 need the numeric comment ID; the thread's node ID won't work there.
-  Query `reviewThreads(first: 100, after: $endCursor)` (`id`, `isResolved`, `isOutdated`, `path`, `line`, `originalLine`,
-  `comments(first: 100) { nodes { fullDatabaseId author { login } body } }`) in a query that declares
-  `query($endCursor: String)`, with `gh api graphql --paginate` and `pageInfo { hasNextPage endCursor }`. Use
-  `fullDatabaseId`; `databaseId` is deprecated. REST review comments (`pulls/{n}/comments`) have no resolution state.
+  Replace `{n}` with the PR number; `gh` fills `{owner}` and `{repo}` from the current repository.
+  ```
+  gh api graphql --paginate --slurp -F owner={owner} -F name={repo} -F number={n} -f query='
+    query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
+      repository(owner: $owner, name: $name) { pullRequest(number: $number) {
+        reviewThreads(first: 100, after: $endCursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes { id isResolved isOutdated path line originalLine
+            comments(first: 100) { nodes { fullDatabaseId author { login } body } } } } } } }'
+  ```
+  `--slurp` combines pages into one JSON array and can't be combined with `--jq`. Use `fullDatabaseId`; `databaseId`
+  is deprecated. REST review comments (`pulls/{n}/comments`) have no resolution state.
 - **Update your assessment** if the additional context genuinely changes your evaluation. Do not soften findings just
   because the PR description sounds reasonable.
 - **Validate the PR title and description** based on the detailed analysis, make sure it is accurate and meets the

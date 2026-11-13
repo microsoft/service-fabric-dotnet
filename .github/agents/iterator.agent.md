@@ -2,7 +2,7 @@
 description: "Coordinates iterative coding and review until the code is ready."
 tools: [agent, execute, read, search, web, annotate_diff_line]
 agents: ["coder", "reviewer"]
-model: ["Claude Sonnet 5.5"]
+model: "Claude Sonnet 5.5"
 include-custom-instructions: true
 ---
 

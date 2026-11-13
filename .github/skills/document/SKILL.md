@@ -18,7 +18,7 @@ argument-hint: "(type|namespace|project)"
   - _Don't use a built-in todo-list tool_. It cannot handle large lists efficiently.
   - _Use this file template_. Add one line for each target type.
     ```md
-    Executing `<userRequest>`
+    Executing `{user-request}`
     - [ ] {target-type}
     ```
   - _If `TODO.md` already exists, check the prompt stored in it_

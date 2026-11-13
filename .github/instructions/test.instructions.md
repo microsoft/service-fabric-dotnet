@@ -403,7 +403,7 @@ applyTo: "test/**/*.cs"
   ```
 
 - **Generate Test Inputs**
-  Avoid test inputs SUT may handle specifically.
+  Avoid test inputs the SUT may handle specially, unless the test targets that case.
   - _Use `Fuzzy` to generate test values of common types_. See [fuzzy.instructions.md](fuzzy.instructions.md) for API details.
   - _Define distinct test types instead of reusing existing types to test polymorphic or generic code_. E.g.
     - Instead of reusing `InvalidOperationException` to test exception propagation, create a nested `TestException` class.

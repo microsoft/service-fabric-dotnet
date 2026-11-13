@@ -1,7 +1,7 @@
 ---
 description: "Sub-agent using Claude Opus. Use as part of multi-model workflows to get a Claude perspective."
 tools: [execute, read, search, skill, web]
-model: ["Claude Opus 5.5"]
+model: "Claude Opus 5.5"
 include-custom-instructions: true
 ---
 

@@ -635,7 +635,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - **Create explicit tests impossible to implement due to SUT testability limitations**.
     - Include `// TODO: SUT testability limitation. {brief explanation}`.
     - Have them `throw new NotImplementedException()`.
-    - RE _Each test method should verify a single logical aspect of a single member of the SUT_: the name of the not-implemented
+    - RE: _Each test method should verify a single logical aspect of a single member of the SUT_. The name of the not-implemented
       explicit test explains what needs to be tested (a single logical aspect of a single member), while the TODO comment explains
       why it is not currently possible.
   - **Make flaky tests explicit to unblock CI**. Include `// TODO: Flaky test. {brief explanation}`.

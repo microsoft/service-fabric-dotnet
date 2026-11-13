@@ -32,12 +32,14 @@ a sharing mechanism. -->
   stored list may be stale.
   - _`{blob}` means the output of `git hash-object {target}`_. It identifies file content, including uncommitted changes.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
+  - _Record reviewed content of the target the `iterator` just finished, if any_. Append ` ({blob})` to its
+    `- [x] {target}: ...` line. Only its current `{blob}` is known to be the reviewed one. Other entries without one
+    predate hash recording or were finished by a stopped run, and their files may have changed since. Recording it here,
+    instead of in the `TODO.md` update step, keeps the shared steps identical.
   - _Reopen entries for target files modified after their review_.
-    Replace `- [x] {target}: ...` lines with `- [ ] {target}` when their recorded `{blob}` differs from the current one
-    or when they end with ` ⚠️ No longer modified.`, i.e. modified again after being reverted or deleted.
-  - _Record reviewed content of target files_. Append ` ({blob})` to `- [x] {target}: ...` lines without one.
-    This step runs right after each `iterator`, so the current `{blob}` is the reviewed one. Recording it here, instead
-    of in the `TODO.md` update step, keeps the shared steps identical.
+    Replace `- [x] {target}: ...` lines with `- [ ] {target}` when they have no recorded `{blob}`, when their recorded
+    `{blob}` differs from the current one, or when they end with ` ⚠️ No longer modified.`, i.e. modified again after
+    being reverted or deleted.
   - _Flag unflagged entries for files missing from target files_, i.e. reverted or deleted.
     Replace `- [ ] {target}` with `- [x] {target}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to
     `- [x] {target}: ...` lines not already ending with it.

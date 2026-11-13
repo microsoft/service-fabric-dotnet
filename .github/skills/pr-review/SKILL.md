@@ -50,9 +50,9 @@ Incorporate the PR description, labels, linked issues, author information, and e
   the PR description, investigate further — do not defer to the author's framing.
 - **Build a thread inventory**: For each unresolved and resolved thread, record the file, line, severity, what was
   requested, the thread ID, and whether it is resolved or unresolved. This is your verification checklist.
-  Query `reviewThreads(first: 100, after: $endCursor)` (`id`, `isResolved`, `path`, `line`, `comments(first: 100)`) in a query
-  that declares `query($endCursor: String)`, with `gh api graphql --paginate` and `pageInfo { hasNextPage endCursor }`. REST
-  review comments (`pulls/{n}/comments`) have no resolution state.
+  Query `reviewThreads(first: 100, after: $endCursor)` (`id`, `isResolved`, `isOutdated`, `path`, `line`, `originalLine`,
+  `comments(first: 100)`) in a query that declares `query($endCursor: String)`, with `gh api graphql --paginate` and
+  `pageInfo { hasNextPage endCursor }`. REST review comments (`pulls/{n}/comments`) have no resolution state.
 - **Update your assessment** if the additional context genuinely changes your evaluation. Do not soften findings just
   because the PR description sounds reasonable.
 - **Validate the PR title and description** based on the detailed analysis, make sure it is accurate and meets the
@@ -63,7 +63,9 @@ Incorporate the PR description, labels, linked issues, author information, and e
 For each thread in the inventory (both unresolved and resolved):
 
 - **Read the current code** at the location the comment refers to. Account for line shifts — the code may have moved
-   due to other changes. Use the comment's context (surrounding code, function name) to locate it.
+   due to other changes. Use the comment's context (surrounding code, function name) to locate it. Outdated threads
+   (`isOutdated`) often have a null `line`; start from `originalLine` (also nullable). Neither field establishes
+   `Superseded` — confirm it from the current code.
 - **Determine the status**:
   - `Addressed`: The code now reflects what was requested (or an equivalent fix the author explained in a reply).
   - `Partially addressed`: Some aspects were fixed but others remain. Be specific about what's still missing.

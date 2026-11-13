@@ -77,6 +77,7 @@ include-custom-instructions: true
       ***
       {Original Finding}
       {Cross-check Responses}
+      {Author's Insist Response}
       ***
       Note that I'm working on the following request.
       ***

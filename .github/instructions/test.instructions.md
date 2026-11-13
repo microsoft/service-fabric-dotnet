@@ -458,10 +458,10 @@ applyTo: "test/**/*.cs"
     - _Don't test what SUT doesn't do_
     - _Don't create explicit tests for unfixed bugs in callee code_.
   - _Test `null`, empty, etc. as distinct inputs when validation rejects more than one_. A guard like `string.IsNullOrEmpty(x)`
-    collapses several conventionally-distinct inputs into a single branch. Test each rejected category - `null`, `""`, and
-    whitespace for `IsNullOrWhiteSpace` - with a `[Theory, InlineData(null), InlineData("")]`. This proves the right guard
-    was invoked and rules out easy common mistakes, such as missing the empty-string check when testing only with `null`,
-    or missing the `null` check when testing only with `string.Empty`.
+    collapses several conventionally-distinct inputs into a single branch. Test each rejected category with a `[Theory]`,
+    e.g. `[Theory, InlineData(null), InlineData("")]` for `IsNullOrEmpty`, plus `InlineData(" ")` for `IsNullOrWhiteSpace`.
+    This proves the right guard was invoked and rules out easy common mistakes, such as missing the empty-string check when
+    testing only with `null`, or missing the `null` check when testing only with `string.Empty`.
 
 - **Use strongest assertions available**.
   - _Prefer `Assert.Same` over `Assert.Equal`_ when asserting on unique test instances that neither SUT nor test logic replace.

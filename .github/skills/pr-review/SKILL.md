@@ -41,9 +41,9 @@ Incorporate the PR description, labels, linked issues, author information, and e
 - **PR metadata**: Fetch the PR description, labels, linked issues, and author. Read linked issues in full.
 - **CI status**: Fetch and report CI errors as their own finding. Include the failed check name and a brief summary from
   the logs. When a failure appears to be a flaky test unrelated to the PR, note it and ask the author or a maintainer to
-  re-run the job — the reviewer cannot re-run CI jobs.
-  Read GitHub Actions logs with `gh run view <run-id> --log-failed`; the run ID is in the `link` from
-  `gh pr checks --json name,state,link`. For other check providers, follow the `link` to their logs.
+  re-run the job — the reviewer cannot re-run CI jobs. Read GitHub Actions logs with `gh run view <run-id> --log-failed`;
+  the run ID is in the `link` from `gh pr checks --json name,state,link`. For other check providers, follow the `link` to
+  their logs.
 - **Related issues**: Search for other open issues in the same area.
 - **Existing review comments**: Check if there are already review comments to avoid duplicating feedback.
 - **Reconcile your assessment with the author's claims.** Where your independent reading of the code disagrees with

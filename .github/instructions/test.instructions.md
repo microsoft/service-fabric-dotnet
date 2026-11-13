@@ -121,6 +121,22 @@ applyTo: "test/**/*.cs"
           [Fact]
           public void ReturnsTrueWhenTypeContextAndEventsAreSame() =>
               Assert.True(sut.Equals(other));
+
+          [Fact]
+          public void ReturnsFalseWhenOtherIsNull() =>
+              Assert.False(sut.Equals(null));
+
+          [Fact]
+          public void ReturnsFalseWhenTypeIsDifferent() =>
+              Assert.False(sut.Equals(new Trace(fuzzy.Type(), context, events)));
+
+          [Fact]
+          public void ReturnsFalseWhenContextIsDifferent() =>
+              Assert.False(sut.Equals(new Trace(type, fuzzy.ServiceContext(), events)));
+
+          [Fact]
+          public void ReturnsFalseWhenEventsAreDifferent() =>
+              Assert.False(sut.Equals(new Trace(type, context, Mock.Of<ITextEventSource>())));
       }
 
       public sealed class Error : TraceTest

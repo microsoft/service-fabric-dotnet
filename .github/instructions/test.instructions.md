@@ -327,7 +327,7 @@ applyTo: "test/**/*.cs"
     bool result = sut.TryBar(out Bar actual);
 
     Assert.True(result);
-    Assert.Equal("Buz", actual.Name);
+    Assert.Same(bar, actual);
     ```
 
   - Omit the blank lines between the single-line sections.

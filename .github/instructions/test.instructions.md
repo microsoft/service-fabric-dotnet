@@ -208,10 +208,10 @@ applyTo: "test/**/*.cs"
     API, even when the getter and setter are compiler-generated. Create a nested test class named after the property with
     at least an `IsSetToGivenValue` test. Indirect coverage through consuming members like `Equals` or `ToString` is not
     a substitute - those tests describe the consumer, not the property.
-  - _Don't create a test class for the SUT constructor when it would duplicate tests for other members_. For example, a
-    SUT with constructor storing its argument that could only be observed indirectly by calling the `ToString()`, could
-    be tested with a constructor test, a `ToString` test, or both. This rule helps to avoid back and forth during reviews,
-    and drop the constructor test and keep only the `ToString` test.
+  - _Don't create a test class for the SUT constructor when it would duplicate tests for other members_. For example, a SUT
+    with a constructor storing its argument that could only be observed indirectly by calling `ToString()` could be tested
+    with a constructor test, a `ToString` test, or both. Drop the constructor test and keep only the `ToString` test to avoid
+    back and forth during reviews.
   - _Do test constructors with hand-coded initialization of accessible fields and auto-properties_. Unlike `ToString()` in
     the example above, whose tests also verify the initialization, fields and compiler-generated auto-properties have no hand-coded
     logic whose tests would also verify it, so the constructor test is required. `IsSetToGivenValue` tests don't replace it,

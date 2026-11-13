@@ -145,7 +145,8 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
   - Keep each element on a single line when practical so users can re-sort them with _Sort Lines Ascending_.
   - When any element spans multiple lines, reorder complete elements without sorting their individual lines.
 - Don't document exceptions without evidence they are actually thrown, except when documenting intended behavior for a known
-  SUT bug demonstrated by an explicit bug test. Symmetry with other APIs is irrelevant and doesn't justify lack of evidence.
+  bug demonstrated by an explicit bug test (see [Bugs](#bugs)). Symmetry with other APIs is irrelevant and doesn't justify
+  lack of evidence.
 - Describe the condition under which it's thrown.
   - Omit "Thrown if ..." or "If ..." at the beginning of the sentence.
 

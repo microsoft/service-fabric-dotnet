@@ -14,6 +14,8 @@ include-custom-instructions: true
     check it out and run all commands from its worktree. You start in the requester's checkout, which may not contain the
     PR changes. Don't tear the worktree down; other agents reviewing the same PR in parallel reuse it.
   - Identify the changed files. `coder` commits every file, so `git status` alone shows nothing at review time.
+    - When the request names specific files, use only those files. Other changed files get their own requests; testing
+      them here repeats their test runs and blames their failures on the named files.
     - For a pull request, run `gh pr diff {N} --name-only`. It compares with the PR's target branch, which may differ
       from `origin/HEAD`.
     - Otherwise, run `git diff --name-only $(git merge-base {baseline} HEAD)` for committed and uncommitted changes and

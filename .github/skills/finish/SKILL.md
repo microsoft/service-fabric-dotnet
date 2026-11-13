@@ -28,21 +28,21 @@ a sharing mechanism. -->
     - If the stored prompt is the same, resume from the first unfinished target.
     - If the stored prompt is different, stop and ask what to do.
 - **Reconcile `TODO.md` with target files before each target and after the last one**.
-  The `iterator` edits and commits other files while fixing findings and the user keeps working between runs, so the
-  stored list may be stale.
+  The `iterator` edits and commits other files while fixing findings and the user keeps working between runs, so the stored
+  list may be stale.
   - _Refresh target files by rerunning **Identify files modified in the current branch**_.
   - _`{blob}` means the output of `git -C "$(git rev-parse --show-toplevel)" hash-object {target}`_.
     It identifies file content, including uncommitted changes. `-C` resolves the root-relative `{target}` from any directory.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
   - _Record reviewed content of the target the `iterator` just finished, if it is still a target file_. Append ` ({blob})`
     to its `- [x] {target}: ...` line. Only its current `{blob}` is known to be the reviewed one. Other entries without one
-    predate hash recording or were finished by a stopped run, and their files may have changed since. Recording it here,
-    instead of in the `TODO.md` update step, keeps the shared steps identical. A target the `iterator` deleted or moved
-    has no `{blob}` because `hash-object` fails for missing files; the flag step below marks it instead.
+    predate hash recording or were finished by a stopped run, and their files may have changed since. Recording it here, instead
+    of in the `TODO.md` update step, keeps the shared steps identical. A target the `iterator` deleted or moved has no `{blob}`
+    because `hash-object` fails for missing files; the flag step below marks it instead.
   - _Reopen entries for target files modified after their review_.
-    Replace `- [x] {target}: ...` lines with `- [ ] {target}` when they have no recorded `{blob}`, when their recorded
-    `{blob}` differs from the current one, or when they end with ` ⚠️ No longer modified.`, i.e. modified again after
-    being reverted or deleted.
+    Replace `- [x] {target}: ...` lines with `- [ ] {target}` when they have no recorded `{blob}`, when their recorded `{blob}`
+    differs from the current one, or when they end with ` ⚠️ No longer modified.`, i.e. modified again after being reverted
+    or deleted.
   - _Flag unflagged entries for files missing from target files_, i.e. reverted or deleted.
     Replace `- [ ] {target}` with `- [x] {target}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to
     `- [x] {target}: ...` lines not already ending with it.

@@ -346,7 +346,8 @@ applyTo: "test/**/*.cs"
   {
       internal int Bar;
       internal int Baz;
-      internal bool Equals(Foo other) => Bar == other.Bar && Baz == other.Baz;
+      internal bool Equals(Foo other) =>
+          Bar == other.Bar && Baz == other.Baz;
   }
 
   public abstract class FooTest
@@ -403,7 +404,8 @@ applyTo: "test/**/*.cs"
 
       static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-      FooTest() => sut = new Foo(bar, baz);
+      FooTest() =>
+          sut = new Foo(bar, baz);
 
       public sealed class Constructor : FooTest
       {

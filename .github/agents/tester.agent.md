@@ -19,6 +19,7 @@ include-custom-instructions: true
     - Otherwise, run `git diff --name-only $(git merge-base {baseline} HEAD)` for committed and uncommitted changes and
       `git ls-files --others --exclude-standard` for untracked files. `{baseline}` is the one named in the request,
       or `origin/HEAD` by default.
+    - Exclude `TODO.md` and `*-needs-human-review.md` files. The `finish` skill produces them; they aren't changes.
   - Map every changed file to the affected test projects. Directory names don't identify them; some `src/` projects are
     tested by differently named `test/` projects or by none, and `test/TestFramework` is a shared library.
     - Changes in a test project affect it.
@@ -26,7 +27,10 @@ include-custom-instructions: true
       `ProjectReference`, which may be all of them.
     - Changes in shared build inputs, such as `Directory.*`, `global.json`, `nuget.config`, `properties/` and `refs/`,
       affect the test projects that depend on them, which may be all of them.
-    - Report the changed files you can't map to any test projects instead of skipping them.
+    - Changes that can't affect build or test output, such as agents, skills and instructions under `.github/` or
+      editor settings under `.vscode/`, affect none. Verify this before relying on it; for example, project `README.md`
+      files are packaged and `.github/workflows/` controls how tests run.
+    - Report the changed files that might affect tests but you can't map to any test projects instead of skipping them.
   - Reduce the scope to the affected test projects, classes, and methods. Run the full suite only when the changes
     affect all test projects.
 
@@ -41,8 +45,8 @@ include-custom-instructions: true
   It's a job for another agent.
 
 - **Report the results using the following template**.
-  - Use `❗ Must Fix` when tests fail, otherwise `❓ Needs Human Review` when you report any untested changes, frameworks
-    or platforms.
+  - Use `❗ Must Fix` when tests fail, otherwise `❓ Needs Human Review` when you report any unmapped files, untested
+    frameworks or platforms. Changes that affect no tests get `✅ Looks Good` with `No relevant tests`.
   ```md
   **{✅ Looks Good, ❓ Needs Human Review or ❗ Must Fix}**
   {Exact commands you ran and their pass/fail outcome}

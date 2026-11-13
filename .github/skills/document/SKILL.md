@@ -1,8 +1,8 @@
 ---
 name: document
 description: |
-  Document public top-level types in a given scope. Use when asked to add or complete XML documentation comments for a
-  type, namespace, or project.
+  Document public top-level types in a given scope. Use when asked to add or complete XML documentation comments for a type,
+  namespace, or project.
 argument-hint: "(type|namespace|project)"
 ---
 
@@ -13,8 +13,8 @@ argument-hint: "(type|namespace|project)"
   - _`{target-type}` means `{namespace-name}.{type-name} in {relative-file-path}`_.
 - **Sort target types from the most generic to the most specific** to enable use of `<inheritdoc/>`.
   - _Place base types/interfaces before types derived from/implementing them_.
-  - _Place generics before specializations_. E.g. place `IComparable<T>` extension classes before extension classes for
-    types implementing `IComparable<T>`.
+  - _Place generics before specializations_. E.g. place `IComparable<T>` extension classes before extension classes for types
+    implementing `IComparable<T>`.
   - _Place providers before consumers_. E.g. place `IEnumerable<T>` before `Enumerable` that uses it.
 - **Ensure `TODO.md` exists in the repo root**.
   - _Don't use a built-in todo-list tool_. It cannot handle large lists efficiently.

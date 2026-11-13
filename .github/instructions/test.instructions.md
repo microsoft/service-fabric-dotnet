@@ -583,11 +583,11 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - _Otherwise, remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only
     verifies a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the
     weaker test.
-  - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
-    another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenBarIsDifferent` only re-verifies the
-    corresponding `Equals_Foo` test. Regressions that only the caller test would catch, e.g. a caller that bypasses the callee
-    or mishandles its result, are accepted per _Don't test what SUT doesn't do_ — delete the caller variant and trust the
-    callee's tests.
+  - Re-running a callee's input permutations through its caller beyond the tests required by _Cover the target's own
+    branches, not its callees' branches_ is duplication. A caller test like `Equals_Object.ReturnsFalseWhenBarIsDifferent`
+    only re-verifies the corresponding `Equals_Foo` test. Regressions that only the caller test would catch, e.g. a caller
+    that bypasses the callee or mishandles its result, are accepted per _Don't test what SUT doesn't do_ — delete the caller
+    variant and trust the callee's tests.
     Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation
     logic_.
 - **Reduce tests to fewest elements**:

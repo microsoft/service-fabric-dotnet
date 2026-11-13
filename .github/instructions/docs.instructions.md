@@ -140,11 +140,11 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
   - Don't document the low-level implementation exceptions that can be thrown by callees. E.g. don't document `ArithmeticException`
     or its descendants.
   - For missing validations that allow low-level exceptions to escape, see [Bugs](#bugs).
-- Sort exceptions by each element's opening line, not by type name, to reduce merge conflicts. This places
-  `<exception cref="...">` sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>`
-  sorted by full type name second.
-  - Sort the way VS Code's _Sort Lines Ascending_ does: compare letters first and use case only to break ties, e.g.
-    `InvalidOperationException` before `IOException`. Ordinal sorting produces a different order.
+- Sort exceptions by each element's opening line, not by type name, to reduce merge conflicts. This places `<exception cref="...">`
+  sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>` sorted by full type name
+  second.
+  - Sort the way VS Code's _Sort Lines Ascending_ does: compare letters first and use case only to break ties, e.g. `InvalidOperationException`
+    before `IOException`. Ordinal sorting produces a different order.
   - Keep each element on a single line when practical so users can re-sort them with VS Code's _Sort Lines Ascending_.
   - When any element spans multiple lines, reorder complete elements without sorting their individual lines.
 - Don't document exceptions without evidence they are actually thrown, except when documenting intended behavior for a known
@@ -156,9 +156,9 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 ### InheritDoc
 
 - _Convert duplicated documentation elements to `<inheritdoc/>`_.
-- _Document interfaces and base classes and `<inheritdoc/>` in implementations and overrides_.
+- _Document interfaces and base classes; use `<inheritdoc/>` in implementations and overrides_.
   - If behavior doesn't apply to every inheritor, don't document it in the base/provider.
-- _Document members with the **most** parameters and `<inheritdoc cref="..."/>` in simplifying overloads/extensions_. The
+- _Document members with the **most** parameters; use `<inheritdoc cref="..."/>` in simplifying overloads/extensions_. The
   C# compiler doesn't recognize `<inheritdoc>` as an equivalent of the `<param>` elements and forces all parameters to be
   documented by the same element type. Documenting methods with the most parameters allows reusing their docs for parameters
   in simpler overloads, but not the other way around.

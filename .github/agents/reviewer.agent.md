@@ -2,7 +2,7 @@
 description: Independent Reviewer
 tools: [agent, execute, read]
 agents: ["gpt", "opus", "tester"]
-model: ["Claude Sonnet 5.5"]
+model: "Claude Sonnet 5.5"
 include-custom-instructions: true
 ---
 

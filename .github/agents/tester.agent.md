@@ -19,14 +19,16 @@ include-custom-instructions: true
     - Otherwise, run `git diff --name-only $(git merge-base {baseline} HEAD)` for committed and uncommitted changes and
       `git ls-files --others --exclude-standard` for untracked files. `{baseline}` is the one named in the request,
       or `origin/HEAD` by default.
-  - Map every changed file to the affected `test/` projects.
-    - Changes in `src/` projects affect their `test/` projects.
-    - Changes in `test/` projects affect these projects.
+  - Map every changed file to the affected test projects. Directory names don't identify them; some `src/` projects are
+    tested by differently named `test/` projects or by none, and `test/TestFramework` is a shared library.
+    - Changes in a test project affect it.
+    - Changes in any other project affect the test projects that reference it directly or transitively through
+      `ProjectReference`, which may be all of them.
     - Changes in shared build inputs, such as `Directory.*`, `global.json`, `nuget.config`, `properties/` and `refs/`,
       affect the test projects that depend on them, which may be all of them.
     - Report the changed files you can't map to any test projects instead of skipping them.
-  - Reduce the scope to the affected test projects, classes, and methods. Run the full suite only when shared build
-    inputs affect all test projects.
+  - Reduce the scope to the affected test projects, classes, and methods. Run the full suite only when the changes
+    affect all test projects.
 
 - **Run the reduced-scope tests on all frameworks and platforms**.
   - Follow instructions in the `CONTRIBUTING.md` closest to the code you need to test.

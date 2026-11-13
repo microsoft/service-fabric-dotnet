@@ -539,7 +539,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     test.
   - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenFooDiffers` cannot
-    fail unless the corresponding `Equals_T` test also fails — delete the caller variant and trust the callee's tests.
+    fail unless the corresponding `Equals_Foo` test also fails — delete the caller variant and trust the callee's tests.
     Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation logic_.
 - **Reduce tests to fewest elements**: 
   - Before writing a test for a branch or guard, verify that the branch is reachable independently of the paths already covered.

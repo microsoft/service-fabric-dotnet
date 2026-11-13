@@ -166,8 +166,10 @@ applyTo: "test/**/*.cs"
 
 - **Create a readonly field called `sut` at the top of the class** to help reader understand what is being tested.
   - _Choose `sut` type based on the primary interface of the SUT_. If the SUT implements and is consumed through a specific
-    interface, the variable should be of that interface type. This helps to better describe the SUT usage. However, when
-    SUT implements multiple interfaces tested independently, use the actual SUT type for the top-level `sut` variable.
+    interface, the variable should be of that interface type. This helps to better describe the SUT usage. Secondary interfaces,
+    such as `IEquatable<T>`, don't change the primary interface; nested classes testing them narrow `sut` by casting `base.sut`
+    to the secondary interface. However, when SUT has no primary interface or implements multiple primary interfaces tested
+    independently, use the actual SUT type for the top-level `sut` variable.
   - _Don't omit the base-class `sut` variable even if it's not applicable to every test_. E.g. tests of overloaded comparison
     operators would need `left` and `right` variables instead of `sut`, however, tests of other methods, like `ToString()`
     and `Equals()` can still use the `sut` variable.

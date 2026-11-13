@@ -125,11 +125,11 @@ applyTo: "test/**/*.cs"
           }
       }
 
-      public sealed class EqualsTest : TraceTest
+      public new sealed class Equals : TraceTest
       {
           new readonly IEquatable<Trace> sut;
 
-          public EqualsTest() =>
+          public Equals() =>
               sut = (IEquatable<Trace>)base.sut;
 
           [Fact]
@@ -557,14 +557,14 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   public abstract class FooTest
   {
       readonly Foo sut = new();
-      public class Equals_Object: FooTest
+      public sealed class Equals_Object: FooTest
       {
           new readonly object sut; // tests override of Object.Equals(object obj)
           readonly object obj = new(); // field and test method names are consistent with Object
           public Equals_Object() => sut = base.sut;
           [Fact] public void ReturnsFalseWhenObjIsDifferent() => Assert.False(sut.Equals(obj));
       }
-      public class Equals_Foo: FooTest
+      public sealed class Equals_Foo: FooTest
       {
           new readonly IEquatable<Foo> sut; // tests implementation of IEquatable<T>.Equals(T? other)
           readonly Foo other = new(); // field and test method names are consistent with IEquatable<T>

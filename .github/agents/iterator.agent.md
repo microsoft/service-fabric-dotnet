@@ -46,7 +46,7 @@ This repository requires unique knowledge you don't possess; you won't know what
 
 3. **Implement human decisions before reviewing again.**.
   - Read `{file path}-needs-human-review.md`. It may have been created by past iterations or agent sessions.
-  - For each finding that has a human decision, one at a time:
+  - For each finding that has a human decision other than `_pending_`, one at a time:
     - Extract a single finding, including notes from authors, other models, and human decision.
     - Run the `coder` subagent with this prompt. It omits step 5's refusal clause because the human decision is final.
       ```md
@@ -58,7 +58,9 @@ This repository requires unique knowledge you don't possess; you won't know what
       - Don't change this prompt in any other way.
       - Don't add any commit instructions.
     - Remove the finding from the file only if the `coder` implemented the decision. Otherwise, append the `coder`'s
-      reasoning to the finding and keep it for the human to reconsider.
+      reasoning to the finding and keep it for the human to reconsider. Rename its `**Human decision:**` label to
+      `**Previous human decision:**` and add a new `**Human decision:** _pending_` line, so the next iteration doesn't
+      retry the decision before the human reconsiders it.
   - Remove the file if all findings have been removed.
 
 4. **Run the `reviewer` subagent with the prepared prompt**.

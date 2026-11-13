@@ -583,7 +583,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     corresponding `Equals_Foo` test. Regressions that only the caller test would catch, e.g. a caller that bypasses the callee
     or mishandles its result, are accepted per _Don't test what SUT doesn't do_ — delete the caller variant and trust the
     callee's tests.
-    Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation logic_.
+    Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation
+    logic_.
 - **Reduce tests to fewest elements**:
   - Before writing a test for a branch or guard, verify that the branch is reachable independently of the paths already covered.
   - Don't create tests for consistency, parity or structural symmetry. API design principles don't apply to tests.

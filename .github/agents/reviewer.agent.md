@@ -28,7 +28,7 @@ include-custom-instructions: true
   - Wait for all three subagents to complete before proceeding.
 
 - **Deduplicate findings raised independently by subagents**.
-  - Retain information about agent that reported each issue for the cross-check and the final report.
+  - Retain information about the agent that reported each finding for the cross-check and the final report.
 
 - **Coordinate discussion of findings reported by the `opus` and `gpt` reviewers**
   - Skip this step for findings reported by the `tester`.

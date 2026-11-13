@@ -342,11 +342,11 @@ applyTo: "test/**/*.cs"
 - **Reduce duplication by extracting code into the constructors of the test classes**. This also helps to focus reader on
   the important distinctions between tests.
   ```csharp
-  class Foo
+  sealed class Foo
   {
-      public int Bar;
-      public int Baz;
-      public bool Equals(Foo other) => Bar == other.Bar && Baz == other.Baz;
+      internal int Bar;
+      internal int Baz;
+      internal bool Equals(Foo other) => Bar == other.Bar && Baz == other.Baz;
   }
 
   public abstract class FooTest
@@ -387,7 +387,7 @@ applyTo: "test/**/*.cs"
   Initialization is a logical aspect of the constructor(s). Also, testing it for each member separately creates a significantly
   larger number of tests. On the other hand, setter logic still needs to be tested in the member tests.
   ```csharp
-  class Foo(int bar, int baz)
+  public sealed class Foo(int bar, int baz)
   {
       public int Bar { get; set; } = bar;
       public int Baz { get; set; } = baz;

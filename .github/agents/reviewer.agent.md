@@ -105,4 +105,5 @@ include-custom-instructions: true
   - Follow the report format defined in `review/SKILL.md` (Verdict, Detailed Assessment, Issues).
   - Finding format:
     - Prefix the finding title with the severity synthesized by the cross-check.
-    - Include complete finding reports from authors, cross-check responses, and authors' response to cross-check.
+    - Include complete finding reports from authors, cross-check responses, authors' response to cross-check, and double-check
+      responses.

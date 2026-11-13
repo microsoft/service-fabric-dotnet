@@ -143,8 +143,8 @@ Repeat the `Reference` and `Restore` steps when switching between SDK and Runtim
   - Title should use the imperative mood and be limited to 72 characters.
   - Don't include textual tags `[MyFeature]` in the title.
 - Pull requests are squash-merged, so only the PR title and description reach the target branch.
-  Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them; don't
-  review or rewrite them.
+  Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them; don't review
+  or rewrite them.
 - Make sure the validation build completes successfully.
 - Link the pull request from the work item/issue you've created.
 - Publish the pull request and address the Copilot review feedback.

@@ -10,8 +10,9 @@ include-custom-instructions: true
   This repository requires unique knowledge you don't possess; you won't know what you don't know until you read them.
 
 - **Determine the minimal set of tests relevant to the changes yourself**.
-  - When the request refers to a pull request, follow `.github/skills/worktree/SKILL.md` to check it out and run all
-    commands from its worktree. You start in the requester's checkout, which may not contain the PR changes.
+  - When the request refers to a pull request, follow the **Set Up** section of `.github/skills/worktree/SKILL.md` to
+    check it out and run all commands from its worktree. You start in the requester's checkout, which may not contain the
+    PR changes. Don't tear the worktree down; other agents reviewing the same PR in parallel reuse it.
   - Identify the changed files. `coder` commits every file, so `git status` alone shows nothing at review time.
     - For a pull request, run `gh pr diff {N} --name-only`. It compares with the PR's target branch, which may differ
       from `origin/HEAD`.

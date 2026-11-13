@@ -617,9 +617,9 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Don't use `Assert.NotNull()`**. On its own, it's unnecessary.
   - Without additional asserts on the state or behavior of the instance that shouldn't be null, `Assert.NotNull()` is insufficient.
   - Let additional asserts accessing the instance that shouldn't be null throw `NullReferenceException` if it is.
-- **Use `ITextContext.CancellationToken` when a pass-through `CancellationToken` parameter is needed**.
-  Xunit provides a unique `CancellationToken` in `TextContext.Current`. When the target doesn't implement its own cancellation
-  logic and simply passes the `CancellationToken` to dependencies, using the Xunit-provided token eliminates the need to
+- **Use `ITestContext.CancellationToken` when a pass-through `CancellationToken` parameter is needed**.
+  xUnit provides a unique `CancellationToken` in `TestContext.Current`. When the target doesn't implement its own cancellation
+  logic and simply passes the `CancellationToken` to dependencies, using the xUnit-provided token eliminates the need to
   create and dispose a `CancellationTokenSource`.
   ```csharp
   using Xunit;

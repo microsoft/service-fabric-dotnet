@@ -336,7 +336,8 @@ applyTo: "test/**/*.cs"
       {
           readonly Foo other;
 
-          public Equals() => other = new Foo { Bar = sut.Bar, Baz = sut.Baz }; // Common arrange logic for all Foo.Equals tests
+          public Equals() =>
+              other = new Foo { Bar = sut.Bar, Baz = sut.Baz }; // Common arrange logic for all Foo.Equals tests
 
           [Fact]
           public void ReturnsFalseWhenBarIsDifferent()

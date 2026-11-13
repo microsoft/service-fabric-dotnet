@@ -1,5 +1,5 @@
 ---
-description: "Sub-agent using latest GPT model"
+description: "Sub-agent using GPT. Use as part of multi-model workflows to get a GPT perspective."
 tools: [execute, read, search, skill, web]
 model: "GPT-6.1 Sol"
 modelPolicy: "required"

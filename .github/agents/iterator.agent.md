@@ -1,6 +1,6 @@
 ---
 description: "Coordinates iterative coding and review until the code is ready."
-tools: [agent, execute, read, search, web]
+tools: [agent, execute, read, search, web, annotate_diff_line]
 agents: ["coder", "reviewer"]
 model: ["Claude Sonnet 5.5"]
 include-custom-instructions: true
@@ -75,6 +75,10 @@ This repository requires unique knowledge you don't possess; you won't know what
 
 6. **Save each new finding that `❓ Needs Human Review`**.
   - Append the entire finding from the `reviewer` report to the `{file path}-needs-human-review.md`.
+    This file is the record of findings and human decisions.
+  - Post the finding to the changes view with the `annotate_diff_line` tool, if available.
+    Use the finding's line range in `{file path}`, its category as `title`, its full text as `explanation`, and `warning`
+    as `severity`. Skip posting if the finding has no line in `{file path}`.
 
 7. **Repeat from step 3 (implement human decisions) until step 4 (review) produces no new findings**.
 

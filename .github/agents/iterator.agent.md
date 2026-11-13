@@ -48,8 +48,17 @@ This repository requires unique knowledge you don't possess; you won't know what
   - Read `{file path}-needs-human-review.md`. It may have been created by past iterations or agent sessions.
   - For each finding that has a human decision, one at a time:
     - Extract a single finding, including notes from authors, other models, and human decision.
-    - Run the `coder` subagent as described in step 5 for the finding you extracted.
-    - Remove the addressed finding from the file.
+    - Run the `coder` subagent with this prompt. It omits step 5's refusal clause because the human decision is final.
+      ```md
+      Implement the human decision for the following review finding.
+      ***
+      {Single finding, including notes and the human decision}
+      ***
+      ```
+      - Don't change this prompt in any other way.
+      - Don't add any commit instructions.
+    - Remove the finding from the file only if the `coder` implemented the decision. Otherwise, append the `coder`'s
+      reasoning to the finding and keep it for the human to reconsider.
   - Remove the file if all findings have been removed.
 
 4. **Run the `reviewer` subagent with the prepared prompt**.

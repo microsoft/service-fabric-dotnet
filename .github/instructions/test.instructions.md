@@ -528,8 +528,8 @@ applyTo: "test/**/*.cs"
     member requires two tests because `bool` cardinality is limited to `true` and `false` and asserting only on one of them
     wouldn't be sufficient to prove that the callee was invoked correctly.
   - _Low-cardinality outputs of callees in the same SUT require a single test_. E.g. `Equals(object)` calling `Equals(T)`
-    needs a single test forwarding the callee's result. Mishandling the other values is an accepted regression per
-    _Don't test what SUT doesn't do_ and re-testing them is duplication per _Minimize duplication_.
+    needs a single test forwarding the callee's result. Mishandling the other values is an accepted regression per _Don't
+    test what SUT doesn't do_ and re-testing them is duplication per _Minimize duplication_.
   - RE: _Omit nested test classes for SUT members without observable behavior_. Delegation is observable behavior. A delegating
     member needs a nested test class to verify the call and its own branches (type-check, guard, transformation of the return
     value).

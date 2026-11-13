@@ -631,7 +631,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Use `[WindowsOnly("reason")]` from `TestFramework` to skip tests that can't run on Linux**.
 - **Use `[Fact(Explicit = true)] // TODO: {Reason}` to exclude intentionally failing and flaky tests**.
   Explicit tests are discovered but not run by default. Run them with `--explicit on`, e.g.
-  `dotnet test -- --filter-method "FullyQualifiedMethodName" --explicit on`.
+  `dotnet test -- --filter-method "*FooTest+Bar.MethodName" --explicit on`. Nested class names are separated by `+`.
   - **Create explicit tests to demonstrate unfixed SUT bugs**.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.

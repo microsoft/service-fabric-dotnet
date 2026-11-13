@@ -665,7 +665,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   ```csharp
   using Xunit;
   readonly CancellationToken cancellation = TestContext.Current.CancellationToken;
-  sut.CloseAsync(cancellation);
+  await sut.CloseAsync(cancellation);
   ```
 
 ## Integration Tests

@@ -137,9 +137,10 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 - For exceptions thrown by the callees of the member
   - Document the API-level exceptions users are likely to encounter. E.g. a member passing an argument to a callee that
     validates it and throws `ArgumentNullException` should have it documented.
+  - Also document the _missing_ API-level exceptions when the callee's bug allows low-level exceptions to escape (e.g.
+    `NullReferenceException` instead of `ArgumentNullException`) and has an explicit test in the callee's test suite (see [Bugs](#bugs)).
   - Don't document the low-level implementation exceptions that can be thrown by callees. E.g. don't document `ArithmeticException`
     or its descendants.
-  - For missing validations that allow low-level exceptions to escape, see [Bugs](#bugs).
 - Sort exceptions by each element's opening line, not by type name, to reduce merge conflicts. This places `<exception cref="...">`
   sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>` sorted by full type name
   second.

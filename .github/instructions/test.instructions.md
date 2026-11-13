@@ -569,9 +569,9 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Minimize duplication**: 
   - If one test can never fail without another also failing, decide whether it's intended to verify distinct behavior.
   - Make tests more specific when they are intended to verify distinct behavior, so they can fail independently.
-  - _Remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only verifies
-    a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker
-    test.
+  - _Otherwise, remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only
+    verifies a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the
+    weaker test.
   - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenFooDiffers` cannot
     fail unless the corresponding `Equals_Foo` test also fails — delete the caller variant and trust the callee's tests.

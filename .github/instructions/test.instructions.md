@@ -325,16 +325,18 @@ applyTo: "test/**/*.cs"
   {
       public int Bar;
       public int Baz;
-      public bool Equals(Foo other) => Bar == other.Bar && Baz == other.Baz
+      public bool Equals(Foo other) => Bar == other.Bar && Baz == other.Baz;
   }
 
   public abstract class FooTest
   {
       readonly Foo sut = new Foo { Bar = 42, Baz = 43 }; // Common arrange logic for all Foo tests.
 
-      public sealed class Equals: FooTest
+      public new sealed class Equals: FooTest
       {
-          readonly Foo other = new Foo { Bar = sut.Bar, Baz = sut.Baz }; // Common arrange logic for all Foo.Equals tests
+          readonly Foo other;
+
+          public Equals() => other = new Foo { Bar = sut.Bar, Baz = sut.Baz }; // Common arrange logic for all Foo.Equals tests
 
           [Fact]
           public void ReturnsFalseWhenBarIsDifferent()
@@ -361,7 +363,7 @@ applyTo: "test/**/*.cs"
   Initialization is a logical aspect of the constructor(s). Also, testing it for each member separately creates a significantly
   larger number of tests. On the other hand, setter logic still needs to be tested in the member tests.
   ```csharp
-  class Foo()
+  class Foo
   {
       public Foo(int bar, int baz) { Bar = bar; Baz = baz; }
       public int Bar { get; set; }
@@ -559,7 +561,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
       {
           new readonly object sut; // tests override of Object.Equals(object obj)
           readonly object obj = new(); // field and test method names are consistent with Object
-          public Equals_Object() => sut = base.sut();
+          public Equals_Object() => sut = base.sut;
           [Fact] public void ReturnsFalseWhenObjIsDifferent() => Assert.False(sut.Equals(obj));
       }
       public class Equals_Foo: FooTest

@@ -81,9 +81,9 @@ This repository requires unique knowledge you don't possess; you won't know what
     - Don't add any commit instructions.
   - _Run the `coder` subagent with the prepared prompt_.
   - _Wait for it to complete before starting the next_.
-  - _Skip the findings the `coder` refuses to implement and continue addressing other findings_. These findings don't need
-    human review. The `reviewer` and the `coder` should continue iterating until the code is clear enough to stop reporting
-    findings that cannot be implemented.
+  - _Skip a finding the `coder` refuses for the first time and continue addressing other findings_. A first refusal
+    doesn't need human review. The `reviewer` and the `coder` should continue iterating until the code is clear enough to
+    stop reporting findings that cannot be implemented.
   - _Save a finding the `coder` refuses a second time as described in step 6, and append the `coder`'s reasoning to it_.
     The `reviewer` reporting it again means the code failed to make the `coder`'s reasoning evident, so the disagreement
     needs a human decision, and the code alone can't carry that reasoning to the human. Saving it also stops the `reviewer`

@@ -521,7 +521,7 @@ applyTo: "test/**/*.cs"
   handling) is correct — not that the callee's internal branches produce the right answer.
   - _High-cardinality callee outputs require a single test_. E.g. `int GetHashCode()` calling `System.HashCode.Combine()`
     needs a single test because `int` is high-cardinality.
-  - _Low-cardinality callee outputs require a separate test per value_. Use [Theory] over the callee's output domain, or
+  - _Low-cardinality callee outputs require a separate test per value_. Use `[Theory]` over the callee's output domain, or
     add one test per distinct forwarded value. E.g. `bool Equals(T)` calling `Equals()` method of its member requires two
     tests because `bool` cardinality is limited to `true` and `false` and asserting only on one of them wouldn't be sufficient
     to prove that the callee was invoked correctly.

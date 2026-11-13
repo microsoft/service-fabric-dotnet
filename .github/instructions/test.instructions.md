@@ -478,8 +478,8 @@ applyTo: "test/**/*.cs"
 
 - **Test exception properties**. Exceptions of common types are expected to provide additional details in properties.
   ```csharp
-  var actual = Assert.Throws<ArgumentNullException>(() => action(parameter));
-  Assert.Equal(nameof(parameter), actual.ParamName);
+  var exception = Assert.Throws<ArgumentNullException>(() => action(parameter));
+  Assert.Equal(nameof(parameter), exception.ParamName);
   ```
 
 - **Use discard variables when exception properties aren't tested intentionally**.

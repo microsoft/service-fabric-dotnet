@@ -550,7 +550,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - If the test still passes, it may be incorrect or too loosely specified.
   - If the test fails, verify that it fails with an expected error.
   - If the test always fails with other tests, it may be redundant.
-- **Find gaps**:  Alter or remove a logical condition, return value, or assignment in the product code.
+- **Find gaps**: Alter or remove a logical condition, return value, or assignment in the product code.
   - If no test fails, the suite is missing coverage for that behavior.
 - **Get empirical evidence**: Actually run the sabotaged product code against the tests to get empirical confirmation of
   your theories. Revert the sabotage after verification.

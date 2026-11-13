@@ -248,8 +248,10 @@ applyTo: "test/**/*.cs"
 ## Test Methods
 
 - **Test names should accurately describe the expected behavior of the target**.
-  - Say _rethrows_ when the target throws the existing exception with its stack trace restarted, as with `throw ex;`.
-    Say _propagates_ when it preserves the original stack trace, as with `throw;`, `ExceptionDispatchInfo.Throw`.
+  - Say _propagates_ when the caller receives the same exception instance, whether the target doesn't catch it or
+    rethrows it with `throw;` or `ExceptionDispatchInfo.Throw`, as described by
+    [CA2200](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca2200).
+    Mention stack trace preservation only when the test verifies `StackTrace`.
 
 - **Test names should form valid English sentences when read together with the class names**.
   For example `TraceTest.Constructor.ThrowsArgumentNullExceptionWhenTypeIsNull`.

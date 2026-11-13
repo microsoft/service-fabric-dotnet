@@ -533,7 +533,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - If one test can never fail without another also failing, check whether it adds independent coverage.
   - Make tests more specific when they are intended to verify distinct behavior, so they can fail independently.
   - _Remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only verifies
-    a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker test.
+    a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker
+    test.
   - Combine assertions when they describe the same single logical aspect of the same target; keep distinct branches separate.
   - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenFooDiffers` cannot

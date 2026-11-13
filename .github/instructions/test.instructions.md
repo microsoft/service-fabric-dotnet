@@ -405,6 +405,17 @@ applyTo: "test/**/*.cs"
               Assert.Equal(expected, sut.Bar);
           }
       }
+
+      public sealed class Baz: FooTest
+      {
+          [Fact]
+          public void IsSetToGivenValue()
+          {
+              int expected = fuzzy.Int32();
+              sut.Baz = expected;
+              Assert.Equal(expected, sut.Baz);
+          }
+      }
   }
   ```
 

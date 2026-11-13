@@ -530,7 +530,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Reveals intent**: Each test should accurately represent behavior of the SUT. A test that appears to verify a distinct
   code path but actually exercises the same logic as another test misrepresents what the SUT does.
 - **Minimize duplication**: 
-  - If one test can never fail without another also failing, check whether it adds independent coverage.
+  - If one test can never fail without another also failing, decide whether it's intended to verify distinct behavior.
   - Make tests more specific when they are intended to verify distinct behavior, so they can fail independently.
   - _Remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only verifies
     a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker

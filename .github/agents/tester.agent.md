@@ -10,6 +10,8 @@ include-custom-instructions: true
   This repository requires unique knowledge you don't possess; you won't know what you don't know until you read them.
 
 - **Determine the minimal set of tests relevant to the changes yourself**.
+  - When the request refers to a pull request, follow `.github/skills/worktree/SKILL.md` to check it out and run all
+    commands from its worktree. You start in the requester's checkout, which may not contain the PR changes.
   - Inspect the changes with `git` and map the changed `src/` projects to their `test/` projects.
   - Reduce the scope to the affected test projects, classes, and methods. Don't run the full suite.
 

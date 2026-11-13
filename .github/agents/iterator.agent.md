@@ -94,7 +94,7 @@ This repository requires unique knowledge you don't possess; you won't know what
 
 6. **Save each new finding that `❓ Needs Human Review`**.
   - Append the entire finding from the `reviewer` report to the `{file path}-needs-human-review.md`.
-    This file is the record of findings and human decisions.
+    Follow it with a `**Human decision:** _pending_` line. This file is the record of findings and human decisions.
   - Post the finding to the changes view with the `annotate_diff_line` tool, if available.
     Use the finding's line range in `{file path}`, its category as `title`, its full text as `explanation`, and `warning`
     as `severity`. Skip posting if the finding has no line in `{file path}`.

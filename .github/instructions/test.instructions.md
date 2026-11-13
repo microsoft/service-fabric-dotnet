@@ -57,7 +57,7 @@ applyTo: "test/**/*.cs"
           events.ErrorText(id, type, message);
 
       static string TraceId(ServiceContext context) =>
-          $"{context.PartitionId:B}:{context.ReplicaOrInstanceId}";
+          FormattableString.Invariant($"{context.PartitionId:B}:{context.ReplicaOrInstanceId}");
 
       bool IEquatable<Trace>.Equals(Trace other) =>
           other != null && type == other.type && id == other.id && events == other.events;

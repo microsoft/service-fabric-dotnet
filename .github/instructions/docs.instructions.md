@@ -139,8 +139,8 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
   - Don't document the low-level implementation exceptions that can be thrown by callees. E.g. don't document `ArithmeticException`
     or its descendants.
   - For missing validations that allow low-level exceptions to escape, see [Bugs](#bugs).
-- Sort exceptions alphabetically by each element's opening line, not by type name, to reduce merge conflicts.
-  This places `<exception cref="...">` sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>`
+- Sort exceptions alphabetically by each element's opening line, not by type name, to reduce merge conflicts. This places
+  `<exception cref="...">` sorted by type name first, followed by `<inheritdoc path="/exception[@cref='T:{FullName}']"/>`
   sorted by full type name second.
   - Keep each element on a single line when practical so users can re-sort them with _Sort Lines Ascending_.
   - When any element spans multiple lines, reorder complete elements without sorting their individual lines.
@@ -154,10 +154,10 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 - _Convert duplicated documentation elements to `<inheritdoc/>`_.
 - _Document interfaces and base classes and `<inheritdoc/>` in implementations and overrides_.
   - If behavior doesn't apply to every inheritor, don't document it in the base/provider.
-- _Document members with the **most** parameters and `<inheritdoc cref="..."/>` in simplifying overloads/extensions_.
-  The C# compiler doesn't recognize `<inheritdoc>` as an equivalent of the `<param>` elements and forces all parameters
-  to be documented by the same element type. Documenting methods with the most parameters allows reusing their docs for
-  parameters in simpler overloads, but not the other way around.
+- _Document members with the **most** parameters and `<inheritdoc cref="..."/>` in simplifying overloads/extensions_. The
+  C# compiler doesn't recognize `<inheritdoc>` as an equivalent of the `<param>` elements and forces all parameters to be
+  documented by the same element type. Documenting methods with the most parameters allows reusing their docs for parameters
+  in simpler overloads, but not the other way around.
 - _Specify `path` to reuse specific XML elements rather than the entire doc_.
   - Place `path` before `cref` to make `<inheritdoc>` more readable when mixed with regular elements.
   - Use `<inheritdoc path="/summary" cref="..."/>` to reuse `<summary>`.

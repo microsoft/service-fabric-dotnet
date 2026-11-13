@@ -15,7 +15,7 @@ argument-hint: "(type|namespace|project)"
     types implementing `IComparable<T>`.
   - _Place providers before consumers_. E.g. place `IEnumerable<T>` before `Enumerable` that uses it.
 - **Ensure `TODO.md` exists in the repo root**.
-  - _Don't use the `manage_todo_list` tool_. It cannot handle large lists efficiently.
+  - _Don't use a built-in todo-list tool_. It cannot handle large lists efficiently.
   - _Use this file template_. Add one line for each target type.
     ```md
     Executing `<userRequest>`
@@ -36,5 +36,5 @@ argument-hint: "(type|namespace|project)"
   - _Print finish note_: `[{types-finished}/{total-types}] Finished {target-type}: {iterator-output}.`
   - _Update the `TODO.md`_.
     - Don't re-read the `TODO.md` file.
-    - `replace_string_in_file` from _oldString_ `- [ ] {target-type}` to _newString_ `- [x] {target-type}: {iterator-output}.`
+    - Edit `TODO.md`, replacing `- [ ] {target-type}` with `- [x] {target-type}: {iterator-output}.`
   - _Go to the next type_.

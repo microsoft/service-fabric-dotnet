@@ -31,7 +31,8 @@ a sharing mechanism. -->
   The `iterator` edits and commits other files while fixing findings and the user keeps working between runs, so the
   stored list may be stale.
   - _Refresh target files by rerunning **Identify files modified in the current branch**_.
-  - _`{blob}` means the output of `git hash-object {target}`_. It identifies file content, including uncommitted changes.
+  - _`{blob}` means the output of `git -C "$(git rev-parse --show-toplevel)" hash-object {target}`_.
+    It identifies file content, including uncommitted changes. `-C` resolves the root-relative `{target}` from any directory.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
   - _Record reviewed content of the target the `iterator` just finished, if any_. Append ` ({blob})` to its
     `- [x] {target}: ...` line. Only its current `{blob}` is known to be the reviewed one. Other entries without one

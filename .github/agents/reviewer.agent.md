@@ -103,6 +103,8 @@ include-custom-instructions: true
   - Retain at the severity reported by the author for findings others decided to `Accept` after the double-check.
   - Elevate `💡 Suggestions` reported or voted `Agree` by multiple models to `⚠️ Should Fix`.
   - Follow the report format defined in `review/SKILL.md` (Verdict, Detailed Assessment, Issues).
+  - Copy the `tester`'s commands and their pass/fail outcomes verbatim into the Detailed Assessment, even when it has no
+    findings, so readers can tell passing tests from no relevant tests.
   - Finding format:
     - Prefix the finding title with the severity synthesized by the cross-check.
     - Include complete finding reports from authors, cross-check responses, authors' response to cross-check, and double-check

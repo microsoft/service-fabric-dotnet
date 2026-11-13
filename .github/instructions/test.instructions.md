@@ -254,7 +254,7 @@ applyTo: "test/**/*.cs"
 - **Create fields for method parameters in the nested test classes** to help the reader understand the method parameters
   and their types. This guidance also applies to C# indexers.
   - _Add a `// Method parameters` comment above them when non-parameter fields appear below_.
-    Omit it when the parameter fields are the only fields in the nested class.
+    Omit it when the parameter fields are the only non-`sut` fields in the nested class.
   - _Add a blank line below the parameter fields_ to separate them from the rest of the test class.
 
 - **Use the exact SUT parameter names for fields** even if their names don't meet current naming guidelines.

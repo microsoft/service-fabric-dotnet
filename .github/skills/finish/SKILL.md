@@ -27,14 +27,21 @@ a sharing mechanism. -->
   - _If `TODO.md` already exists, check the prompt stored in it_
     - If the stored prompt is the same, resume from the first unfinished target.
     - If the stored prompt is different, stop and ask what to do.
-- **When resuming, reconcile `TODO.md` with target files**.
-  The `iterator` commits changes during the run and the user keeps working between runs, so the stored list may be stale.
+- **Reconcile `TODO.md` with target files before each target and after the last one**.
+  The `iterator` edits and commits other files while fixing findings and the user keeps working between runs, so the
+  stored list may be stale.
+  - _`{blob}` means the output of `git hash-object {target}`_. It identifies file content, including uncommitted changes.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
-  - _Reopen flagged entries for target files_, i.e. modified again after being reverted or deleted.
-    Replace `- [x] {target}: ...` lines ending with ` ⚠️ No longer modified.` with `- [ ] {target}`.
+  - _Reopen entries for target files modified after their review_.
+    Replace `- [x] {target}: ...` lines with `- [ ] {target}` when their recorded `{blob}` differs from the current one
+    or when they end with ` ⚠️ No longer modified.`, i.e. modified again after being reverted or deleted.
+  - _Record reviewed content of target files_. Append ` ({blob})` to `- [x] {target}: ...` lines without one.
+    This step runs right after each `iterator`, so the current `{blob}` is the reviewed one. Recording it here, instead
+    of in the `TODO.md` update step, keeps the shared steps identical.
   - _Flag unflagged entries for files missing from target files_, i.e. reverted or deleted.
     Replace `- [ ] {target}` with `- [x] {target}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to
     `- [x] {target}: ...` lines not already ending with it.
+  - _Continue with the first unfinished target_. Finish when none are left.
 - **Repeat for each target, _one at a time_**.
   - _Print start note_: `[{finished + 1}/{total}] Finishing {target} ...`
   - _Run the `iterator` subagent_; use this prompt:

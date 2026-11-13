@@ -73,6 +73,9 @@ This repository requires unique knowledge you don't possess; you won't know what
   - _Skip the findings the `coder` refuses to implement and continue addressing other findings_. These findings don't need
     human review. The `reviewer` and the `coder` should continue iterating until the code is clear enough to stop reporting
     findings that cannot be implemented.
+  - _Save a finding the `coder` refuses a second time as described in step 6_. The `reviewer` reporting it again means the
+    code failed to make the `coder`'s reasoning evident, so the disagreement needs a human decision. Saving it also stops
+    the `reviewer` from reporting it again and guarantees the loop ends.
 
 6. **Save each new finding that `❓ Needs Human Review`**.
   - Append the entire finding from the `reviewer` report to the `{file path}-needs-human-review.md`.
@@ -82,5 +85,8 @@ This repository requires unique knowledge you don't possess; you won't know what
     as `severity`. Skip posting if the finding has no line in `{file path}`.
 
 7. **Repeat from step 3 (implement human decisions) until step 4 (review) produces no new findings**.
+  - A finding the `coder` refused once and the `reviewer` reports again is new; it gets one more `coder` attempt in step 5.
 
 8. **Return the final review output verbatim**.
+  - _If `{file path}-needs-human-review.md` exists, start the output with `❓ Needs Human Review` and the file path_.
+    The final review excludes findings saved in this file, so its own verdict may hide pending human decisions.

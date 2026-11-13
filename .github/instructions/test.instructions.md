@@ -213,9 +213,9 @@ applyTo: "test/**/*.cs"
     with a constructor test, a `ToString` test, or both. Drop the constructor test and keep only the `ToString` test to avoid
     back and forth during reviews.
   - _Do test constructors with hand-coded initialization of accessible fields and auto-properties_. Unlike `ToString()` in
-    the example above, whose tests also verify the initialization, fields and compiler-generated auto-properties have no hand-coded
-    logic whose tests would also verify it, so the constructor test is required. `IsSetToGivenValue` tests don't replace it,
-    because they overwrite the initial value.
+    the example above, whose tests also verify the initialization, fields and compiler-generated auto-properties have no
+    hand-coded logic whose tests would also verify it, so the constructor test is required. `IsSetToGivenValue` tests don't
+    replace it, because they overwrite the initial value.
   - _Don't add a `Constructor` nested class to verify the compiler-generated default constructor_. Asserting that constructor
     initialized accessible fields and auto-properties to their default/0/null values exercises C# zero-initialization, not
     SUT code. Only add a `Constructor` nested class when SUT with a compiler-generated default constructor has hand-coded

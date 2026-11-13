@@ -1,0 +1,35 @@
+---
+name: finish
+description: "Make sure changes in the current branch pass review."
+---
+
+- **Read `.github/copilot-instructions.md` before doing anything else**.
+- **Identify files modified in the current branch**.
+  - _Run `git diff --name-only --diff-filter=d $(git merge-base origin/HEAD HEAD)`_.
+    It includes committed and uncommitted changes and excludes deleted files.
+  - _Exclude `TODO.md` and `*-needs-human-review.md` files_. They are produced by this workflow.
+  - _Include all files, regardless of their number_. User will stop processing if needed.
+  - _`{target-file}` means the relative file path_.
+- **Ensure `TODO.md` exists in the repo root**.
+  - _Don't use the `manage_todo_list` tool_. It cannot handle large lists efficiently.
+  - _Use this file template_. Add one line for each target file.
+    ```md
+    Executing `<userRequest>`
+    - [ ] {target-file}
+    ```
+  - _If `TODO.md` already exists, check the prompt stored in it_
+    - If the stored prompt is the same, resume from the first unfinished file.
+    - If the stored prompt is different, stop and ask what to do.
+- **Repeat for each target file, _one at a time_**.
+  - _Print start note_: `[{files-finished + 1}/{total-files}] Finishing {target-file} ...`
+  - _Run the `iterator` subagent_; use this prompt:
+    ```md
+    Make sure changes in `{target-file}` pass review.
+    ```
+  - _`{iterator-output}` should be `✅ Looks Good` or `❓ Needs Human Review`_.
+  - _Don't pause for `iterator` responses that need human review_. User will review them later.
+  - _Print finish note_: `[{files-finished}/{total-files}] Finished {target-file}: {iterator-output}.`
+  - _Update the `TODO.md`_.
+    - Don't re-read the `TODO.md` file.
+    - `replace_string_in_file` from _oldString_ `- [ ] {target-file}` to _newString_ `- [x] {target-file}: {iterator-output}.`
+  - _Go to the next file_.

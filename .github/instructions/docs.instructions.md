@@ -89,7 +89,7 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 ### Parameters
 
 - Remove `<param>` elements that restate information evident from the parameter types and names.
-  This is an optional element, but if one parameter is needs docs, C# compiler requires them for all parameters.
+  This is an optional element, but if one parameter needs docs, C# compiler requires them for all parameters.
 - Improve parameter types and names before documenting them.
 - Use `<param name="...">` to describe method parameters.
   - The description should be a noun phrase that doesn't specify the data type.
@@ -105,6 +105,7 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 
 - Use `<typeparam name="...">` to describe type parameters in generic types or methods, but only if they're not redundant.
   - Remove all `<typeparam>` elements if they restate documented-elsewhere or self-evident information. This is an optional
+    element.
 - Use `<typeparamref name="...">` to reference type parameters in documentation.
 
 ### Constructors

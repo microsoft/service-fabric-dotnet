@@ -523,10 +523,13 @@ applyTo: "test/**/*.cs"
   handling) is correct — not that the callee's internal branches produce the right answer.
   - _High-cardinality callee outputs require a single test_. E.g. `int GetHashCode()` calling `System.HashCode.Combine()`
     needs a single test because `int` is high-cardinality.
-  - _Low-cardinality callee outputs require a separate test per value_. Use `[Theory]` over the callee's output domain, or
-    add one test per distinct forwarded value. E.g. `bool Equals(T)` calling `Equals()` method of its member requires two
-    tests because `bool` cardinality is limited to `true` and `false` and asserting only on one of them wouldn't be sufficient
-    to prove that the callee was invoked correctly.
+  - _Low-cardinality outputs of callees in other types require a separate test per value_. Use `[Theory]` over the callee's
+    output domain, or add one test per distinct forwarded value. E.g. `bool Equals(T)` calling `Equals()` method of its
+    member requires two tests because `bool` cardinality is limited to `true` and `false` and asserting only on one of them
+    wouldn't be sufficient to prove that the callee was invoked correctly.
+  - _Low-cardinality outputs of callees in the same SUT require a single test_. E.g. `Equals(object)` calling `Equals(T)`
+    needs a single test forwarding the callee's result. Mishandling the other values is an accepted regression per
+    _Don't test what SUT doesn't do_ and re-testing them is duplication per _Minimize duplication_.
   - RE: _Omit nested test classes for SUT members without observable behavior_. Delegation is observable behavior. A delegating
     member needs a nested test class to verify the call and its own branches (type-check, guard, transformation of the return
     value).

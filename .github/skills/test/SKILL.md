@@ -32,7 +32,7 @@ a sharing mechanism. -->
     Bug fixes, testability improvements in `{target}` are out of scope.
     Restructure existing, eliminate redundant tests as needed.
     ```
-  - _`{iterator-output}` should be `✅ Looks Good` or `❓ Needs Human Review`_.
+  - _`{iterator-output}` is the verdict on the first line of the `iterator` response_, without report text or file path.
   - _Don't pause for `iterator` responses that need human review_. User will review them later.
   - _Print finish note_: `[{finished}/{total}] Finished {target}: {iterator-output}.`
   - _Update the `TODO.md`_.

@@ -219,13 +219,13 @@ applyTo: "test/**/*.cs"
 - **Resolve naming conflicts between SUT members and common methods of test classes**.
   - _Add the `new` keyword to the test sub-class_. If SUT overrides `Object` methods like `GetHashCode()` the nested
     test class name `GetHashCode` would conflict with the `GetHashCode()` method of the base test class. The `new` keyword
-    resolves the conflict: `public new sealed class GetHashCode: FooTest`.
+    resolves the conflict: `public new sealed class GetHashCode : FooTest`.
   - _Implement `IDisposable` in test classes explicitly_. If SUT has a `Dispose()` method, the nested test class name `Dispose`
     may conflict with the `Dispose()` method of the test class responsible for test fixture cleanup. Implementing `IDisposable`
     in the test class explicitly resolves the conflict: `void IDisposable.Dispose()`.
   - _Add `_` suffix to nested test class name_. When the test base `Dispose()` method is virtual and overridden by the nested
     test sub-classes, adding the `_` suffix to the test name resolves the conflict.
-    `public sealed class Dispose_: FooTest`.
+    `public sealed class Dispose_ : FooTest`.
 
 - **Use IL names of operator methods for nested test classes**. 
   - E.g. `operator <()` -> `Op_LessThan`.
@@ -339,7 +339,7 @@ applyTo: "test/**/*.cs"
 
       static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-      public new sealed class Equals: FooTest
+      public new sealed class Equals : FooTest
       {
           readonly Foo other;
 
@@ -389,7 +389,7 @@ applyTo: "test/**/*.cs"
 
       FooTest() => sut = new Foo(bar, baz);
 
-      public sealed class Constructor: FooTest
+      public sealed class Constructor : FooTest
       {
           [Fact]
           public void InitializesProperties()
@@ -399,7 +399,7 @@ applyTo: "test/**/*.cs"
           }
       }
 
-      public sealed class Bar: FooTest
+      public sealed class Bar : FooTest
       {
           [Fact]
           public void IsSetToGivenValue()
@@ -410,7 +410,7 @@ applyTo: "test/**/*.cs"
           }
       }
 
-      public sealed class Baz: FooTest
+      public sealed class Baz : FooTest
       {
           [Fact]
           public void IsSetToGivenValue()
@@ -570,7 +570,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   in tests and makes tests stronger. Example below is compressed to reduce space and meant to illustrate structure and
   naming, not formatting or comments.
   ```csharp
-  public class Foo: IEquatable<Foo>
+  public class Foo : IEquatable<Foo>
   {
      public override bool Equals(object foo);
      public bool Equals(Foo foo);
@@ -578,14 +578,14 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   public abstract class FooTest
   {
       readonly Foo sut = new();
-      public sealed class Equals_Foo: FooTest
+      public sealed class Equals_Foo : FooTest
       {
           new readonly IEquatable<Foo> sut; // tests implementation of IEquatable<T>.Equals(T? other)
           readonly Foo other = new(); // field and test method names are consistent with IEquatable<T>
           public Equals_Foo() => sut = base.sut;
           [Fact] public void ReturnsFalseWhenOtherIsDifferent() => Assert.False(sut.Equals(other));
       }
-      public sealed class Equals_Object: FooTest
+      public sealed class Equals_Object : FooTest
       {
           new readonly object sut; // tests override of Object.Equals(object obj)
           readonly object obj = new(); // field and test method names are consistent with Object

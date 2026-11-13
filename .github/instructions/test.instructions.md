@@ -367,11 +367,10 @@ applyTo: "test/**/*.cs"
   Initialization is a logical aspect of the constructor(s). Also, testing it for each member separately creates a significantly
   larger number of tests. On the other hand, setter logic still needs to be tested in the member tests.
   ```csharp
-  class Foo
+  class Foo(int bar, int baz)
   {
-      public Foo(int bar, int baz) { Bar = bar; Baz = baz; }
-      public int Bar { get; set; }
-      public int Baz { get; set; }
+      public int Bar { get; set; } = bar;
+      public int Baz { get; set; } = baz;
   }
 
   public abstract class FooTest

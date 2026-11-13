@@ -23,10 +23,10 @@ applyTo: "test/**/*.cs"
 - **Test projects should use the product namespace, without the `Tests` suffix**.
   This helps to reduce the number of namespaces and using directives. For example, the `Microsoft.ServiceFabric.Actors.Tests.csproj`
   test classes should be in the `Microsoft.ServiceFabric.Actors` namespace.
-- **Each top-level `public` or `internal` product type should have a separate test class `{TypeUnderTest}Test`**.
+- **Each top-level `public` or `internal` product type with observable behavior should have a separate test class `{TypeUnderTest}Test`**.
   Note that singular `Test` in the class name indicates that each test creates a separate instance of the test class.
   For example, top-level product class `ActorBase` should have a test class `ActorBaseTest`.
-- **Each nested non-private product type should have a nested test class**.
+- **Each nested non-private product type with observable behavior should have a nested test class**.
   This helps to maintain test code structure consistent with the product code structure and reinforces discouragement of
   nested public types by the .NET Framework design guidelines. For example, nested type `Outer.Inner` should have a nested
   test class `OuterTest.InnerTest`.

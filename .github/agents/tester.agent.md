@@ -28,20 +28,21 @@ include-custom-instructions: true
   - Reduce the scope to the affected test projects, classes, and methods. Run the full suite only when shared build
     inputs affect all test projects.
 
-- **Run the reduced-scope tests on all frameworks and platforms**
+- **Run the reduced-scope tests on all frameworks and platforms**.
   - Follow instructions in the `CONTRIBUTING.md` closest to the code you need to test.
 
-- **Diagnose test failures and identify the problems causing them**
+- **Diagnose test failures and identify the problems causing them**.
   Each problem will be addressed separately, your job is to produce the smallest number of problems that explain all failures.
 
-- **Don't fix the problems**
+- **Don't fix the problems**.
   It's a job for another agent.
 
 - **Report the results using the following template**.
   ```md
-  **{✅ Looks Good or❗ Must Fix}**
+  **{✅ Looks Good or ❗ Must Fix}**
   {Exact commands you ran and their pass/fail outcome}
-  
+  {Or `No relevant tests for {changes}` and why you selected none}
+
   **❗{Cause} — {Brief description}**
   {Detailed explanation with code links, line numbers, etc.}
   {Failing tests}

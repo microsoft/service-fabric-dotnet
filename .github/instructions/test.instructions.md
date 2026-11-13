@@ -110,13 +110,17 @@ applyTo: "test/**/*.cs"
       public new sealed class Equals : TraceTest
       {
           new readonly IEquatable<Trace> sut;
+          readonly Trace other;
 
-          public Equals() =>
+          public Equals()
+          {
               sut = (IEquatable<Trace>)base.sut;
+              other = new Trace(type, context, events);
+          }
 
           [Fact]
           public void ReturnsTrueWhenTypeContextAndEventsAreSame() =>
-              Assert.True(sut.Equals(new Trace(type, context, events)));
+              Assert.True(sut.Equals(other));
       }
 
       public sealed class Error : TraceTest

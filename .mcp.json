@@ -8,7 +8,7 @@
     "NuGet": {
       "type": "stdio",
       "command": "dnx",
-      "args": [ "NuGet.Mcp.Server@1.4.16", "--source", "https://api.nuget.org/v3/index.json", "--yes" ],
+      "args": [ "NuGet.Mcp.Server@1.4.23", "--source", "https://api.nuget.org/v3/index.json", "--yes" ],
       "tools": [ "*" ]
     }
   }

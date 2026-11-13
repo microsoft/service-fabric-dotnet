@@ -221,10 +221,9 @@ applyTo: "test/**/*.cs"
     initialized accessible fields and auto-properties to their default/0/null values exercises C# zero-initialization, not
     SUT code. Only add a `Constructor` nested class when SUT with a compiler-generated default constructor has hand-coded
     logic initializing the accessible fields or auto-properties inline.
-  - _Don't add a `Default` nested class to verify compiler-generated default-struct state_. Asserting that
-    `default(SUT).Member == default(T)` exercises C# zero-initialization, not SUT code. Only add a `Default` nested class
-    when the SUT defines executable logic that runs for `default(SUT)` - a property getter, method, or operator with
-    hand-written code.
+  - _Don't add a `Default` nested class to verify compiler-generated default-struct state_. Asserting that `default(SUT).Member
+    == default(T)` exercises C# zero-initialization, not SUT code. Test hand-written logic that runs for `default(SUT)`, such
+    as a property getter, method, or operator, in the nested class of the member implementing it.
 
 - **Create a separate nested test class for each overloaded SUT member**.
   - Use BCL type names of parameters to disambiguate test class names. SUT with `Task<Stream> OpenAsync(string)`

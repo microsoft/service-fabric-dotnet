@@ -55,7 +55,7 @@ include-custom-instructions: true
   {Or `No relevant tests for {changes}` and why you selected none}
   {Changed files you couldn't map to tests, and frameworks or platforms you couldn't test, with reasons}
 
-  **❗{Cause} — {Brief description}**
+  **❗ {Cause} — {Brief description}**
   {Detailed explanation with code links, line numbers, etc.}
   {Failing tests}
   ```

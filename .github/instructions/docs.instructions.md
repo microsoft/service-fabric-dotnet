@@ -172,7 +172,7 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
   - Use `<inheritdoc path="/typeparam[@name='{name}']" cref="..."/>` to reuse a specific `<typeparam name="{name}">`.
   - Use `<inheritdoc path="/exception" cref="..."/>` to reuse all `<exception>` elements.
   - Use `<inheritdoc path="/exception[@cref='T:{FullName}']" cref="..."/>` to reuse a specific `<exception cref="{Name}">`.
-- _Don't use `<inheritdoc/>` when there is a major behavior difference_.
+- _Document the differences instead of using `<inheritdoc/>` for elements with a major behavior difference_.
 
 ### Bugs
 

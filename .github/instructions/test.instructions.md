@@ -361,7 +361,7 @@ applyTo: "test/**/*.cs"
           }
 
           [Fact]
-          public void ReturnsTrueWhenBarBazEqual() =>
+          public void ReturnsTrueWhenBarAndBazAreSame() =>
               Assert.True(sut.Equals(other));
       }
   }

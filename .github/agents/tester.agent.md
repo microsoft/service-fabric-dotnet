@@ -1,7 +1,7 @@
 ---
 description: Runs the tests relevant to a change.
 tools: [execute, read, search]
-model: ["Claude Sonnet 5.5"]
+model: "Claude Sonnet 5.5"
 include-custom-instructions: true
 ---
 

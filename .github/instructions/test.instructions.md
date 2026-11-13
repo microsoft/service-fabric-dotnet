@@ -179,9 +179,9 @@ applyTo: "test/**/*.cs"
   - _Add a blank line and a `// Constructor parameters` comment above them when non-parameter fields appear below_.
     Omit it when the parameter fields are the only non-`sut` fields in the top-level class.
   - _Add a blank line below the parameter fields_ to separate them from the rest of the test class.
-  - _Create parameter fields for constructor with the most parameters, if SUT constructors are overloaded_. 
+  - _Create parameter fields for the constructor with the most parameters, if SUT constructors are overloaded_.
 
-- **Initialize `sut` inline or in the base class constructor**. 
+- **Initialize `sut` inline or in the base class constructor**.
   - _Use the overloaded SUT constructor with the largest number of parameters_.
   - _Don't set SUT properties in the base initializer when SUT has only a default constructor_. Mirror the SUT's actual
     construction: write `new()` and nothing more. Pre-setting properties misrepresents how the SUT is built and makes the
@@ -242,13 +242,13 @@ applyTo: "test/**/*.cs"
     may conflict with the `Dispose()` method of the test class responsible for test fixture cleanup. Implementing `IDisposable`
     in the test class explicitly resolves the conflict: `void IDisposable.Dispose()`.
   - _Add `_` suffix to nested test class name_. When the test base `Dispose()` method is virtual and overridden by the nested
-    test sub-classes, adding the `_` suffix to the test name resolves the conflict.
+    test sub-classes, adding the `_` suffix to the test class name resolves the conflict.
     `public sealed class Dispose_ : FooTest`.
 
-- **Use IL names of operator methods for nested test classes**. 
+- **Use IL names of operator methods for nested test classes**.
   - E.g. `operator <()` -> `Op_LessThan`.
   - For conversion operators, append `_{ParameterType}_To_{ReturnType}`.
-    For example, given `OrdinalString` SUT and its test class `OrdinalStringTest` the 
+    For example, given `OrdinalString` SUT and its test class `OrdinalStringTest` the
     `explicit operator string(OrdinalString value)` should have nested class `Op_Explicit_OrdinalString_To_String` and
     `implicit operator OrdinalString(string value)` should have nested class `Op_Implicit_String_To_OrdinalString`.
 
@@ -291,11 +291,11 @@ applyTo: "test/**/*.cs"
     have a single test with two assertions.
   - Inheritance alone is not a separate logical aspect and shouldn't be tested separately.
 
-- **Order test methods so that collapsed definitions form description of the SUT**, mirroring its doc
+- **Order test methods so that collapsed definitions form a description of the SUT**, mirroring its doc
   comments and implementation. These rules are for _ordering_ tests, not for _creating_ or _keeping_ them.
   - Place tests describing default/most common behavior first.
     They serve as an executable equivalent of the `<summary>`.
-  - Place tests of inputs, edge cases and outputs next. 
+  - Place tests of inputs, edge cases and outputs next.
     They serve as an executable equivalent of the `<param>`, `<exception>` and `<returns>` docs.
   - Place remaining tests in the approximate order of the code they are verifying.
   - Place tests targeting related code/conditions together.
@@ -471,10 +471,10 @@ applyTo: "test/**/*.cs"
   tests to that member's correctness; a bug in one target should fail as few unrelated tests as possible.
   - _Pick the most independent member_, e.g. prefer `sut.ToString()` (one dependency) over `(string)sut` that itself calls
     `ToString()` (two dependencies).
-  - _Use the same member in different tests_, e.g. even if `operator string()` had an independent implementation too, use 
+  - _Use the same member in different tests_, e.g. even if `operator string()` had an independent implementation too, use
     `ToString` in all tests (same dependency) rather than mixing `(string)sut` and `ToString` (two distinct dependencies).
 
-- **Test exception properties**. Exceptions of common types are expected to provide additional details in properties. 
+- **Test exception properties**. Exceptions of common types are expected to provide additional details in properties.
   ```csharp
   var actual = Assert.Throws<ArgumentNullException>(() => action(parameter));
   Assert.Equal(nameof(parameter), actual.ParamName);
@@ -547,7 +547,7 @@ Use _Sabotage_ (a.k.a. mutation testing), the practice of deliberately breaking 
 Use it both to evaluate individual tests and to find gaps in the test suite.
 
 - **Evaluate a test**: Sabotage the product code in a way that should make the test fail.
-  - If the test still passes, it may be incorrect, too loosely specified.
+  - If the test still passes, it may be incorrect or too loosely specified.
   - If the test fails, verify that it fails with an expected error.
   - If the test always fails with other tests, it may be redundant.
 - **Find gaps**:  Alter or remove a logical condition, return value, or assignment in the product code.
@@ -571,7 +571,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Tests Pass**: Quickly and reliably.
 - **Reveals intent**: Each test should accurately represent behavior of the SUT. A test that appears to verify a distinct
   code path but actually exercises the same logic as another test misrepresents what the SUT does.
-- **Minimize duplication**: 
+- **Minimize duplication**:
   - If one test can never fail without another also failing, decide whether it's intended to verify distinct behavior.
   - Make tests more specific when they are intended to verify distinct behavior, so they can fail independently.
   - _Otherwise, remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only
@@ -581,7 +581,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenBarIsDifferent` cannot fail unless
     the corresponding `Equals_Foo` test also fails — delete the caller variant and trust the callee's tests.
     Exception: distinct argument-validation categories (`null`, empty, whitespace) are covered per _Test argument validation logic_.
-- **Reduce tests to fewest elements**: 
+- **Reduce tests to fewest elements**:
   - Before writing a test for a branch or guard, verify that the branch is reachable independently of the paths already covered.
   - Don't create tests for consistency, parity or structural symmetry. API design principles don't apply to tests.
 
@@ -636,7 +636,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     - RE _Each test method should verify a single logical aspect of a single member of the SUT_: the name of the not-implemented
       explicit test explains what needs to be tested (a single logical aspect of a single member), while the TODO comment explains
       why it is not currently possible.
-  - **Make flaky tests explicit to unblock CI**. Include `// TODO: Flaky test. {brief explanation}`
+  - **Make flaky tests explicit to unblock CI**. Include `// TODO: Flaky test. {brief explanation}`.
   - **Keep the `// TODO: {Reason}` short and single-line**.
     It will be displayed in the _Task List_ in _Visual Studio_.
   - **Include detailed explanation of the exclusion in the body of the test method**.
@@ -653,7 +653,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   Combining SUT changes with the initial implementation of the test suite increases the risk of breaking it without adequate
   test coverage.
 - **Don't use `Assert.IsAssignableFrom<T>()` or `Assert.IsType<T>()`**. On their own, these are unnecessary.
-  - SUT inheritance can be verified by compiler and shouldn't be tested separately. 
+  - SUT inheritance can be verified by compiler and shouldn't be tested separately.
   - When type information cannot be verified by compiler, additional asserts are needed on state or behavior of the expected
     type. Use type casting instead.
 - **Don't use `Assert.NotNull()`**. On its own, it's unnecessary.
@@ -688,5 +688,5 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 - **Delete well-known files and directories at the start and the end of each test** to reduce the risk of tests failing
   when reusing the test fixture left over by previous tests.
-  
+
 - **Prefer test class constructor and `IDisposable.Dispose` for file cleanup over `try/finally` in individual tests**

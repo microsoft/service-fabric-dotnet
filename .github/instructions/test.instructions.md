@@ -412,6 +412,7 @@ applyTo: "test/**/*.cs"
   - _Define distinct test types instead of reusing existing types to test polymorphic or generic code_. E.g.
     - Instead of reusing `InvalidOperationException` to test exception propagation, create a nested `TestException` class.
     - Instead of reusing `int` and `string` to test collections, create nested `TestKey` and `TestValue` classes or structs.
+  - _Use mocks for abstractions_. See [moq.instructions.md](moq.instructions.md) for details.
 
 - **Test argument validation logic** - it's part of SUT's API.
   - _Create explicit tests for missing argument validation_ that can cause `NullReferenceException`, etc. in the consuming

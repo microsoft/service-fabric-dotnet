@@ -588,7 +588,6 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.
     - The _Don't test what SUT doesn't do_ rule doesn't apply to bugs caused by code missing from SUT.
-    - When fixing the bug, remove `Explicit = true` and the `// TODO` comment, then verify that the test passes.
   - **Don't create explicit tests for unfixed bugs in callee code** - the _Don't test what SUT doesn't do_ rule still applies
     to callee bugs. E.g. SUT passing an argument to a callee that dereferences it without a `null` guard, is a bug in the
     callee. It's out of scope for SUT and should have an explicit test in the callee's test suite instead.
@@ -605,6 +604,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - **Include detailed explanation of the exclusion in the body of the test method**.
     - Add comments to explain _why_ the test code demonstrates a problem.
     - Use `Assert` messages, when available.
+  - **When fixing a problem documented by an explicit test, remove `Explicit = true` and the `// TODO` comment**,
+    implement the test if it throws `NotImplementedException`, then verify that it passes.
   - **Remove explicit tests when their `{Reason}` becomes invalid without fixing the problem**, such as when a missing logic
     previously documented as a bug is now unnecessary based on latest `*.instructions.md` or docs.
 - **Consider fixing problems documented by explicit tests when changing SUT**.

@@ -63,16 +63,15 @@ argument-hint: "(class|file|tests for X)"
 - **Use `❓ Needs Human Review` when unsure**.
 
 # 5. Generate a Report using the following template
-  - Group related findings under a single category.
+- Group related findings under a single category.
   ```md
   **{✅ Looks Good / ❓ Needs Human Review / ⚠️ Needs Changes}**
   {2-3 sentence summary of the overall verdict and key points.}
   {If ❓, state which findings you are uncertain about and what a human reviewer should focus on.}
-  
+
   **Detailed Assessment**
   {Motivation, approach, cost-benefit, and risk analysis.}
-  
+
   **{❗/⚠️/💡/📝 or ✅/❓} {Category Name} — {Brief description}**
   {Detailed explanation with code links, line numbers, etc.}
-  {Include specifics — reference code, line numbers, etc.}
   ```

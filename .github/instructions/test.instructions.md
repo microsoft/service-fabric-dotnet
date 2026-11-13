@@ -309,7 +309,7 @@ applyTo: "test/**/*.cs"
 
   - Omit the blank lines between the single-line sections.
     ```csharp
-      var sut = new Foo();
+      Foo sut = new();
       string result = sut.Bar();
       Assert.Equal("Buz", result);
     ```

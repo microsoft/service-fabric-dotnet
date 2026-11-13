@@ -590,7 +590,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - **Don't create explicit tests for unfixed bugs in callee code** - the _Don't test what SUT doesn't do_ rule still applies
     to callee bugs. E.g. SUT passing an argument to a callee that dereferences it without a `null` guard, is a bug in the
     callee. It's out of scope for SUT and should have an explicit test in the callee's test suite instead.
-    When the callee is outside of this repo, report the bug upstream.
+    When the callee is outside of this repo, report the bug to the user and ask them to submit an issue to the callee's repo.
   - **Create explicit tests impossible to implement due to SUT testability limitations**.
     - Include `// TODO: SUT testability limitation. {brief explanation}`.
     - Have them `throw new NotImplementedException()`.

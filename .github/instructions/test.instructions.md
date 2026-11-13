@@ -377,8 +377,11 @@ applyTo: "test/**/*.cs"
   {
       readonly Foo sut;
 
+      // Constructor parameters
       readonly int bar = fuzzy.Int32();
       readonly int baz = fuzzy.Int32();
+
+      static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
       FooTest() => sut = new Foo(bar, baz);
 

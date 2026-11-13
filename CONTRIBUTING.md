@@ -137,13 +137,13 @@ Repeat the `Reference` and `Restore` steps when switching between SDK and Runtim
 
 ## All Contributors
 - Create a [draft pull request](https://docs.github.com/articles/creating-a-pull-request).
-- Follow the [git commit guidelines](https://cbea.ms/git-commit) to author the PR title and description.
+- Pull requests are squash-merged, so only the PR title and description reach the target branch.
+  Follow the [git commit guidelines](https://cbea.ms/git-commit) to author them.
   - Write for the person reading history of the _target_ branch in the future.
   - Describe _what_ it changes and _why_, not _how_ it was developed or which prior PRs it addresses.
   - Title should use the imperative mood and be limited to 72 characters.
   - Don't include textual tags `[MyFeature]` in the title.
-- Pull requests are squash-merged, so only the PR title and description reach the target branch.
-  Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them; don't review
+- Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them; don't review
   or rewrite them.
 - Make sure the validation build completes successfully.
 - Link the pull request from the work item/issue you've created.

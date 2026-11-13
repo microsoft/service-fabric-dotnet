@@ -332,14 +332,16 @@ applyTo: "test/**/*.cs"
 
   public abstract class FooTest
   {
-      readonly Foo sut = new Foo { Bar = 42, Baz = 43 }; // Common arrange logic for all Foo tests.
+      readonly Foo sut = new(); // Common arrange logic for all Foo tests.
+
+      static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
       public new sealed class Equals: FooTest
       {
           readonly Foo other;
 
-          public Equals() =>
-              other = new Foo { Bar = sut.Bar, Baz = sut.Baz }; // Common arrange logic for all Foo.Equals tests
+          public Equals() => // Common arrange logic for all Foo.Equals tests
+              other = new Foo { Bar = sut.Bar = fuzzy.Int32(), Baz = sut.Baz = fuzzy.Int32() };
 
           [Fact]
           public void ReturnsFalseWhenBarIsDifferent()

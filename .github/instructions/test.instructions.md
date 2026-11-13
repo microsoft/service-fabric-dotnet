@@ -345,14 +345,14 @@ applyTo: "test/**/*.cs"
           [Fact]
           public void ReturnsFalseWhenBarIsDifferent()
           {
-              other.Bar = sut.Bar + 1;
+              other.Bar = sut.Bar + fuzzy.SByte().Between(1, 5);
               Assert.False(sut.Equals(other));
           }
 
           [Fact]
           public void ReturnsFalseWhenBazIsDifferent()
           {
-              other.Baz = sut.Baz + 1;
+              other.Baz = sut.Baz + fuzzy.SByte().Between(1, 5);
               Assert.False(sut.Equals(other));
           }
 

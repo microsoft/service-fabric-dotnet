@@ -2,6 +2,7 @@
 description: Runs the tests relevant to a change.
 tools: [execute, read, search]
 model: "Claude Sonnet 5.5"
+modelPolicy: "required"
 include-custom-instructions: true
 ---
 

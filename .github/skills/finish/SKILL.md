@@ -29,8 +29,11 @@ a sharing mechanism. -->
 - **When resuming, reconcile `TODO.md` with target files**.
   The `iterator` commits changes during the run and the user keeps working between runs, so the stored list may be stale.
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
-  - _Flag entries for files missing from target files_, i.e. reverted or deleted.
-    Replace `- [ ] {file}` with `- [x] {file}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to `- [x] {file}: ...` lines.
+  - _Reopen flagged entries for target files_, i.e. modified again after being reverted or deleted.
+    Replace `- [x] {target}: ...` lines ending with ` ⚠️ No longer modified.` with `- [ ] {target}`.
+  - _Flag unflagged entries for files missing from target files_, i.e. reverted or deleted.
+    Replace `- [ ] {target}` with `- [x] {target}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to
+    `- [x] {target}: ...` lines not already ending with it.
 - **Repeat for each target, _one at a time_**.
   - _Print start note_: `[{finished + 1}/{total}] Finishing {target} ...`
   - _Run the `iterator` subagent_; use this prompt:

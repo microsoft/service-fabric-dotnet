@@ -59,7 +59,7 @@ This repository requires unique knowledge you don't possess; you won't know what
   - _Don't bundle multiple findings into a single `coder` invocation, even if they apply to the same file_.
   - _Prepare prompt for the `coder`_.
     ```md
-    Address the following review finding. If you refuse implementing the suggested changes, update the code to make your
+    Address the following review finding. If you refuse to implement the suggested changes, update the code to make your
     reasoning evident and prevent reporting of similar findings in future reviews. Add comments if the reasoning cannot
     be expressed in code itself.
     ***

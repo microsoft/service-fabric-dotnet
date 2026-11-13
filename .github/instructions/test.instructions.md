@@ -204,8 +204,8 @@ applyTo: "test/**/*.cs"
 - **Create a separate nested test classes for each overloaded SUT member**.
   - Use BCL type names of parameters to disambiguate test class names. SUT with `Task<Stream> OpenAsync(string)`
     and `Task<Stream> OpenAsync(string, int, CancellationToken)` requires two nested test classes - `OpenAsync_String` and
-    `OpenAsync_String_Int64_CancellationToken`.
-  - Use closed generic type names. Parameter type `Func<Task<int>>` becomes `FuncOfTaskOfInt64` in the class name.
+    `OpenAsync_String_Int32_CancellationToken`.
+  - Use closed generic type names. Parameter type `Func<Task<int>>` becomes `FuncOfTaskOfInt32` in the class name.
     This makes test classes _closed to modification_ when a new member overloads this parameter to `Func<int>`.
   - Don't create separate classes for parameters with default values. `Task<Stream> OpenAsync(string, int, CancellationToken = default)`
     is a single overload and should still have a single test class.

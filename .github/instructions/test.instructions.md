@@ -590,7 +590,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     logic_.
 - **Reduce tests to fewest elements**:
   - Before writing a test for a branch or guard, verify that the branch is reachable independently of the paths already covered.
-  - Don't create tests for consistency, parity or structural symmetry. API design principles don't apply to tests.
+  - Don't create tests for consistency, parity or structural symmetry. Symmetry of the SUT's API doesn't justify a test.
 
 ## Special Cases
 

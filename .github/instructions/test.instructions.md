@@ -56,7 +56,7 @@ applyTo: "test/**/*.cs"
       void ITrace.Error(string message) =>
           events.ErrorText(id, type, message);
 
-      string TraceId(ServiceContext context) =>
+      static string TraceId(ServiceContext context) =>
           $"{context.PartitionId:B}:{context.ReplicaOrInstanceId}";
 
       bool IEquatable<Trace>.Equals(Trace other) =>

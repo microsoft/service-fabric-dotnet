@@ -36,9 +36,9 @@ a sharing mechanism. -->
   - _Append `- [ ] {target}` for target files missing from `TODO.md`_.
   - _Record reviewed content of the target the `iterator` just finished, if it is still a target file_. Append ` ({blob})`
     to its `- [x] {target}: ...` line. Only its current `{blob}` is known to be the reviewed one. Other entries without one
-    predate hash recording or were finished by a stopped run, and their files may have changed since. Recording it here, instead
-    of in the `TODO.md` update step, keeps the shared steps identical. A target the `iterator` deleted or moved has no `{blob}`
-    because `hash-object` fails for missing files; the flag step below marks it instead.
+    predate hash recording or were finished by a stopped run, and their files may have changed since. Recording it here,
+    instead of in the `TODO.md` update step, keeps the shared steps identical. A target the `iterator` deleted or moved has
+    no `{blob}` because `hash-object` fails for missing files; the flag step below marks it instead.
   - _Reopen entries for target files modified after their review_.
     Replace `- [x] {target}: ...` lines with `- [ ] {target}` when they have no recorded `{blob}`, when their recorded `{blob}`
     differs from the current one, or when they end with ` ⚠️ No longer modified.`, i.e. modified again after being reverted

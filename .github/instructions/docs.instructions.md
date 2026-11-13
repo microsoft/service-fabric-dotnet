@@ -157,7 +157,7 @@ applyTo: "{**/*.cs,src/**/README.md,src/**/*.csproj}"
 
 - _Convert duplicated documentation elements to `<inheritdoc/>`_.
 - _Document interfaces and base classes; use `<inheritdoc/>` in implementations and overrides_.
-  - If behavior doesn't apply to every inheritor, don't document it in the base/provider.
+  - If behavior doesn't apply to every implementation or override, don't document it in the interface or base class.
 - _Document members with the **most** parameters; use `<inheritdoc cref="..."/>` in simplifying overloads/extensions_. The
   C# compiler doesn't recognize `<inheritdoc>` as an equivalent of the `<param>` elements and forces all parameters to be
   documented by the same element type. Documenting methods with the most parameters allows reusing their docs for parameters

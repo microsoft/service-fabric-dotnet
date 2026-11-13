@@ -45,7 +45,8 @@ include-custom-instructions: true
   - **Cross-check every _review_ finding that lacks unanimous support**.
     - Don't cross-check `📝 Notes` unless they contradict recommendations from other models.
     - A finding requires cross-check if `gpt` or `opus` explicitly contradicted or did not report it.
-    - Run, in parallel, the `gpt` or `opus` subagents that contradicted or did not report the finding, with the cross-check prompt.
+    - Run, in parallel, the `gpt` or `opus` subagents that contradicted or did not report the finding, with the cross-check
+      prompt.
       For example, if `gpt` reported a finding and `opus` did not, ask `opus` to cross-check it.
     - Record each cross-check verdict verbatim (`Agree`, `Disagree`, `Abstain`) alongside the model name.
   - **Incorporate the cross-check feedback**.

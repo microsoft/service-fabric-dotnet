@@ -37,7 +37,7 @@ a sharing mechanism. -->
     ```md
     Make sure changes in `{target}` pass review.
     ```
-  - _`{iterator-output}` should be `✅ Looks Good` or `❓ Needs Human Review`_.
+  - _`{iterator-output}` is the verdict on the first line of the `iterator` response_, without report text or file path.
   - _Don't pause for `iterator` responses that need human review_. User will review them later.
   - _Print finish note_: `[{finished}/{total}] Finished {target}: {iterator-output}.`
   - _Update the `TODO.md`_.

@@ -12,7 +12,13 @@ include-custom-instructions: true
 - **Determine the minimal set of tests relevant to the changes yourself**.
   - When the request refers to a pull request, follow `.github/skills/worktree/SKILL.md` to check it out and run all
     commands from its worktree. You start in the requester's checkout, which may not contain the PR changes.
-  - Inspect the changes with `git` and map every changed file to the affected `test/` projects.
+  - Identify the changed files. `coder` commits every file, so `git status` alone shows nothing at review time.
+    - For a pull request, run `gh pr diff {N} --name-only`. It compares with the PR's target branch, which may differ
+      from `origin/HEAD`.
+    - Otherwise, run `git diff --name-only $(git merge-base {baseline} HEAD)` for committed and uncommitted changes and
+      `git ls-files --others --exclude-standard` for untracked files. `{baseline}` is the one named in the request,
+      or `origin/HEAD` by default.
+  - Map every changed file to the affected `test/` projects.
     - Changes in `src/` projects affect their `test/` projects.
     - Changes in `test/` projects affect these projects.
     - Changes in shared build inputs, such as `Directory.*`, `global.json`, `nuget.config`, `properties/` and `refs/`,

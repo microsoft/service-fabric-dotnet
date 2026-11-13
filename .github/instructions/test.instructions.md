@@ -615,10 +615,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 - **Use `[WindowsOnly("reason")]` from `TestFramework` to skip tests that can't run on Linux**.
 - **Use `[Fact(Explicit = true)] // TODO: {Reason}` to exclude intentionally failing and flaky tests**.
-  Explicit tests are not discovered by `dotnet test`, but they can be executed by the xUnit console runner like so:
-  ```shell
-  Path/TestAssembly.exe -method "FullyQualifiedMethodName" -explicit on
-  ```
+  Explicit tests are discovered but not run by default. Run them with `--explicit on`, e.g.
+  `dotnet test -- --filter-method "FullyQualifiedMethodName" --explicit on`.
   - **Create explicit tests to demonstrate unfixed SUT bugs**.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.

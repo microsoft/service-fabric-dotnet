@@ -34,7 +34,7 @@ a sharing mechanism. -->
     ```
   - _`{iterator-output}` is the verdict on the first line of the `iterator` response_, without report text or file path.
   - _Don't pause for `iterator` responses that need human review_. User will review them later.
-  - _Print finish note_: `[{finished}/{total}] Finished {target}: {iterator-output}.`
+  - _Print finish note_: `[{finished + 1}/{total}] Finished {target}: {iterator-output}.`
   - _Update the `TODO.md`_.
     - Don't re-read the `TODO.md` file.
     - Edit `TODO.md`, replacing `- [ ] {target}` with `- [x] {target}: {iterator-output}.`

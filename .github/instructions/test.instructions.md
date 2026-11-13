@@ -587,11 +587,11 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.
     - The _Don't test what SUT doesn't do_ rule doesn't apply to bugs caused by code missing from SUT.
-    - Don't create explicit bug tests for bugs in code outside of this repo.
     - When fixing the bug, remove `Explicit = true` and the `// TODO` comment, then verify that the test passes.
   - **Don't create explicit tests for unfixed bugs in callee code** - the _Don't test what SUT doesn't do_ rule still applies
     to callee bugs. E.g. SUT passing an argument to a callee that dereferences it without a `null` guard, is a bug in the
     callee. It's out of scope for SUT and should have an explicit test in the callee's test suite instead.
+    When the callee is outside of this repo, report the bug upstream.
   - **Create explicit tests impossible to implement due to SUT testability limitations**.
     - Include `// TODO: SUT testability limitation. {brief explanation}`.
     - Have them `throw new NotImplementedException()`.

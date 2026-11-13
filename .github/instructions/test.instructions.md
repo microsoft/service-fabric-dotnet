@@ -36,7 +36,7 @@ applyTo: "test/**/*.cs"
 
 ## Test Classes
 
-- **Use use nested test classes to mirror SUT structure**
+- **Use nested test classes to mirror SUT structure**
   ```csharp
   namespace Microsoft.ServiceFabric.Diagnostics.Tracing;
 
@@ -203,7 +203,7 @@ applyTo: "test/**/*.cs"
     when the SUT defines executable logic that runs for `default(SUT)` - a property getter, method, or operator with
     hand-written code.
 
-- **Create a separate nested test classes for each overloaded SUT member**.
+- **Create a separate nested test class for each overloaded SUT member**.
   - Use BCL type names of parameters to disambiguate test class names. SUT with `Task<Stream> OpenAsync(string)`
     and `Task<Stream> OpenAsync(string, int, CancellationToken)` requires two nested test classes - `OpenAsync_String` and
     `OpenAsync_String_Int32_CancellationToken`.
@@ -239,7 +239,7 @@ applyTo: "test/**/*.cs"
 - **Use the exact SUT parameter names for fields** even if their names don't meet current naming guidelines.
   - _Don't change SUT parameter names when implementing tests_. Parameter name change is build-breaking for code that specifies
     parameter names explicitly; product versioning restrictions apply.
-  - Note: _Test overrides and interfaces implementations through their declaring APIs_ modifies this rule.
+  - Note: _Test overrides and interface implementations through their declaring APIs_ modifies this rule.
 
 - **Place helpers below tests**.
   Helpers are implementation details of the tests and shouldn't interfere with the tests' purpose of serving as executable
@@ -260,7 +260,7 @@ applyTo: "test/**/*.cs"
   - _Describe the SUT's behavior, not the test mechanics_.
   - _Refer to a SUT parameter by its name_. E.g. for `Equals(object obj)` write `ReturnsFalseWhenObjIsNotEqual`. Parameter names
     like `obj` that violate .NET Framework design guidelines should be rare enough that this shouldn't be a readability problem.
-    Note: _Test overrides and interfaces implementations through their declaring APIs_ modifies this rule.
+    Note: _Test overrides and interface implementations through their declaring APIs_ modifies this rule.
 
 - **Each test method should verify a single logical aspect of a single member of the SUT**.
   - Multiple assertions per test method are OK as long as they test the same specific logical aspect of the target.
@@ -448,7 +448,7 @@ applyTo: "test/**/*.cs"
 
 ## Test Coverage
 
-- **Strive for 100% test coverage of product code is the goal**. This means:
+- **Strive for 100% test coverage of product code**. This means:
   - Every statement.
   - Every independently reachable logical branch, e.g. `if`, `switch`, `?:`, `?.`, comparison operator, pattern.
     - A `Nullable<T>` comparison is a single branch and doesn't require separate tests for `null` values.
@@ -461,7 +461,7 @@ applyTo: "test/**/*.cs"
 - **Improve existing APIs to reach this goal with SemVer restrictions on backward compatibility**.
 - **Create a separate test for each logical branch (statement or expression) in the body of the target member**.
 - **Create tests for existing code even if it's stable and unlikely to change**.
-  Tests explain and verify that the current implementation, not just that future regressions will be caught.
+  Tests explain and verify the current implementation, not just that future regressions will be caught.
 - **Don't test what SUT doesn't do**.
   - _Don't test the behavior of the target's callees, only that they are called_. The target is tested to verify it delegates
     to the callees and each callee is tested as a separate target. This applies equally to members of other types, e.g.
@@ -547,7 +547,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 ## Special Cases
 
-- **Test overrides and interfaces implementations through their declaring APIs**. This helps to explain the SUT better
+- **Test overrides and interface implementations through their declaring APIs**. This helps to explain the SUT better
   in tests and makes tests stronger. Example below is compressed to reduce space and meant to illustrate structure and
   naming, not formatting or comments.
   ```csharp
@@ -612,7 +612,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 - **Don't fix problems documented by explicit tests when putting SUT under test**.
   Combining SUT changes with the initial implementation of the test suite increases the risk of breaking it without adequate
   test coverage.
-- **Don't use `Assert.IsAssignableFrom<T>()` or `Assert.IsType<T>()`**. On their own, these're unnecessary.
+- **Don't use `Assert.IsAssignableFrom<T>()` or `Assert.IsType<T>()`**. On their own, these are unnecessary.
   - SUT inheritance can be verified by compiler and shouldn't be tested separately. 
   - When type information cannot be verified by compiler, additional asserts are needed on state or behavior of the expected
     type. Use type casting instead.
@@ -633,7 +633,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 - **Avoid integration tests**
   Integration tests typically don't have the 1:1 equivalency with the product code and tend to drift away over time.
-  They are also often fragile, producing flakey results and difficult to modify over time. Instead of integration tests,
+  They are also often fragile, producing flaky results and difficult to modify over time. Instead of integration tests,
   strive to unit test each product type in isolation of its dependencies.
 
 - **Don't hard-code/commit test files, generate them on-the-fly in tests**

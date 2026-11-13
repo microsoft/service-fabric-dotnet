@@ -87,10 +87,11 @@ This repository requires unique knowledge you don't possess; you won't know what
   - _Skip a finding the `coder` refuses for the first time and continue addressing other findings_. A first refusal
     doesn't need human review. The `reviewer` and the `coder` should continue iterating until the code is clear enough to
     stop reporting findings that cannot be implemented.
-  - _Save a finding the `coder` refuses a second time as described in step 6, and append the `coder`'s reasoning to it_.
-    The `reviewer` reporting it again means the code failed to make the `coder`'s reasoning evident, so the disagreement
-    needs a human decision, and the code alone can't carry that reasoning to the human. Saving it also stops the `reviewer`
-    from reporting it again. It bounds repeated refusals, not the loop; step 7 decides when the loop ends.
+  - _Save a finding the `coder` refuses a second time as described in step 6, with the `coder`'s reasoning before its
+    `**Human decision:**` line_, so the human decides after reading all the context. The `reviewer` reporting it again
+    means the code failed to make the `coder`'s reasoning evident, so the disagreement needs a human decision, and the code
+    alone can't carry that reasoning to the human. Saving it also stops the `reviewer` from reporting it again. It bounds
+    repeated refusals, not the loop; step 7 decides when the loop ends.
 
 6. **Save each new finding that `❓ Needs Human Review`**.
   - Append the entire finding from the `reviewer` report to the `{file path}-needs-human-review.md`.

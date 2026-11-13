@@ -53,7 +53,7 @@ Incorporate the PR description, labels, linked issues, author information, and e
   Replies in §6 need the numeric comment ID; the thread's node ID won't work there. Replace `{n}` with the PR number; `gh`
   fills `{owner}` and `{repo}` from the current repository.
   ```
-  gh api graphql --paginate --slurp -F owner={owner} -F name={repo} -F number={n} -f query='
+  gh api graphql --paginate --slurp -F 'owner={owner}' -F 'name={repo}' -F number={n} -f query='
     query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
       repository(owner: $owner, name: $name) { pullRequest(number: $number) {
         reviewThreads(first: 100, after: $endCursor) {

@@ -49,10 +49,12 @@ Incorporate the PR description, labels, linked issues, author information, and e
 - **Reconcile your assessment with the author's claims.** Where your independent reading of the code disagrees with
   the PR description, investigate further — do not defer to the author's framing.
 - **Build a thread inventory**: For each unresolved and resolved thread, record the file, line, severity, what was
-  requested, the thread ID, and whether it is resolved or unresolved. This is your verification checklist.
+  requested, the thread ID, the root comment's numeric ID, and whether it is resolved or unresolved. This is your
+  verification checklist. Replies in §6 need the numeric comment ID; the thread's node ID won't work there.
   Query `reviewThreads(first: 100, after: $endCursor)` (`id`, `isResolved`, `isOutdated`, `path`, `line`, `originalLine`,
-  `comments(first: 100)`) in a query that declares `query($endCursor: String)`, with `gh api graphql --paginate` and
-  `pageInfo { hasNextPage endCursor }`. REST review comments (`pulls/{n}/comments`) have no resolution state.
+  `comments(first: 100) { nodes { fullDatabaseId author { login } body } }`) in a query that declares
+  `query($endCursor: String)`, with `gh api graphql --paginate` and `pageInfo { hasNextPage endCursor }`. Use
+  `fullDatabaseId`; `databaseId` is deprecated. REST review comments (`pulls/{n}/comments`) have no resolution state.
 - **Update your assessment** if the additional context genuinely changes your evaluation. Do not soften findings just
   because the PR description sounds reasonable.
 - **Validate the PR title and description** based on the detailed analysis, make sure it is accurate and meets the

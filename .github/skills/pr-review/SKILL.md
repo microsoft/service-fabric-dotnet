@@ -91,7 +91,7 @@ it _only_ in the initial review (to help the human reviewer decide whether the P
 final "Looks Good" review (to reiterate that the PR still makes sense after additional changes). Omit it from
 follow-up reviews requesting or suggesting changes.
 
-For the **Issues** section, always include open issues. Closed issues should appear only in the final "Looks Good"
+Always include finding blocks for open issues. Include finding blocks for closed issues only in the final "Looks Good"
 review.
 
 # 6. (Optional) Post Review to GitHub
@@ -122,9 +122,9 @@ Use the GitHub MCP tools:
    - Create a new pending review only for new findings in updated code.
 4. **Submit the review** — Use `pull_request_review_write` with `method: "submit_pending"`
    - `body`:
-      - Include the _Summary_ section of the review
+      - Include the verdict and summary lines of the review.
       - Include the _Detailed Assessment_ section only in the initial and the final reviews.
-      - Include in the _Issues_ section **only** findings that were NOT posted as inline comments.
+      - Include **only** finding blocks that were NOT posted as inline comments.
         Inline comments already create their own threads — repeating them in the body is redundant.
       - When there are unaddressed threads or findings, tag the author and ask them to take a look.
       - When the author is `copilot-swe-agent`, tag `@copilot` instead — that is the handle Copilot responds to.

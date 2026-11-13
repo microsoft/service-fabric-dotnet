@@ -1,4 +1,5 @@
 ---
+name: test
 description: "Test public and internal types in a given scope."
 argument-hint: "(type|namespace|project)"
 ---

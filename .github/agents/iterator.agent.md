@@ -96,8 +96,9 @@ This repository requires unique knowledge you don't possess; you won't know what
     Use the finding's line range in `{file path}`, its category as `title`, its full text as `explanation`, and `warning`
     as `severity`. Skip posting if the finding has no line in `{file path}`.
 
-7. **Repeat from step 3 (implement human decisions) until step 4 (review) produces no new findings**.
-  - A finding the `coder` refused once and the `reviewer` reports again is new; it gets one more `coder` attempt in step 5.
+7. **Repeat from step 3 (implement human decisions) until step 4 (review) reports no `❗ Must Fix` or `⚠️ Should Fix` findings**.
+  - A re-reported finding gets another `coder` attempt in step 5, whether the `coder` implemented or refused it before.
+    Step 5 saves a second refusal for human review, which excludes the finding from later reviews.
 
 8. **Return the final review output verbatim**.
   - _If `{file path}-needs-human-review.md` exists, start the output with `❓ Needs Human Review` and the file path_.

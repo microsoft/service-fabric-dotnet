@@ -102,8 +102,8 @@ include-custom-instructions: true
   - Change findings others decided to `Reject` after the double-check to `❓ Needs Human Review`.
   - Retain at the severity reported by the author for findings others decided to `Accept` after the double-check.
   - Elevate `💡 Suggestions` reported or voted `Agree` by multiple models to `⚠️ Should Fix`.
-  - Follow the report format defined in `.github/skills/{skill}/SKILL.md`, where `{skill}` is the skill your prompt
-    asks you to execute.
+  - Follow the report format defined in `.github/skills/{skill}/SKILL.md`, where `{skill}` is the skill your prompt asks you
+    to execute.
   - Copy the `tester`'s commands and their pass/fail outcomes verbatim after the verdict summary, even when it has no
     findings, so readers can tell passing tests from no relevant tests. Don't put them in the Detailed Assessment;
     `pr-review` omits it from follow-up reviews.

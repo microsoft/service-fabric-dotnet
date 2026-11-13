@@ -143,8 +143,8 @@ Repeat the `Reference` and `Restore` steps when switching between SDK and Runtim
   - Describe _what_ it changes and _why_, not _how_ it was developed or which prior PRs it addresses.
   - Title should use the imperative mood and be limited to 72 characters.
   - Don't include textual tags `[MyFeature]` in the title.
-- Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them; don't review
-  or rewrite them.
+- Branch commit messages are working notes, such as `squash!` commits recording the prompt that produced them and the
+  decisions made; don't report findings about them or rewrite them.
 - Make sure the validation build completes successfully.
 - Link the pull request from the work item/issue you've created.
 - Publish the pull request and address the Copilot review feedback.

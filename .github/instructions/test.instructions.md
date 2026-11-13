@@ -525,8 +525,9 @@ applyTo: "test/**/*.cs"
     add one test per distinct forwarded value. E.g. `bool Equals(T)` calling `Equals()` method of its member requires two
     tests because `bool` cardinality is limited to `true` and `false` and asserting only on one of them wouldn't be sufficient
     to prove that the callee was invoked correctly.
-  - RE: _Omit nested test classes for SUT members without observable behavior_. A delegating member with its own branches
-    (type-check, guard, transformation of the return value) still needs a nested test class for those branches.
+  - RE: _Omit nested test classes for SUT members without observable behavior_. Delegation is observable behavior. A delegating
+    member needs a nested test class to verify the call and its own branches (type-check, guard, transformation of the return
+    value).
 
 ## Test Quality
 

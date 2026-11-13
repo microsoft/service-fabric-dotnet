@@ -606,8 +606,9 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - **Include detailed explanation of the exclusion in the body of the test method**.
     - Add comments to explain _why_ the test code demonstrates a problem.
     - Use `Assert` messages, when available.
-  - **When fixing a problem documented by an explicit test, remove `Explicit = true` and the `// TODO` comment**, implement
-    the test if it throws `NotImplementedException`, then verify that it passes.
+  - **When fixing a problem documented by an explicit test, remove `Explicit = true` and the `// TODO` comment**, along with
+    the comments explaining why the test code demonstrates the problem, implement the test if it throws `NotImplementedException`,
+    then verify that it passes.
   - **Remove explicit tests when their `{Reason}` becomes invalid without fixing the problem**, such as when a missing logic
     previously documented as a bug is now unnecessary based on latest `*.instructions.md` or docs.
 - **Consider fixing problems documented by explicit tests when changing SUT**.

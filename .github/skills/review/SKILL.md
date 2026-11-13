@@ -58,7 +58,7 @@ argument-hint: "(class|file|tests for X)"
 
 # 4. Issue a Verdict
 
-- **Use `✅ Looks Good` when all findings are ✅ and you agree with the approach**.
+- **Use `✅ Looks Good` when there are no `❗ Must Fix` or `⚠️ Should Fix` findings and you agree with the approach**.
 - **Use `⚠️ Needs Changes` when any findings are `❗ Must Fix` or `⚠️ Should Fix`**.
 - **Use `❓ Needs Human Review` when unsure**.
 

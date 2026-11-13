@@ -1,6 +1,8 @@
 ---
 name: document
-description: "Document public types in a given scope."
+description: |
+  Document public top-level types in a given scope. Use when asked to add or complete XML documentation comments for a
+  type, namespace, or project.
 argument-hint: "(type|namespace|project)"
 ---
 

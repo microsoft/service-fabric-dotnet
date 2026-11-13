@@ -291,8 +291,8 @@ applyTo: "test/**/*.cs"
     have a single test with two assertions.
   - Inheritance alone is not a separate logical aspect and shouldn't be tested separately.
 
-- **Order test methods so that collapsed definitions form a description of the SUT**, mirroring its doc
-  comments and implementation. These rules are for _ordering_ tests, not for _creating_ or _keeping_ them.
+- **Order test methods so that collapsed definitions form a description of the SUT**, mirroring its doc comments and implementation.
+  These rules are for _ordering_ tests, not for _creating_ or _keeping_ them.
   - Place tests describing default/most common behavior first.
     They serve as an executable equivalent of the `<summary>`.
   - Place tests of inputs, edge cases and outputs next.

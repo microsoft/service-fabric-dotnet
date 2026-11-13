@@ -14,10 +14,10 @@ description: "Make sure changes in the current branch pass review."
   - _Include all files, regardless of their number_. User will stop processing if needed.
   - _`{target-file}` means the relative file path_.
 - **Ensure `TODO.md` exists in the repo root**.
-  - _Don't use the `manage_todo_list` tool_. It cannot handle large lists efficiently.
+  - _Don't use a built-in todo-list tool_. It cannot handle large lists efficiently.
   - _Use this file template_. Add one line for each target file.
     ```md
-    Executing `<userRequest>`
+    Executing `{user-request}`
     - [ ] {target-file}
     ```
   - _If `TODO.md` already exists, check the prompt stored in it_
@@ -38,5 +38,5 @@ description: "Make sure changes in the current branch pass review."
   - _Print finish note_: `[{files-finished}/{total-files}] Finished {target-file}: {iterator-output}.`
   - _Update the `TODO.md`_.
     - Don't re-read the `TODO.md` file.
-    - `replace_string_in_file` from _oldString_ `- [ ] {target-file}` to _newString_ `- [x] {target-file}: {iterator-output}.`
+    - Edit `TODO.md`, replacing `- [ ] {target-file}` with `- [x] {target-file}: {iterator-output}.`
   - _Go to the next file_.

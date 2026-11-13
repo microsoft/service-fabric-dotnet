@@ -493,7 +493,7 @@ applyTo: "test/**/*.cs"
 - **Strive for 100% test coverage of product code**. This means:
   - Every statement.
   - Every independently reachable logical branch, e.g. `if`, `switch`, `?:`, `?.`, comparison operator, pattern.
-    - A `Nullable<T>` comparison is a single branch and doesn't require separate tests for `null` values.
+    - A `Nullable<T>` comparison doesn't require separate tests for `null` operands.
       The following function requires two tests - one for true/equality and one for false/inequality.
       ```csharp
       bool Equals(int? foo, int? bar) => foo == bar;

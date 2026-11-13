@@ -10,8 +10,9 @@ a sharing mechanism. -->
 - **Identify files modified in the current branch**.
   - _Run `git diff --name-only --diff-filter=d $(git merge-base origin/HEAD HEAD)`_.
     It includes committed and uncommitted changes to tracked files and excludes deleted files.
-  - _Run `git ls-files --others --exclude-standard`_.
+  - _Run `git ls-files --others --exclude-standard --full-name :/`_.
     It includes untracked files, which `git diff` omits, and excludes ignored files.
+    `:/` and `--full-name` list files in the whole repo with root-relative paths, matching `git diff` from any directory.
   - _Combine both lists without duplicates_.
   - _Exclude `TODO.md` and `*-needs-human-review.md` files_. They are produced by this workflow.
   - _Include all files, regardless of their number_. User will stop processing if needed.

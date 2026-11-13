@@ -262,7 +262,7 @@ applyTo: "test/**/*.cs"
 
 - **Each test method should verify a single logical aspect of a single member of the SUT**.
   - Multiple assertions per test method are OK as long as they test the same specific logical aspect of the target.
-  - Create a separate test for each logical branch in the product code.
+  - See _Create a separate test for each logical branch_ in the Test Coverage section.
   - Don't separate tests for sequential product code. For example, a constructor storing two parameters in two fields should
     have a single test with two assertions.
   - Inheritance alone is not a separate logical aspect and shouldn't be tested separately.
@@ -473,10 +473,9 @@ applyTo: "test/**/*.cs"
     early-bound calls, which cannot be tested directly, late-bound calls can be mocked at run-time and tested directly.
   - _Open-ended "doesn't do X" tests are acceptable only when fixing a specific bug or documenting a key behavior of the SUT_.
 - **Cover the target's own branches, not its callees' branches**.
-  Each branch in the target's body gets a test; branches that live in a callee are covered by the callee's tests. When
-  the target delegates to a callee, the target's tests verify that the call happens and that the target's own logic
-  around the call (type-checks, guards, return-value handling) is correct — not that the callee's internal branches
-  produce the right answer.
+  Branches that live in a callee are covered by the callee's tests. When the target delegates to a callee, the target's
+  tests verify that the call happens and that the target's own logic around the call (type-checks, guards, return-value
+  handling) is correct — not that the callee's internal branches produce the right answer.
   - _High-cardinality callee outputs require a single test_. E.g. `int GetHashCode()` calling `System.HashCode.Combine()`
     needs a single test because `int` is high-cardinality.
   - _Low-cardinality callee outputs require a separate test per value_. Use [Theory] over the callee's output domain, or
@@ -516,8 +515,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 ## Test Design
 
 ### [SOLID](https://en.wikipedia.org/wiki/SOLID)
-- **Single Responsibility**: Each test verifies one logical condition or behavior. When the product code has independent
-  `if` branches, each branch gets its own test — not a single test that checks them all at once.
+- **Single Responsibility**: Each test verifies one logical condition or behavior.
+  See _Create a separate test for each logical branch_.
 - **Open/Closed**: The test suite should be open for extension (adding a test for a new property) without modifying
   existing tests.
 - **Liskov Substitution**: Test the SUT through its public interface or base type when that's how consumers use it.
@@ -535,7 +534,6 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - _Remove or combine tests that cannot fail independently_. For equivalent targets and inputs, a test that only verifies
     a non-null result is redundant with one that verifies the result is the expected non-null instance. Remove the weaker
     test.
-  - Combine assertions when they describe the same single logical aspect of the same target; keep distinct branches separate.
   - Re-running a callee's input permutations through its caller is duplication, regardless of whether the callee lives in
     another type or in the same SUT. A caller test like `Equals_Object.ReturnsFalseWhenFooDiffers` cannot
     fail unless the corresponding `Equals_T` test also fails — delete the caller variant and trust the callee's tests.

@@ -50,14 +50,17 @@ This repository requires unique knowledge you don't possess; you won't know what
     - Extract a single finding, including notes from authors, other models, and human decision.
     - Run the `coder` subagent with this prompt. It omits step 5's refusal clause because the human decision is final.
       ```md
-      Implement the human decision for the following review finding.
+      Implement the human decision for the following review finding. If the decision is to keep the code unchanged,
+      update the code to make the reasoning evident and prevent reporting of similar findings in future reviews. Add
+      comments if the reasoning cannot be expressed in code itself.
       ***
       {Single finding, including notes and the human decision}
       ***
       ```
       - Don't change this prompt in any other way.
       - Don't add any commit instructions.
-    - Remove the finding from the file only if the `coder` implemented the decision. Otherwise, append the `coder`'s
+    - Remove the finding from the file only if the `coder` committed the decision. After removal, the commit is the only
+      record that stops the `reviewer` from reporting the finding again. Otherwise, append the `coder`'s
       reasoning to the finding and keep it for the human to reconsider. Rename its `**Human decision:**` label to
       `**Previous human decision:**` and add a new `**Human decision:** _pending_` line, so the next iteration doesn't
       retry the decision before the human reconsiders it.

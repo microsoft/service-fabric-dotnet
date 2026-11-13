@@ -1,7 +1,7 @@
 ---
 description: "Sub-agent using latest GPT model"
 tools: [execute, read, search, skill, web]
-model: ["GPT-6.1 Sol"]
+model: "GPT-6.1 Sol"
 include-custom-instructions: true
 ---
 

@@ -419,7 +419,7 @@ applyTo: "test/**/*.cs"
   }
   ```
 
-- **Generate Test Inputs**
+- **Generate test inputs**.
   Avoid well-known test inputs the SUT may handle specially or produce on its own, unless the test targets that case.
   - _Use `Fuzzy` to generate test values of common types_. See [fuzzy.instructions.md](fuzzy.instructions.md) for API details.
   - _Define distinct test types instead of reusing existing types to test polymorphic or generic code_. E.g.
@@ -648,7 +648,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 ## Integration Tests
 
-- **Avoid integration tests**
+- **Avoid integration tests**.
   Integration tests typically don't have the 1:1 equivalency with the product code and tend to drift away over time.
   They are also often fragile, producing flaky results and difficult to modify over time. Instead of integration tests,
   strive to unit test each product type in isolation of its dependencies.
@@ -657,7 +657,7 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
   - Generate test file contents with appropriate `Fuzzy` values.
   - Replace existing hard-coded/committed test files with file-generation logic.
 
-- **Generate unique paths for test files, if possible**
+- **Generate unique paths for test files, if possible**.
   When SUT accepts file names or paths, generate unique file or directory names to avoid sharing test fixture between tests.
   This is not possible when SUT expects files or paths with well-known names.
 

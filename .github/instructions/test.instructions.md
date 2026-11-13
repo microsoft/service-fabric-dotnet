@@ -243,15 +243,14 @@ applyTo: "test/**/*.cs"
     may conflict with the `Dispose()` method of the test class responsible for test fixture cleanup. Implementing `IDisposable`
     in the test class explicitly resolves the conflict: `void IDisposable.Dispose()`.
   - _Add `_` suffix to nested test class name_. When the test base `Dispose()` method is virtual and overridden by the nested
-    test sub-classes, adding the `_` suffix to the test class name resolves the conflict.
-    `public sealed class Dispose_ : FooTest`.
+    test sub-classes, adding the `_` suffix to the test class name resolves the conflict. `public sealed class Dispose_ : FooTest`.
 
 - **Use IL names of operator methods, capitalized, for nested test classes**.
   - E.g. `operator <()` (IL name `op_LessThan`) -> `Op_LessThan`.
   - For conversion operators, append `_{ParameterType}_To_{ReturnType}`.
-    For example, given `OrdinalString` SUT and its test class `OrdinalStringTest` the
-    `explicit operator string(OrdinalString value)` should have nested class `Op_Explicit_OrdinalString_To_String` and
-    `implicit operator OrdinalString(string value)` should have nested class `Op_Implicit_String_To_OrdinalString`.
+    For example, given `OrdinalString` SUT and its test class `OrdinalStringTest` the `explicit operator string(OrdinalString value)`
+    should have nested class `Op_Explicit_OrdinalString_To_String` and `implicit operator OrdinalString(string value)` should
+    have nested class `Op_Implicit_String_To_OrdinalString`.
 
 - **Create fields for method parameters in the nested test classes** to help the reader understand the method parameters
   and their types. This guidance also applies to C# indexers.
@@ -629,8 +628,8 @@ Use it both to evaluate individual tests and to find gaps in the test suite.
 
 - **Use `[WindowsOnly("reason")]` from `TestFramework` to skip tests that can't run on Linux**.
 - **Use `[Fact(Explicit = true)] // TODO: {Reason}` to exclude intentionally failing and flaky tests**.
-  Explicit tests are discovered but not run by default. Run them with `--explicit on`, e.g.
-  `dotnet test -- --filter-method "*FooTest+Bar.MethodName" --explicit on`. Nested class names are separated by `+`.
+  Explicit tests are discovered but not run by default. Run them with `--explicit on`, e.g. `dotnet test -- --filter-method "*FooTest+Bar.MethodName" --explicit on`.
+  Nested class names are separated by `+`.
   - **Create explicit tests to demonstrate unfixed SUT bugs**.
     - `{Reason}` should be `SUT bug. {brief explanation}`.
     - Name the test for the expected post-fix behavior (e.g. `IsSymmetric`), not for the bug.

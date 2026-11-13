@@ -234,9 +234,9 @@ applyTo: "test/**/*.cs"
     is a single overload and should still have a single test class.
 
 - **Resolve naming conflicts between SUT members and common methods of test classes**.
-  - _Add the `new` keyword to the test sub-class_. If SUT overrides `Object` methods like `GetHashCode()` the nested
-    test class name `GetHashCode` would conflict with the `GetHashCode()` method of the base test class. The `new` keyword
-    resolves the conflict: `public new sealed class GetHashCode : FooTest`.
+  - _Add the `new` keyword to the test sub-class_. When a nested test class is named after a SUT member like `Equals`, `GetHashCode`
+    or `ToString`, it conflicts with the method the base test class inherits from `Object`. The `new` keyword resolves the
+    conflict: `public new sealed class GetHashCode : FooTest`.
   - _Implement `IDisposable` in test classes explicitly_. If SUT has a `Dispose()` method, the nested test class name `Dispose`
     may conflict with the `Dispose()` method of the test class responsible for test fixture cleanup. Implementing `IDisposable`
     in the test class explicitly resolves the conflict: `void IDisposable.Dispose()`.

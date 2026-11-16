@@ -142,6 +142,21 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         }
 
         [Theory]
+        [InlineData("OpenTelemetry")]
+        [InlineData("OpenTelemetry.Api")]
+        [InlineData("OpenTelemetry.Api.ProviderBuilderExtensions")]
+        [InlineData("OpenTelemetry.Exporter.Geneva")]
+        public void ThrowsWhenAnOpenTelemetryAssemblyOrGenevaExporterHasNewerMajorVersion(string assemblyName)
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = assembly =>
+                assembly.GetName().Name == assemblyName ? new Version(2, 0, 0, 0) : new Version(1, 15, 3, 0);
+
+            NotSupportedException error = Assert.Throws<NotSupportedException>(SfOpenTelemetrySdk.EnsureSupportedVersion);
+
+            Assert.Contains($"{assemblyName} 2.0.0.0 loaded from ", error.Message);
+        }
+
+        [Theory]
         [InlineData("1.15.3.0")]
         [InlineData("1.20.1.1")]
         [InlineData(null)]

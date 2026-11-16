@@ -122,6 +122,19 @@ public abstract class MetricsBackendSelectorTest : IDisposable
         }
 
         [Fact]
+        public void IsComInteropAndTracesWarningWhenLoadedGenevaExporterHasNewerMajorVersion()
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = assembly =>
+                assembly.GetName().Name == "OpenTelemetry.Exporter.Geneva" ? new Version(2, 0, 0, 1) : new Version(1, 15, 3, 0);
+
+            Assert.Equal(MetricsBackend.ComInterop, MetricsBackendSelector.Backend);
+            Assert.Contains("2.0.0.1", AssertWarningTrace().Message);
+            _ = AssertInfoTrace(MetricsBackend.ComInterop);
+            Assert.False(SfMetricsPipeline.MetricsEnabled);
+            Assert.Empty(scope.Exporters);
+        }
+
+        [Fact]
         public void IsComInteropAndTracesWarningWhenGenevaExporterCannotBeLoaded()
         {
             FileNotFoundException error = new(fuzzy.String());

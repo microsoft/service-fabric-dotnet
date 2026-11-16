@@ -33,6 +33,10 @@ static class SfOpenTelemetrySdk
     // .NET Framework an app's older copy can load instead; only the file version tells them apart.
     static readonly Version minimumOpenTelemetryVersion = new(1, 15, 3);
 
+    // An app's own OpenTelemetry or Geneva exporter with a newer major version, such as 2.x, can load instead too, and may have
+    // removed or changed what this class uses.
+    const int SupportedMajorVersion = 1;
+
     // Replaced by tests to export to an in-memory exporter.
     internal static Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> CreateExporter = CreateGenevaExporter;
 
@@ -45,8 +49,9 @@ static class SfOpenTelemetrySdk
     static readonly FailureTraceThrottle flushFailures = new();
 
     /// <summary>
-    /// Throws when the Geneva exporter cannot be loaded or a loaded OpenTelemetry assembly is older than the exporter requires. Call
-    /// before <see cref="Build"/>, which may not even compile against an older OpenTelemetry.
+    /// Throws when the Geneva exporter cannot be loaded, a loaded OpenTelemetry assembly is older than the exporter requires, or a
+    /// loaded OpenTelemetry assembly or Geneva exporter has a newer major version than this class supports. Call before
+    /// <see cref="Build"/>, which may not even compile against such versions.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void EnsureSupportedVersion()
@@ -65,6 +70,20 @@ static class SfOpenTelemetrySdk
                 throw new NotSupportedException(
                     $"{assembly.GetName().Name} {version} loaded from '{assembly.Location}' is older than OpenTelemetry {minimumOpenTelemetryVersion}, which the Geneva exporter requires.");
             }
+
+            EnsureSupportedMajorVersion(assembly, version);
+        }
+
+        Assembly genevaExporter = typeof(GenevaMetricExporter).Assembly;
+        EnsureSupportedMajorVersion(genevaExporter, ReadFileVersion(genevaExporter));
+    }
+
+    static void EnsureSupportedMajorVersion(Assembly assembly, Version version)
+    {
+        if (version != null && version.Major > SupportedMajorVersion)
+        {
+            throw new NotSupportedException(
+                $"{assembly.GetName().Name} {version} loaded from '{assembly.Location}' is a newer major version than {SupportedMajorVersion}.x, which Service Fabric supports.");
         }
     }
 

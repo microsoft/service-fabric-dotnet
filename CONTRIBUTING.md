@@ -20,7 +20,7 @@ Directory names omit the `Microsoft.ServiceFabric` prefix and the `Tests` suffix
 `Microsoft.ServiceFabric.Actors.csproj` and `test/Actors` contains `Microsoft.ServiceFabric.Actors.Tests.csproj`.
 
 Product projects target `net8.0;net462`, except `Client.Http` and `PowerShell.Http` which target `netstandard2.0`.
-Test projects target `net10.0;net9.0;net8.0;net472`.
+Test projects target `net11.0;net10.0;net9.0;net8.0;net472`.
 
 Assemblies are delay-signed with `properties/Key.snk`.
 

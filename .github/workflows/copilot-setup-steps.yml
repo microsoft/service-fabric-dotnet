@@ -13,6 +13,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.x
       - run: |
           .\eng\SkipStrongName.ps1
           .\eng\UninstallSfSdkFromGac.ps1

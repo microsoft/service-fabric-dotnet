@@ -1,0 +1,7 @@
+<Project>
+  <Import Project="..\..\Directory.Packages.props" />
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.ServiceFabric.Actors" Version="[$(ServiceFabricSdkVersion)]" />
+    <PackageVersion Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="[$(ServiceFabricSdkVersion)]" />
+  </ItemGroup>
+</Project>

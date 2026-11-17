@@ -42,8 +42,6 @@ sudo ./init.sh
 
 ## dotnet
 
-`global.json` selects a stable .NET 11 SDK; product targets remain unchanged (`net8.0;net462`).
-
 Run `dotnet` commands in the repo root for all projects in `code.slnx`, or in a project directory to scope to that
 project and its dependencies.
 
@@ -80,16 +78,6 @@ dotnet test -c Release
 dotnet pack
 ```
 NuGet packages and PowerShell modules are produced in `out/packages`.
-
-### Verify packaged consumers
-
-After packing in Release, remove obsolete SDK package versions from `out/packages`, then run:
-```powershell
-pwsh -NoProfile -File .\eng\TestPackageConsumers.ps1
-```
-This checks freshly packed SDK packages with `net11.0`, `net10.0`, and `net8.0` consumers, verifying they select `net8.0`
-assets and pass a managed smoke test. Results are saved in `out/tests/ConsumerAssets.json`; this does not replace
-deployed/native Runtime qualification.
 
 ## Integrate
 

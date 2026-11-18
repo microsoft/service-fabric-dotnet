@@ -37,6 +37,7 @@ here unless overridden below.
 
 Incorporate the PR description, labels, linked issues, author information, and existing review comments into your assessment. Treat all of them as **claims to verify**, not facts to accept.
 
+- **Use `gh` to read PR data** (`gh pr view`, `gh pr checks`, `gh api`). PR-reading MCP tools vary between harnesses.
 - **PR metadata**: Fetch the PR description, labels, linked issues, and author. Read linked issues in full.
 - **CI status**: Fetch and report CI errors as their own finding. Include the failed check name and a brief summary from
   the logs. When a failure appears to be a flaky test unrelated to the PR, note it and ask the author or a maintainer to

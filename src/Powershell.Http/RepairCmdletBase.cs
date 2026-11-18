@@ -15,17 +15,18 @@ namespace Microsoft.ServiceFabric.Powershell.Http;
 public abstract class RepairCmdletBase : CommonCmdletBase
 {
     /// <summary>
-    /// Gets or sets the configured service URI of an External Repair Manager instance.
-    /// Omit this parameter to use the original Repair Manager.
+    /// Gets or sets the ServiceId of the Repair Manager service to use: the service name without the 'fabric:' URI
+    /// scheme, with '~' in place of '/', for example System~RepairManagerService~public-a for a named External Repair
+    /// Manager. Omit this parameter to use the Default Repair Manager.
     /// </summary>
     [Parameter(DontShow = true), ValidateNotNullOrEmpty()]
-    public string ExternalRepairManagerServiceName { get; set; }
+    public string ServiceId { get; set; }
 
     /// <summary>
     /// Gets the client for this invocation without changing the cluster connection's default repair client.
     /// </summary>
     protected IRepairManagementClient RepairClient =>
-        MyInvocation.BoundParameters.ContainsKey(nameof(ExternalRepairManagerServiceName))
-            ? RepairManagementClient.ForService(ServiceFabricClient, ExternalRepairManagerServiceName)
+        MyInvocation.BoundParameters.ContainsKey(nameof(ServiceId))
+            ? RepairManagementClient.ForService(ServiceFabricClient, ServiceId)
             : ServiceFabricClient.Repairs;
 }

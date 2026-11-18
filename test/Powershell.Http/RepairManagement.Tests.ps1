@@ -58,12 +58,14 @@ function TestMetadata([string] $moduleName) {
         'Get-SFRepairTaskList', 'New-SFRepairTask', 'Stop-SFRepairTask', 'New-SFApproveRepairTask',
         'Remove-SFRepairTask', 'Update-SFRepairExecutionState', 'Update-SFRepairTaskHealthPolicy'
     ) | Sort-Object
+    # Other commands have a visible ServiceId for user services; only the repair commands have the hidden selector.
     [object[]] $commands = @(Get-Command -Module $moduleName | Where-Object {
-        $_.Parameters.ContainsKey('ExternalRepairManagerServiceName')
+        $_.Parameters.ContainsKey('ServiceId') -and @($_.Parameters['ServiceId'].Attributes | Where-Object {
+            $_ -is [System.Management.Automation.ParameterAttribute] -and $_.DontShow }).Count -gt 0
     })
-    AssertEqual ($expected -join ',') (($commands.Name | Sort-Object) -join ',') 'Only seven repair commands have the selector'
+    AssertEqual ($expected -join ',') (($commands.Name | Sort-Object) -join ',') 'Only seven repair commands have the hidden ServiceId selector'
     foreach ($command in $commands) {
-        [object] $parameter = $command.Parameters['ExternalRepairManagerServiceName']
+        [object] $parameter = $command.Parameters['ServiceId']
         AssertEqual ([string]) $parameter.ParameterType "$($command.Name): selector is a string"
         [object[]] $attributes = @($parameter.Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] })
         AssertEqual 1 $attributes.Count "$($command.Name): one selector declaration"
@@ -115,19 +117,19 @@ function TestRequests([object] $recorder) {
             Update-SFRepairTaskHealthPolicy -TaskId $taskId -Version '123' -PerformPreparingHealthCheck $false @selector
         } }
     )
-    [string] $service = 'fabric:/System/RepairManagerService/ext01'
+    [string] $service = 'System~RepairManagerService~public-a'
     foreach ($case in $cases) {
         [int] $before = $recorder.Urls.Count
         $null = & $case.Invoke @{}
-        $null = & $case.Invoke @{ ExternalRepairManagerServiceName = $service }
+        $null = & $case.Invoke @{ ServiceId = $service }
         AssertEqual ($before + 2) $recorder.Urls.Count "$($case.Path): exactly two requests"
         [uri] $original = $recorder.Urls[$before]
         [uri] $named = $recorder.Urls[$before + 1]
         AssertEqual ('/$/' + $case.Path) $named.AbsolutePath "$($case.Path): unchanged path"
         AssertEqual $case.Method $recorder.Methods[$before + 1] "$($case.Path): HTTP method"
         AssertEqual $recorder.Bodies[$before] $recorder.Bodies[$before + 1] "$($case.Path): unchanged body"
-        AssertEqual ('?ExternalRepairManagerServiceUri=' + [uri]::EscapeDataString($service) + '&' + $original.Query.Substring(1)) `
-            $named.Query "$($case.Path): one encoded query selector"
+        AssertEqual ($original.Query.Replace('api-version=6.0', 'api-version=12.0&ServiceId=' + $service)) `
+            $named.Query "$($case.Path): api-version 12.0 and one ServiceId"
         if ($case.Method -eq 'POST') {
             [object] $body = ConvertFrom-Json $recorder.Bodies[$before + 1]
             AssertEqual $taskId $body.TaskId "$($case.Path): task ID"
@@ -135,16 +137,16 @@ function TestRequests([object] $recorder) {
     }
 
     [int] $start = $recorder.Urls.Count
-    $null = Get-SFRepairTaskList -ExternalRepairManagerServiceName 'fabric:/System/RepairManagerService/RM2'
+    $null = Get-SFRepairTaskList -ServiceId 'System~RepairManagerService~RM2'
     $null = Get-SFRepairTaskList
     AssertEqual '?api-version=6.0' ([uri]$recorder.Urls[$start + 1]).Query 'Named invocation does not change default connection'
 }
 
 function TestInvalidTargets([object] $recorder) {
-    foreach ($name in @($null, '', ' ', 'fabric:/System/RepairManagerService',
-        'fabric:/System/RepairManagerService/', 'fabric:/System/RepairManagerService/ext-1',
-        'fabric:/System/RepairManagerService/ext1/other', 'fabric:/System/ERM/ext')) {
-        AssertRejected { Get-SFRepairTaskList -ExternalRepairManagerServiceName $name } $recorder 'Invalid selector'
+    foreach ($name in @($null, '', ' ', '~', 'System~RepairManagerService~', 'System~RepairManagerService~-public',
+        'System~RepairManagerService~public-a~child', 'System/RepairManagerService/public-a',
+        'fabric:/System/RepairManagerService/public-a', 'System~ClusterManagerService')) {
+        AssertRejected { Get-SFRepairTaskList -ServiceId $name } $recorder 'Invalid selector'
     }
     AssertRejected {
         New-SFRepairTask -Node -External -TaskId example -State Created -Action Restart
@@ -165,15 +167,15 @@ function TestTaskPayloads([object] $recorder) {
     AssertEqual 'Node' $body.Target.Kind 'Existing Node target'
     AssertEqual 'node1' $body.Target.NodeNames[0] 'Existing Node name'
 
-    [string] $service = 'fabric:/System/RepairManagerService/ext01'
-    $null = New-SFRepairTask -ExternalRepairManagerServiceName $service -External `
+    [string] $service = 'System~RepairManagerService~public-a'
+    $null = New-SFRepairTask -ServiceId $service -External `
         -TaskId $taskId -State Created -Action External.RestartNode
     $body = ConvertFrom-Json $recorder.Bodies[$recorder.Bodies.Count - 1]
     AssertEqual 'External' $body.Target.Kind 'External target without mandatory impact'
     AssertEqual $null $body.PSObject.Properties['Impact'] 'Omitted impact is not synthesized'
 
     foreach ($command in @('New-SFRepairTask', 'Update-SFRepairExecutionState')) {
-        $null = & $command -ExternalRepairManagerServiceName $service -External -ExternalImpactLevel RestartNode `
+        $null = & $command -ServiceId $service -External -ExternalImpactLevel RestartNode `
             -TaskId $taskId -State Claimed -Action External.RestartNode -Executor XKulfi -Version '123'
         $body = ConvertFrom-Json $recorder.Bodies[$recorder.Bodies.Count - 1]
         AssertEqual 'External' $body.Target.Kind "$command`: External target"
@@ -187,7 +189,7 @@ function TestTaskPayloads([object] $recorder) {
         Target = @{ Kind = 'External' }
         Impact = [ordered]@{ Kind = 'External'; ExternalImpactInfo = @{ ImpactLevel = 'RestartNode' } }
     })
-    [object[]] $tasks = @(Get-SFRepairTaskList -ExternalRepairManagerServiceName $service)
+    [object[]] $tasks = @(Get-SFRepairTaskList -ServiceId $service)
     AssertEqual 1 $tasks.Count 'GET deserializes External task'
     AssertEqual $taskId $tasks[0].TaskId 'GET preserves task identity'
     AssertEqual 'External' $tasks[0].Target.Kind.ToString() 'GET preserves External target kind'

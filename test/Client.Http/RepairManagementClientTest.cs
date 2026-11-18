@@ -25,7 +25,7 @@ public abstract class RepairManagementClientTest : IDisposable
         target: new ExternalRepairTargetDescription(), executor: fuzzy.String(),
         impact: new ExternalRepairImpactDescription("RestartNode"));
 
-    const string ServiceName = "fabric:/System/RepairManagerService/ext01";
+    const string ServiceId = "System~RepairManagerService~public-a";
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
     RepairManagementClientTest()
@@ -34,7 +34,7 @@ public abstract class RepairManagementClientTest : IDisposable
             .UseEndpoints(new Uri("http://unused.invalid:19080"))
             .ConfigureHttpClientSettings(new HttpClientHandler(), recorder)
             .BuildAsync().GetAwaiter().GetResult();
-        sut = RepairManagementClient.ForService(client, ServiceName);
+        sut = RepairManagementClient.ForService(client, ServiceId);
     }
 
     void IDisposable.Dispose() =>
@@ -43,61 +43,63 @@ public abstract class RepairManagementClientTest : IDisposable
     public sealed class ForService : RepairManagementClientTest
     {
         [Theory]
-        [InlineData("ext")]
-        [InlineData("ext01")]
-        [InlineData("alpha")]
-        [InlineData("RM2")]
-        [InlineData("0")]
-        [InlineData("01")]
-        public async Task AcceptsOneAlphanumericSuffix(string suffix)
+        [InlineData("System~RepairManagerService")]
+        [InlineData("System~RepairManagerService~public-a")]
+        [InlineData("System~RepairManagerService~ext01")]
+        [InlineData("System~RepairManagerService~RM2")]
+        [InlineData("System~RepairManagerService~0")]
+        [InlineData("System~RepairManagerService~a-b-c")]
+        public async Task AcceptsTheServiceIdOfARepairManagerService(string serviceId)
         {
-            string serviceName = "fabric:/System/RepairManagerService/" + suffix;
-            IRepairManagementClient named = RepairManagementClient.ForService(client, serviceName);
+            IRepairManagementClient named = RepairManagementClient.ForService(client, serviceId);
 
             _ = await named.GetRepairTaskListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
             Request request = Assert.Single(recorder.Requests);
-            Assert.Equal("/$/GetRepairTaskList?ExternalRepairManagerServiceUri=" +
-                Uri.EscapeDataString(serviceName) + "&api-version=6.0", request.Uri.PathAndQuery);
+            Assert.Equal("/$/GetRepairTaskList?api-version=12.0&ServiceId=" + serviceId, request.Uri.PathAndQuery);
         }
 
         [Fact]
-        public void RejectsNullServiceName()
+        public void RejectsNullServiceId()
         {
             var exception = Assert.Throws<ArgumentNullException>(() => RepairManagementClient.ForService(client, null));
-            Assert.Equal("serviceName", exception.ParamName);
+            Assert.Equal("serviceId", exception.ParamName);
             Assert.Empty(recorder.Requests);
         }
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
-        [InlineData("fabric:/System/RepairManagerService")]
-        [InlineData("fabric:/System/RepairManagerService/")]
-        [InlineData("fabric:/System/RepairManagerService/ext-1")]
-        [InlineData("fabric:/System/RepairManagerService/ext_1")]
-        [InlineData("fabric:/System/RepairManagerService/ext1/other")]
-        [InlineData("fabric:/System/RepairManagerService/ext1\n")]
-        [InlineData("fabric:/System/RepairManagerService/\u00e9")]
-        [InlineData("fabric:/System/RepairManagerService/ext1?x=y")]
-        [InlineData("fabric:/System/RepairManagerService/ext1#fragment")]
-        [InlineData("fabric:/System/RepairManagerService/ext1&ExternalRepairManagerServiceUri=other")]
-        [InlineData("fabric:/System/RepairManagerService/%65xt1")]
-        [InlineData("fabric%3A%2FSystem%2FRepairManagerService%2Fext1")]
-        [InlineData("'fabric:/System/RepairManagerService/ext1'")]
-        [InlineData("Fabric:/System/RepairManagerService/ext1")]
-        [InlineData("fabric:/System/ERM/ext")]
-        public void RejectsInvalidServiceNameBeforeSending(string serviceName)
+        [InlineData("~")]
+        [InlineData("System~RepairManagerService~")]
+        [InlineData("System~RepairManagerService~-public")]
+        [InlineData("System~RepairManagerService~public_a")]
+        [InlineData("System~RepairManagerService~public.a")]
+        [InlineData("System~RepairManagerService~public-a~child")]
+        [InlineData("System~RepairManagerService~public-a\n")]
+        [InlineData("System~RepairManagerService~\u00e9")]
+        [InlineData("System~RepairManagerService~public-a&ServiceId=other")]
+        [InlineData("System~RepairManagerService~%70ublic-a")]
+        [InlineData("System%7ERepairManagerService%7Epublic-a")]
+        [InlineData("'System~RepairManagerService~public-a'")]
+        [InlineData("system~RepairManagerService~public-a")]
+        [InlineData("System~ClusterManagerService")]
+        [InlineData("Application~RepairManagerService~public-a")]
+        [InlineData("~System~RepairManagerService~public-a")]
+        [InlineData("/System~RepairManagerService~public-a")]
+        [InlineData("System/RepairManagerService/public-a")]
+        [InlineData("fabric:/System/RepairManagerService/public-a")]
+        public void RejectsInvalidServiceIdBeforeSending(string serviceId)
         {
-            var exception = Assert.Throws<ArgumentException>(() => RepairManagementClient.ForService(client, serviceName));
-            Assert.Equal(nameof(serviceName), exception.ParamName);
+            var exception = Assert.Throws<ArgumentException>(() => RepairManagementClient.ForService(client, serviceId));
+            Assert.Equal(nameof(serviceId), exception.ParamName);
             Assert.Empty(recorder.Requests);
         }
 
         [Fact]
         public void RejectsNullClient()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => RepairManagementClient.ForService(null, ServiceName));
+            var exception = Assert.Throws<ArgumentNullException>(() => RepairManagementClient.ForService(null, ServiceId));
             Assert.Equal(nameof(client), exception.ParamName);
         }
 
@@ -105,7 +107,7 @@ public abstract class RepairManagementClientTest : IDisposable
         public void RejectsUnsupportedClientWithoutFallingBack()
         {
             IServiceFabricClient other = Mock.Of<IServiceFabricClient>();
-            var exception = Assert.Throws<ArgumentException>(() => RepairManagementClient.ForService(other, ServiceName));
+            var exception = Assert.Throws<ArgumentException>(() => RepairManagementClient.ForService(other, ServiceId));
             Assert.Equal(nameof(client), exception.ParamName);
             Mock.Get(other).VerifyNoOtherCalls();
         }
@@ -114,7 +116,7 @@ public abstract class RepairManagementClientTest : IDisposable
         public async Task KeepsConcurrentNamedClientsAndDefaultClientIsolated()
         {
             IRepairManagementClient original = client.Repairs;
-            IRepairManagementClient other = RepairManagementClient.ForService(client, "fabric:/System/RepairManagerService/RM2");
+            IRepairManagementClient other = RepairManagementClient.ForService(client, "System~RepairManagerService~RM2");
             CancellationToken cancellation = TestContext.Current.CancellationToken;
             TaskCompletionSource<bool> release = new(TaskCreationOptions.RunContinuationsAsynchronously);
             recorder.Release = release.Task;
@@ -132,9 +134,9 @@ public abstract class RepairManagementClientTest : IDisposable
             Assert.Equal(3, recorder.Requests.Count);
             Assert.Contains(recorder.Requests, request => request.Uri.Query == "?api-version=6.0");
             Assert.Contains(recorder.Requests, request => request.Uri.Query ==
-                "?ExternalRepairManagerServiceUri=fabric%3A%2FSystem%2FRepairManagerService%2Fext01&api-version=6.0");
+                "?api-version=12.0&ServiceId=System~RepairManagerService~public-a");
             Assert.Contains(recorder.Requests, request => request.Uri.Query ==
-                "?ExternalRepairManagerServiceUri=fabric%3A%2FSystem%2FRepairManagerService%2FRM2&api-version=6.0");
+                "?api-version=12.0&ServiceId=System~RepairManagerService~RM2");
         }
     }
 
@@ -148,7 +150,7 @@ public abstract class RepairManagementClientTest : IDisposable
         [InlineData("ForceApproveRepairTask")]
         [InlineData("UpdateRepairTaskHealthPolicy")]
         [InlineData("UpdateRepairExecutionState")]
-        public async Task ChangesOnlyTheTargetQueryForEveryExistingOperation(string operation)
+        public async Task ChangesOnlyTheApiVersionAndServiceIdForEveryExistingOperation(string operation)
         {
             await Send(client.Repairs, operation);
             await Send(sut, operation);
@@ -163,10 +165,10 @@ public abstract class RepairManagementClientTest : IDisposable
             Assert.Equal(operation == "GetRepairTaskList"
                 ? "?TaskIdFilter=prefix&StateFilter=2&ExecutorFilter=executor&api-version=6.0"
                 : "?api-version=6.0", requests[0].Uri.Query);
-            Assert.DoesNotContain("ExternalRepairManagerServiceUri", requests[0].Uri.Query);
-            Assert.Equal("?ExternalRepairManagerServiceUri=" + Uri.EscapeDataString(ServiceName) +
-                "&" + requests[0].Uri.Query.Substring(1), requests[1].Uri.Query);
-            Assert.DoesNotContain("%253A", requests[1].Uri.Query);
+            Assert.DoesNotContain("ServiceId", requests[0].Uri.Query);
+            Assert.Equal(requests[0].Uri.Query.Replace("api-version=6.0", "api-version=12.0&ServiceId=" + ServiceId),
+                requests[1].Uri.Query);
+            Assert.DoesNotContain("%7E", requests[1].Uri.Query);
             if (operation != "GetRepairTaskList")
             {
                 JObject body = JObject.Parse(requests[1].Body);
@@ -192,7 +194,7 @@ public abstract class RepairManagementClientTest : IDisposable
                 sut.DeleteRepairTaskAsync(new RepairTaskDeleteDescription(task.TaskId), TestContext.Current.CancellationToken));
 
             Assert.Contains("named instance missing", exception.Message);
-            Assert.Contains("ExternalRepairManagerServiceUri=", Assert.Single(recorder.Requests).Uri.Query);
+            Assert.Contains("ServiceId=" + ServiceId, Assert.Single(recorder.Requests).Uri.Query);
         }
 
         [Fact]

@@ -42,10 +42,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/CreateRepairTask";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -78,10 +77,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/CancelRepairTask";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -114,10 +112,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/DeleteRepairTask";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -151,13 +148,12 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/GetRepairTaskList";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
             taskIdFilter?.AddToQueryParameters(queryParams, $"TaskIdFilter={taskIdFilter}");
             stateFilter?.AddToQueryParameters(queryParams, $"StateFilter={stateFilter}");
             executorFilter?.AddToQueryParameters(queryParams, $"ExecutorFilter={executorFilter}");
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             HttpRequestMessage RequestFunc()
@@ -181,10 +177,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/ForceApproveRepairTask";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -217,10 +212,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/UpdateRepairTaskHealthPolicy";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -253,10 +247,9 @@ namespace Microsoft.ServiceFabric.Client.Http
             var requestId = Guid.NewGuid().ToString();
             var url = "$/UpdateRepairExecutionState";
             var queryParams = new List<string>();
-            this.AddExternalRepairManagerQuery(queryParams);
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;

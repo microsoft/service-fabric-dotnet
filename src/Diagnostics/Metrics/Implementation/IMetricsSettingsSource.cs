@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Configuration and environment that metrics settings are read from.
+/// Provides the configuration and environment that metrics settings are read from.
 /// </summary>
 interface IMetricsSettingsSource
 {

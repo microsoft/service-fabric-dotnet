@@ -14,12 +14,12 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
 /// Makes the next meter provider choose the OpenTelemetry backend with fake settings, test exporters and an in-memory trace
-/// sink, and restores the process-wide state on dispose. Tests using it must belong to <see cref="MetricsPipelineCollection"/>.
+/// sink, and restores the process-wide state on dispose. It relies on the tests of this assembly running sequentially.
 /// </summary>
 sealed class MetricsTestScope : IDisposable
 {
     /// <summary>
-    /// A Geneva connection string the native validation accepts on this platform.
+    /// Represents a Geneva connection string the native validation accepts on this platform.
     /// </summary>
     internal static readonly string ValidConnectionString = GenevaCollectorRules.IsLinux
         ? "Endpoint=unix:///var/run/sf-metrics-test.socket;Account=TestAccount;Namespace=TestNamespace"
@@ -33,6 +33,7 @@ sealed class MetricsTestScope : IDisposable
     readonly Func<IMetricsSettingsSource> createSettingsSource = MetricsBackendSelector.CreateSettingsSource;
     readonly Func<MetricsSettings> loadSettings = SfMetricsPipeline.LoadSettings;
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
+    readonly Action<IDisposable> flushSdkProvider = SfMetricsPipeline.FlushSdkProvider;
     readonly Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createExporter = SfOpenTelemetrySdk.CreateExporter;
     readonly Func<Assembly, Version> readFileVersion = SfOpenTelemetrySdk.ReadFileVersion;
     readonly Action loadGenevaExporter = SfOpenTelemetrySdk.LoadGenevaExporter;
@@ -103,11 +104,12 @@ sealed class MetricsTestScope : IDisposable
 
     internal IReadOnlyList<TraceRecord> TracesOfType(string type) => Traces.Where(t => t.Type == type).ToArray();
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         SfMetricsPipeline.ResetForTesting();
         SfMetricsPipeline.LoadSettings = loadSettings;
         SfMetricsPipeline.BuildSdkProvider = buildSdkProvider;
+        SfMetricsPipeline.FlushSdkProvider = flushSdkProvider;
         SfOpenTelemetrySdk.CreateExporter = createExporter;
         SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
         SfOpenTelemetrySdk.LoadGenevaExporter = loadGenevaExporter;

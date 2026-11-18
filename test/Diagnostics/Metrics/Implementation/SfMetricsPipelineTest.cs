@@ -8,14 +8,29 @@ using Xunit;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Process-wide state of the OpenTelemetry backend: the configuration gate, collectors and the SDK provider lifetime.
+/// Tests the process-wide state of the OpenTelemetry backend: the configuration gate, collectors and the SDK provider lifetime.
 /// </summary>
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class SfMetricsPipelineTest : IDisposable
 {
     readonly MetricsTestScope scope = new();
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
+
+    public sealed class ForceFlush : SfMetricsPipelineTest
+    {
+        [Fact]
+        public void TracesWarningWhenFlushingThrows()
+        {
+            SfMetricsPipeline.FlushSdkProvider = _ => throw new InvalidOperationException();
+            using Int64MeterProvider provider = new();
+
+            SfMetricsPipeline.ForceFlush();
+
+            Assert.Contains(
+                scope.TracesOfType("OpenTelemetryMetricsFactory"),
+                t => t.Level == MetricsTraceLevel.Warning && t.Message.StartsWith("Failed to flush managed metrics.", StringComparison.Ordinal));
+        }
+    }
 
     public sealed class Start : SfMetricsPipelineTest
     {

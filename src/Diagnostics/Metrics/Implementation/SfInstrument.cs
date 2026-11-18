@@ -4,9 +4,9 @@
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Recording target of an <see cref="OpenTelemetryInstrument"/>. It references this type instead of System.Diagnostics.Metrics
-/// types, so meters load in a process where System.Diagnostics.DiagnosticSource cannot be loaded. The variable dimension values
-/// passed to each overload match the dimension names the instrument was created with.
+/// Records the values of an <see cref="OpenTelemetryInstrument"/>, which references this type instead of
+/// System.Diagnostics.Metrics types, so meters load in a process where System.Diagnostics.DiagnosticSource cannot be loaded.
+/// The variable dimension values passed to each overload match the dimension names the instrument was created with.
 /// </summary>
 abstract class SfInstrument
 {

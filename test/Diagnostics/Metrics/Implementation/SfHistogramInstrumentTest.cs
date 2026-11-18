@@ -15,9 +15,8 @@ using Xunit;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// What recorded values look like once exported: values, buckets, tags, aggregation and failure handling.
+/// Tests what recorded values look like once exported: values, buckets, tags, aggregation and failure handling.
 /// </summary>
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class SfHistogramInstrumentTest : IDisposable
 {
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
@@ -25,7 +24,7 @@ public abstract class SfHistogramInstrumentTest : IDisposable
     readonly MetricsTestScope scope = new();
     readonly StatefulServiceContext context = fuzzy.StatefulServiceContext();
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class Record : SfHistogramInstrumentTest
     {

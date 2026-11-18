@@ -29,13 +29,12 @@ sealed class RuntimeMetricsSettingsSource : IMetricsSettingsSource
 
     string IMetricsSettingsSource.GetFabricVersion()
     {
-        string processPath = GetProcessPath();
         if (GenevaCollectorRules.IsLinux)
         {
             // Linux: contents of the ClusterVersion file next to the executable, or "" when it cannot be read.
             try
             {
-                return File.ReadAllText(Path.Combine(Path.GetDirectoryName(processPath), "ClusterVersion"));
+                return File.ReadAllText(Path.Combine(Path.GetDirectoryName(GetProcessPath()), "ClusterVersion"));
             }
             catch (Exception)
             {
@@ -46,7 +45,7 @@ sealed class RuntimeMetricsSettingsSource : IMetricsSettingsSource
         // Windows: file version of the process executable, or 0.0.0.0 when it cannot be read.
         try
         {
-            FileVersionInfo version = FileVersionInfo.GetVersionInfo(processPath);
+            FileVersionInfo version = FileVersionInfo.GetVersionInfo(GetProcessPath());
             return $"{version.FileMajorPart}.{version.FileMinorPart}.{version.FileBuildPart}.{version.FilePrivatePart}";
         }
         catch (Exception)
@@ -57,11 +56,7 @@ sealed class RuntimeMetricsSettingsSource : IMetricsSettingsSource
 
     static string GetProcessPath()
     {
-#if NET
-        return Environment.ProcessPath;
-#else
         using Process process = Process.GetCurrentProcess();
         return process.MainModule.FileName;
-#endif
     }
 }

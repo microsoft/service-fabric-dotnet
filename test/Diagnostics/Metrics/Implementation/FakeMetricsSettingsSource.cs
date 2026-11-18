@@ -8,7 +8,7 @@ using System.Linq;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// In-memory configuration and environment for <see cref="MetricsSettings"/> and <see cref="MetricsBackendSelector"/>.
+/// Provides in-memory configuration and environment to <see cref="MetricsSettings"/> and <see cref="MetricsBackendSelector"/>.
 /// </summary>
 sealed class FakeMetricsSettingsSource : IMetricsSettingsSource
 {

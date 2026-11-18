@@ -9,13 +9,13 @@ using System.Threading;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Process-wide (AppDomain or load context) state of the OpenTelemetry metrics backend: the configuration gate and Service
-/// Fabric's OpenTelemetry SDK provider. <see cref="MetricsBackendSelector"/> starts it when it chooses the backend; only
+/// Holds the process-wide (AppDomain or load context) state of the OpenTelemetry metrics backend: the configuration gate and
+/// Service Fabric's OpenTelemetry SDK provider. <see cref="MetricsBackendSelector"/> starts it when it chooses the backend; only
 /// <see cref="Start"/> throws.
 /// </summary>
 static class SfMetricsPipeline
 {
-    const string TraceType = "OpenTelemetryMetricsFactory";
+    internal const string TraceType = "OpenTelemetryMetricsFactory";
 
     static readonly object syncRoot = new();
     static State state;
@@ -76,7 +76,7 @@ static class SfMetricsPipeline
     }
 
     /// <summary>
-    /// Test hook: disposes the SDK provider and forgets the state.
+    /// Disposes the SDK provider and forgets the state.
     /// </summary>
     internal static void ResetForTesting()
     {
@@ -99,7 +99,7 @@ static class SfMetricsPipeline
             return new State(metricsEnabled: false, sdkProvider: null);
         }
 
-        // Throws when System.Diagnostics.DiagnosticSource cannot be loaded.
+        // Throws when System.Diagnostics.DiagnosticSource cannot be loaded, so the backend falls back to COM interop.
         SfMeterRegistry.EnsureLoaded();
 
         IDisposable sdkProvider = null;

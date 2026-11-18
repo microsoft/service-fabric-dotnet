@@ -111,14 +111,6 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation
 
 
             [Fact]
-            public void ThrowsExceptionIfNumberOfCustomDimensionsNegative() =>
-                Assert.Throws<ArgumentOutOfRangeException>(() => sutMethod.Invoke(value, fuzzy.Int32().Maximum(-1), dimension1Value, dimension2Value, dimension3Value));
-
-            [Fact]
-            public void ThrowsExceptionIfNumberOfCustomDimensionsHigherThanSupported() =>
-                Assert.Throws<ArgumentOutOfRangeException>(() => sutMethod.Invoke(value, fuzzy.Int32().Minimum(4), dimension1Value, dimension2Value, dimension3Value));
-
-            [Fact]
             public void CallsNativeMeterRecordWithZeroCustomDimensions()
             {
                 string[] expectedArray = [];

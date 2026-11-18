@@ -9,9 +9,8 @@ using Xunit;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Port of the native MetricsSettings tests in the WindowsFabric repo, plus the managed rules.
+/// Ports the native MetricsSettings tests in the WindowsFabric repo, plus the managed rules.
 /// </summary>
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class MetricsSettingsTest : IDisposable
 {
     const string Dimensions = "Telemetry/Metrics/Dimensions";
@@ -19,7 +18,7 @@ public abstract class MetricsSettingsTest : IDisposable
     // Captures traces; the settings themselves are loaded directly from a fake source.
     readonly MetricsTestScope scope = new(withCollector: false);
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class Load : MetricsSettingsTest
     {

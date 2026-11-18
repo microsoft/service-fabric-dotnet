@@ -4,35 +4,43 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Fuzzy;
 using Xunit;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// API behavior of meter providers on the OpenTelemetry backend, which must match the native implementation on the COM interop
-/// path.
+/// Tests the API behavior of meter providers on the OpenTelemetry backend, which must match the native implementation on
+/// the COM interop path.
 /// </summary>
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
 {
     const int E_FAIL = unchecked((int)0x80004005);
 
     readonly MetricsTestScope scope = new();
 
-    void IDisposable.Dispose() => scope.Dispose();
+    static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
+
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class CreateInstrument : OpenTelemetryInstrumentProviderTest
     {
+        readonly string metricNamespace = fuzzy.String();
+        readonly string name = fuzzy.String();
+        readonly string dimension1Name = fuzzy.String();
+        readonly string dimension2Name = fuzzy.String();
+        readonly string dimension3Name = fuzzy.String();
+
         [Theory, InlineData(true), InlineData(false)]
         public void ThrowsArgumentExceptionForNullOrEmptyNamespaceOrName(bool gateOpen)
         {
             SetGate(gateOpen);
             using Int64MeterProvider provider = new();
 
-            _ = Assert.Throws<ArgumentException>(() => provider.CreateMeter(null, "Name"));
-            _ = Assert.Throws<ArgumentException>(() => provider.CreateMeter(string.Empty, "Name"));
-            _ = Assert.Throws<ArgumentException>(() => provider.CreateMeter("Namespace", null));
-            _ = Assert.Throws<ArgumentException>(() => provider.CreateMeter("Namespace", string.Empty, "Dimension1"));
+            Assert.Equal(nameof(metricNamespace), Assert.Throws<ArgumentException>(() => provider.CreateMeter(null, name)).ParamName);
+            Assert.Equal(nameof(metricNamespace), Assert.Throws<ArgumentException>(() => provider.CreateMeter(string.Empty, name)).ParamName);
+            Assert.Equal(nameof(name), Assert.Throws<ArgumentException>(() => provider.CreateMeter(metricNamespace, null)).ParamName);
+            Assert.Equal(nameof(name), Assert.Throws<ArgumentException>(() => provider.CreateMeter(metricNamespace, string.Empty, dimension1Name)).ParamName);
         }
 
         [Fact]
@@ -40,18 +48,18 @@ public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
         {
             using Int64MeterProvider provider = new();
 
-            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(".", "Name")).HResult);
-            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter("Namespace", ".", "Dimension1")).HResult);
+            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(".", name)).HResult);
+            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(metricNamespace, ".", dimension1Name)).HResult);
         }
 
         [Fact]
-        public void ThrowsComExceptionForNullOrEmptyDimensionName()
+        public void ThrowsComExceptionWithEFailForNullOrEmptyDimensionName()
         {
             using TimeSpanMeterProvider provider = new();
 
-            _ = Assert.Throws<COMException>(() => provider.CreateMeter("Namespace", "Name", string.Empty));
-            _ = Assert.Throws<COMException>(() => provider.CreateMeter("Namespace", "Name", "Dimension1", null));
-            _ = Assert.Throws<COMException>(() => provider.CreateMeter("Namespace", "Name", "Dimension1", "Dimension2", string.Empty));
+            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(metricNamespace, name, string.Empty)).HResult);
+            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(metricNamespace, name, dimension1Name, null)).HResult);
+            Assert.Equal(E_FAIL, Assert.Throws<COMException>(() => provider.CreateMeter(metricNamespace, name, dimension1Name, dimension2Name, string.Empty)).HResult);
         }
 
         [Fact]
@@ -60,10 +68,10 @@ public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
             SetGate(gateOpen: false);
             using (Int64MeterProvider provider = new())
             {
-                provider.CreateMeter(".", "Name").Record(1);
-                provider.CreateMeter("Namespace", ".").Record(1);
-                provider.CreateMeter("Namespace", "Name", string.Empty).Record(1, "value");
-                provider.CreateMeter("Namespace", "Name", "Dimension1", null).Record(1, "value1", "value2");
+                provider.CreateMeter(".", name).Record(fuzzy.Int64());
+                provider.CreateMeter(metricNamespace, ".").Record(fuzzy.Int64());
+                provider.CreateMeter(metricNamespace, name, string.Empty).Record(fuzzy.Int64(), fuzzy.String());
+                provider.CreateMeter(metricNamespace, name, dimension1Name, null).Record(fuzzy.Int64(), fuzzy.String(), fuzzy.String());
             }
 
             // A closed gate builds no exporter.
@@ -77,8 +85,9 @@ public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
             Int64MeterProvider provider = new();
             provider.Dispose();
 
-            _ = Assert.Throws<ObjectDisposedException>(() => provider.CreateMeter("Namespace", "Name"));
-            _ = Assert.Throws<ObjectDisposedException>(() => provider.CreateMeter("Namespace", "Name", "Dimension1", "Dimension2", "Dimension3"));
+            var exception = Assert.Throws<ObjectDisposedException>(() => provider.CreateMeter(metricNamespace, name));
+            Assert.Equal(nameof(MeterProvider<>), exception.ObjectName);
+            _ = Assert.Throws<ObjectDisposedException>(() => provider.CreateMeter(metricNamespace, name, dimension1Name, dimension2Name, dimension3Name));
 
             // The disposed check precedes argument validation, as in the COM implementation.
             _ = Assert.Throws<ObjectDisposedException>(() => provider.CreateMeter(null, null));
@@ -91,14 +100,16 @@ public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
         public void ExportsEverythingRecordedSoFar()
         {
             string name = MetricsTestScope.UniqueName("DisposeFlush");
+            // Negative values are clamped to 0.
+            long value = fuzzy.Int64().Minimum(0);
             Int64MeterProvider provider = new();
-            provider.CreateMeter("Namespace", name).Record(10);
+            provider.CreateMeter("Namespace", name).Record(value);
             int exportsBefore = scope.Exporter.ExportCount;
 
             provider.Dispose();
 
             Assert.Equal(exportsBefore + 1, scope.Exporter.ExportCount);
-            Assert.Equal(10d, scope.Exporter.Points.Single(p => p.MetricName == "Namespace." + name).Sum);
+            Assert.Equal(value, scope.Exporter.Points.Single(p => p.MetricName == "Namespace." + name).Sum);
         }
 
         [Fact]
@@ -106,11 +117,11 @@ public abstract class OpenTelemetryInstrumentProviderTest : IDisposable
         {
             string name = MetricsTestScope.UniqueName("AfterDispose");
             Int64MeterProvider provider = new();
-            IMeter1D<long> meter = provider.CreateMeter("Namespace", name, "D1");
+            IMeter1D<long> meter = provider.CreateMeter("Namespace", name, fuzzy.String());
 
             provider.Dispose();
             provider.Dispose();
-            meter.Record(5, "a");
+            meter.Record(fuzzy.Int64(), fuzzy.String());
 
             Assert.Equal(1, scope.FlushAndGet("Namespace." + name)[0].Count);
         }

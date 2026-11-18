@@ -10,7 +10,7 @@ using OpenTelemetry.Metrics;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// One exported histogram point, copied during export because the SDK reuses its metric points.
+/// Represents one exported histogram point, copied during export because the SDK reuses its metric points.
 /// </summary>
 sealed class ExportedPoint(
     string metricName,

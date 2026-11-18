@@ -11,14 +11,14 @@ using System.Text;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// The Geneva entry of Telemetry/Metrics/Collectors, for example {"ConnectionStrings":["Account=a;Namespace=n"]}.
+/// Deserializes the Geneva entry of Telemetry/Metrics/Collectors, for example {"ConnectionStrings":["Account=a;Namespace=n"]}.
 /// Same shape as native GenevaCollectorSettings; property names are case-sensitive.
 /// </summary>
 [DataContract]
 sealed class GenevaCollectorSettingsJson
 {
-    [DataMember(Name = "ConnectionStrings")]
-    public string[] ConnectionStrings { get; set; }
+    [DataMember]
+    internal readonly string[] ConnectionStrings;
 
     internal static bool TryParse(string json, out IReadOnlyList<string> connectionStrings, out Exception error)
     {

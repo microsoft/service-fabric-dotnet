@@ -35,7 +35,7 @@ static class MetricsBackendSelector
             : new ComInstrumentProvider(fixedDimensionNames, fixedDimensionValues);
 
     /// <summary>
-    /// Test hook: forgets the chosen backend, so the next meter provider chooses it again.
+    /// Forgets the chosen backend, so the next meter provider chooses it again.
     /// </summary>
     internal static void ResetForTesting() => selected = new Lazy<MetricsBackend>(Select);
 

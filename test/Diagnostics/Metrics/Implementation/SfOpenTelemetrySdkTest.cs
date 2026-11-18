@@ -3,21 +3,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using Xunit;
 using DiagnosticsMeter = System.Diagnostics.Metrics.Meter;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class SfOpenTelemetrySdkTest : IDisposable
 {
     readonly MetricsTestScope scope = new();
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class Build : SfOpenTelemetrySdkTest
     {
@@ -36,6 +37,16 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         }
 
         [Fact]
+        public void ReturnsNullWithoutValidCollector()
+        {
+            _ = scope.Source.SetCollectors("Account=OnlyAccount");
+            MetricsSettings settings = MetricsSettings.Load(scope.Source);
+
+            Assert.Null(SfOpenTelemetrySdk.Build(settings));
+            Assert.Contains(scope.TracesOfType("OpenTelemetryMetricsFactory"), t => t.Message.Contains("No valid Geneva collector"));
+        }
+
+        [Fact]
         public void ExportsSameDataToEachValidCollector()
         {
             _ = scope.Source.SetCollectors(MetricsTestScope.ValidConnectionString, MetricsTestScope.ValidConnectionString.Replace("TestAccount", "SecondAccount"));
@@ -50,14 +61,15 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
                 Assert.Equal(3d, exporter.Points.Single(p => p.MetricName == "Namespace." + name).Sum);
         }
 
-        [Fact]
-        public void SkipsCollectorRejectedByExporter()
+        [Theory, InlineData(typeof(ArgumentException)), InlineData(typeof(NotSupportedException))]
+        public void SkipsCollectorRejectedByExporter(Type errorType)
         {
             string rejected = MetricsTestScope.ValidConnectionString.Replace("TestAccount", "Rejected");
             _ = scope.Source.SetCollectors(rejected, MetricsTestScope.ValidConnectionString);
-            var createTestExporter = SfOpenTelemetrySdk.CreateExporter;
-            SfOpenTelemetrySdk.CreateExporter = (connectionString, dimensions) =>
-                connectionString == rejected ? throw new ArgumentException("rejected by the exporter") : createTestExporter(connectionString, dimensions);
+            Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createTestExporter = SfOpenTelemetrySdk.CreateExporter;
+            SfOpenTelemetrySdk.CreateExporter = (connectionString, dimensions) => connectionString == rejected
+                ? throw (Exception)Activator.CreateInstance(errorType, "rejected by the exporter")
+                : createTestExporter(connectionString, dimensions);
             using Int64MeterProvider provider = new();
             string name = MetricsTestScope.UniqueName("Rejected");
 
@@ -65,6 +77,42 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
 
             _ = Assert.Single(scope.FlushAndGet("Namespace." + name));
             Assert.Contains(scope.TracesOfType("OpenTelemetryMetricsFactory"), t => t.Message.Contains("rejected by the exporter"));
+        }
+
+        [Fact]
+        public void ThrowsWhenExporterRejectsEveryCollector()
+        {
+            ArgumentException rejection = new();
+            SfOpenTelemetrySdk.CreateExporter = (_, _) => throw rejection;
+            MetricsSettings settings = MetricsSettings.Load(scope.Source);
+
+            NotSupportedException error = Assert.Throws<NotSupportedException>(() => SfOpenTelemetrySdk.Build(settings));
+
+            Assert.Same(rejection, error.InnerException);
+        }
+
+        [Fact]
+        public void ThrowsExporterErrorOtherThanRejectedConnectionString()
+        {
+            FileNotFoundException error = new();
+            SfOpenTelemetrySdk.CreateExporter = (_, _) => throw error;
+            MetricsSettings settings = MetricsSettings.Load(scope.Source);
+
+            Assert.Same(error, Assert.Throws<FileNotFoundException>(() => SfOpenTelemetrySdk.Build(settings)));
+        }
+
+        [Fact]
+        public void DisposesExportersOfEarlierCollectorsWhenItThrows()
+        {
+            string failing = MetricsTestScope.ValidConnectionString.Replace("TestAccount", "Failing");
+            _ = scope.Source.SetCollectors(MetricsTestScope.ValidConnectionString, failing);
+            Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createTestExporter = SfOpenTelemetrySdk.CreateExporter;
+            SfOpenTelemetrySdk.CreateExporter = (connectionString, dimensions) =>
+                connectionString == failing ? throw new FileNotFoundException() : createTestExporter(connectionString, dimensions);
+            MetricsSettings settings = MetricsSettings.Load(scope.Source);
+
+            _ = Assert.Throws<FileNotFoundException>(() => SfOpenTelemetrySdk.Build(settings));
+            Assert.True(scope.Exporter.Disposed);
         }
 
         [Fact]

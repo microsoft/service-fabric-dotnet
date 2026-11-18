@@ -7,12 +7,11 @@ using Xunit;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class GenevaCollectorRulesTest : IDisposable
 {
     readonly MetricsTestScope scope = new(withCollector: false);
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class IsValidConnectionString : GenevaCollectorRulesTest
     {
@@ -98,6 +97,20 @@ public abstract class GenevaCollectorRulesTest : IDisposable
             IReadOnlyDictionary<string, object> result = GenevaCollectorRules.FilterPrepopulatedDimensions(new Dictionary<string, string> { { "Name", null } });
 
             Assert.Equal(string.Empty, result["Name"]);
+        }
+    }
+
+    public sealed class ToExporterConnectionString : GenevaCollectorRulesTest
+    {
+        [Fact]
+        public void ConvertsUnixEndpointWhosePathDoesNotStartWithSlash() =>
+            Assert.Equal("Endpoint=unix:@abstract", GenevaCollectorRules.ToExporterConnectionString("Endpoint=unix://@abstract"));
+
+        [Fact]
+        public void KeepsUnixEndpointWhosePathStartsWithSlash()
+        {
+            string connectionString = "Endpoint=unix:///var/etw/mdm_ifx.socket";
+            Assert.Equal(connectionString, GenevaCollectorRules.ToExporterConnectionString(connectionString));
         }
     }
 }

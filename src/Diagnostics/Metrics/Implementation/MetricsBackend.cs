@@ -4,17 +4,17 @@
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Metrics backend of a process; the values of the Telemetry/Metrics ManagedMetricsBackend cluster setting.
+/// Specifies the metrics backend of a process; the values of the Telemetry/Metrics ManagedMetricsBackend cluster setting.
 /// </summary>
 enum MetricsBackend
 {
     /// <summary>
-    /// Meters record through COM interop with the native FabricTelemetry.dll, which exports the values.
+    /// Records meter values through COM interop with the native FabricTelemetry.dll, which exports them.
     /// </summary>
     ComInterop,
 
     /// <summary>
-    /// Meters record in process with System.Diagnostics.Metrics, and the OpenTelemetry SDK exports the values to Geneva.
+    /// Records meter values in process with System.Diagnostics.Metrics and exports them to Geneva with the OpenTelemetry SDK.
     /// </summary>
     OpenTelemetry,
 }

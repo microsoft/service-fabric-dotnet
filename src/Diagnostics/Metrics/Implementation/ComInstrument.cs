@@ -46,8 +46,6 @@ sealed class ComInstrument : IInstrument
     {
         if (IsDisposed())
             throw new ObjectDisposedException(nameof(Meter));
-        if (variableDimensionCount < 0 || variableDimensionCount > 3)
-            throw new ArgumentOutOfRangeException(nameof(variableDimensionCount));
 
         GCHandle* dimensionPins = stackalloc GCHandle[variableDimensionCount];
         IntPtr* dimensionValuesPointers = stackalloc IntPtr[variableDimensionCount];

@@ -15,7 +15,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 static class MetricsTrace
 {
     /// <summary>
-    /// Repeated hot-path problems are traced on the first occurrence and then every 1000th, like native
+    /// Specifies how often repeated hot-path problems are traced: on the first occurrence and then every 1000th, like native
     /// MeterBase::RecordToInstrument (RecordFailureTraceInterval).
     /// </summary>
     internal const long RepeatedEventTraceInterval = 1000;

@@ -9,7 +9,7 @@ using OpenTelemetry.Metrics;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Exporter standing in for the Geneva exporter; records what it was created with and every exported point.
+/// Stands in for the Geneva exporter and records what it was created with and every exported point.
 /// </summary>
 sealed class TestMetricExporter(string connectionString, IReadOnlyDictionary<string, object> prepopulatedDimensions) : BaseExporter<Metric>
 {
@@ -25,6 +25,8 @@ sealed class TestMetricExporter(string connectionString, IReadOnlyDictionary<str
     /// Makes exports fail, like a collector that cannot be reached.
     /// </summary>
     internal volatile bool Fails;
+
+    internal volatile bool Disposed;
 
     readonly object sync = new();
     readonly List<ExportedPoint> points = [];
@@ -60,5 +62,11 @@ sealed class TestMetricExporter(string connectionString, IReadOnlyDictionary<str
         }
 
         return Fails ? ExportResult.Failure : ExportResult.Success;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        Disposed = true;
+        base.Dispose(disposing);
     }
 }

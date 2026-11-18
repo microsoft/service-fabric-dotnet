@@ -4,16 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Rules for configuring a Geneva collector: the native implementation's connection string validation and the
-/// limits OpenTelemetry.Exporter.Geneva enforces on prepopulated dimensions.
+/// Checks the configuration of a Geneva collector against the native implementation's connection string validation and the
+/// limits OpenTelemetry.Exporter.Geneva enforces on prepopulated dimensions, and adapts its unix endpoint to the exporter.
 /// </summary>
 static class GenevaCollectorRules
 {
-    const string TraceType = "OpenTelemetryMetricsFactory";
+    const string TraceType = SfMetricsPipeline.TraceType;
 
     // GenevaMetricExporter.MaxDimensionNameSize, MaxDimensionValueSize and reserved dimension keys (OpenTelemetry.Exporter.Geneva 1.15.2).
     internal const int MaxDimensionNameLength = 256;
@@ -24,8 +25,9 @@ static class GenevaCollectorRules
     internal static readonly bool IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
     /// <summary>
-    /// Port of native IsValidGenevaConnectionString (src/prod/src/Telemetry/Native/OpenTelemetryMetricsFactory.cpp in the
-    /// WindowsFabric repo); keep the two in sync. Keys are case-sensitive.
+    /// Returns whether a connection string is valid, ported from native IsValidGenevaConnectionString
+    /// (src/prod/src/Telemetry/Native/OpenTelemetryMetricsFactory.cpp in the WindowsFabric repo); keep the two in sync. Keys
+    /// are case-sensitive.
     /// Windows needs Account and Namespace and no Endpoint (ETW). Linux needs an Endpoint with the "unix" scheme.
     /// </summary>
     internal static bool IsValidConnectionString(string connectionString, bool isLinux)
@@ -76,6 +78,14 @@ static class GenevaCollectorRules
 
         return !string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(metricNamespace) && !endpointPresent;
     }
+
+    /// <summary>
+    /// Returns the connection string with a unix endpoint the Geneva exporter resolves to the same socket as native. Native
+    /// takes the path after "unix://"; the exporter takes the path of the endpoint URI, where a path not starting with '/',
+    /// such as an abstract socket's "@name", would be the host.
+    /// </summary>
+    internal static string ToExporterConnectionString(string connectionString) =>
+        Regex.Replace(connectionString, "Endpoint=unix://(?!/)", "Endpoint=unix:");
 
     /// <summary>
     /// Returns the dimensions the Geneva exporter accepts as prepopulated dimensions. The exporter rejects the whole

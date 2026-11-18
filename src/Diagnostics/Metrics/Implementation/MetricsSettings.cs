@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Metrics settings of managed meter providers. Port of native MetricsConfig and MetricsSettings (FabricTelemetry,
+/// Holds the metrics settings of managed meter providers, ported from native MetricsConfig and MetricsSettings (FabricTelemetry,
 /// src/prod/src/Telemetry/Native/config in the WindowsFabric repo); keep the two in sync.
 /// </summary>
 sealed class MetricsSettings
@@ -36,22 +36,23 @@ sealed class MetricsSettings
     static readonly IReadOnlyList<string> noConnectionStrings = [];
 
     /// <summary>
-    /// Telemetry/Metrics IsEnabled (default true).
+    /// Indicates whether Telemetry/Metrics IsEnabled is true (the default).
     /// </summary>
     internal readonly bool IsEnabled;
 
     /// <summary>
-    /// Telemetry/Metrics IsManagedTelemetryEnabled (default true).
+    /// Indicates whether Telemetry/Metrics IsManagedTelemetryEnabled is true (the default).
     /// </summary>
     internal readonly bool IsManagedTelemetryEnabled;
 
     /// <summary>
-    /// Dimensions added to every exported metric, ordered by name like the native std::map. Empty when the gate is closed.
+    /// Contains the dimensions added to every exported metric, ordered by name like the native std::map. Empty when the gate is
+    /// closed.
     /// </summary>
     internal readonly IReadOnlyDictionary<string, string> Dimensions;
 
     /// <summary>
-    /// Connection strings of the Geneva collector, before validation. Empty when the gate is closed.
+    /// Contains the connection strings of the Geneva collector, before validation. Empty when the gate is closed.
     /// </summary>
     internal readonly IReadOnlyList<string> GenevaConnectionStrings;
 
@@ -163,8 +164,8 @@ sealed class MetricsSettings
     }
 
     /// <summary>
-    /// Port of native MetricsSettings::GetArchitecture, which reports the architecture FabricTelemetry.dll was compiled
-    /// for. On ARM64 hosts that DLL is ARM64X, so an x64 process runs its ARM64EC code and reports "ARM64EC".
+    /// Returns the architecture FabricTelemetry.dll was compiled for, ported from native MetricsSettings::GetArchitecture. On
+    /// ARM64 hosts that DLL is ARM64X, so an x64 process runs its ARM64EC code and reports "ARM64EC".
     /// </summary>
     internal static string GetArchitecture(Architecture processArchitecture, bool isArm64Host) =>
         processArchitecture switch
@@ -177,7 +178,7 @@ sealed class MetricsSettings
         };
 
     /// <summary>
-    /// Native config parses a present bool value as true only when it equals "true" ignoring case; an absent value is the default.
+    /// Reads a bool value like native config: true only when it equals "true" ignoring case, and the default when it is absent.
     /// </summary>
     static bool ReadBool(IMetricsSettingsSource source, string sectionName, string keyName, bool defaultValue)
     {
@@ -244,13 +245,14 @@ sealed class MetricsSettings
     [DllImport("kernel32.dll")]
     static extern IntPtr GetCurrentProcess();
 
-    [DllImport("kernel32.dll", SetLastError = true)]
+    [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool IsWow64Process2(IntPtr process, out ushort processMachine, out ushort nativeMachine);
 
     /// <summary>
-    /// Port of native MetricsSettings::GetVmssId: VMSS_ARM_ID when set, otherwise the scale set ID derived from the ResourceId
-    /// dimension and FabricNode/NodeType (SFRP names the scale set after the node type). Returns "" when it cannot be derived.
+    /// Returns the VMSS ID like native MetricsSettings::GetVmssId: VMSS_ARM_ID when set, otherwise the scale set ID derived from
+    /// the ResourceId dimension and FabricNode/NodeType (SFRP names the scale set after the node type), or "" when it cannot be
+    /// derived.
     /// </summary>
     static string GetVmssId(SortedDictionary<string, string> dimensions, IMetricsSettingsSource source)
     {

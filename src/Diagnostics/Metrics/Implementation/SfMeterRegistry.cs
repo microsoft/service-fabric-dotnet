@@ -18,7 +18,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 static class SfMeterRegistry
 {
     /// <summary>
-    /// Meter (instrumentation scope) name and version, the same as the native implementation's.
+    /// Identifies the meter (instrumentation scope) by the same name and version as the native implementation.
     /// </summary>
     internal const string MeterName = "Microsoft.ServiceFabric";
     internal const string MeterVersion = "1.0";

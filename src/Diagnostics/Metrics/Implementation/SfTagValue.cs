@@ -6,9 +6,9 @@ using System;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// A tag value that carries the hash code of its string. On every record the OpenTelemetry SDK hashes each tag key and value
-/// to find the time series (Tags.ComputeHashCode), which for a string value means hashing the whole string each time; this
-/// type is hashed once, when it is created. Exporters write tag values with Convert.ToString, which returns
+/// Represents a tag value that carries the hash code of its string. On every record the OpenTelemetry SDK hashes each tag
+/// key and value to find the time series (Tags.ComputeHashCode), which for a string value means hashing the whole string
+/// each time; this type is hashed once, when it is created. Exporters write tag values with Convert.ToString, which returns
 /// <see cref="ToString"/>, so the exported dimensions are the same strings.
 /// </summary>
 /// <remarks>

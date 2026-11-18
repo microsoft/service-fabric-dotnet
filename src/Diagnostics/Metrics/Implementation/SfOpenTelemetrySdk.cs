@@ -23,7 +23,7 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 /// </summary>
 static class SfOpenTelemetrySdk
 {
-    const string TraceType = "OpenTelemetryMetricsFactory";
+    const string TraceType = SfMetricsPipeline.TraceType;
 
     // The native implementation's PeriodicExportingMetricReaderOptions defaults.
     const int ExportIntervalMilliseconds = 60000;
@@ -56,8 +56,8 @@ static class SfOpenTelemetrySdk
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void EnsureSupportedVersion()
     {
-        // Loads the exporter outside Build's per-collector catch, so a missing or older Geneva falls back to COM interop instead
-        // of skipping every collector.
+        // Loads the exporter before Build, so a missing or older Geneva falls back to COM interop even when no collector
+        // reaches the exporter.
         LoadGenevaExporter();
 
         Assembly[] assemblies =
@@ -88,7 +88,8 @@ static class SfOpenTelemetrySdk
     }
 
     /// <summary>
-    /// Returns the SDK meter provider, or null when no collector yields an exporter. Throws when the provider cannot be built.
+    /// Returns the SDK meter provider, or null when no collector is valid on this platform. Throws when the provider cannot
+    /// be built or the exporter rejects every valid collector.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static IDisposable Build(MetricsSettings settings)
@@ -97,6 +98,7 @@ static class SfOpenTelemetrySdk
         List<MetricReader> readers = [];
         try
         {
+            Exception rejection = null;
             foreach (string connectionString in settings.GenevaConnectionStrings)
             {
                 if (!GenevaCollectorRules.IsValidConnectionString(connectionString, GenevaCollectorRules.IsLinux))
@@ -107,16 +109,19 @@ static class SfOpenTelemetrySdk
                     continue;
                 }
 
+                // Skips only a collector whose connection string the exporter rejects. Any other failure, such as an assembly
+                // that cannot be loaded, fails the build, so the backend falls back to COM interop.
                 BaseExporter<Metric> exporter;
                 try
                 {
                     exporter = CreateExporter(connectionString, prepopulatedDimensions);
                 }
-                catch (Exception e)
+                catch (Exception e) when (e is ArgumentException or NotSupportedException)
                 {
                     MetricsTrace.Warning(
                         TraceType,
                         $"Geneva collector connection string '{connectionString}' was rejected by the Geneva exporter; skipping this collector. Metrics for this collector are disabled. Error: {e}");
+                    rejection = e;
                     continue;
                 }
 
@@ -128,6 +133,10 @@ static class SfOpenTelemetrySdk
 
             if (readers.Count == 0)
             {
+                // Native would export to the rejected collectors, so fall back to COM interop rather than export nothing.
+                if (rejection != null)
+                    throw new NotSupportedException("The Geneva exporter rejected every collector.", rejection);
+
                 MetricsTrace.Info(TraceType, "No valid Geneva collector is configured; managed metrics are recorded but not exported.");
                 return null;
             }
@@ -180,7 +189,7 @@ static class SfOpenTelemetrySdk
 
     static BaseExporter<Metric> CreateGenevaExporter(string connectionString, IReadOnlyDictionary<string, object> prepopulatedDimensions)
     {
-        GenevaMetricExporterOptions options = new() { ConnectionString = connectionString };
+        GenevaMetricExporterOptions options = new() { ConnectionString = GenevaCollectorRules.ToExporterConnectionString(connectionString) };
         if (prepopulatedDimensions.Count > 0)
             options.PrepopulatedMetricDimensions = prepopulatedDimensions;
 
@@ -202,9 +211,9 @@ static class SfOpenTelemetrySdk
     }
 
     /// <summary>
-    /// The Geneva exporter reports a failed export only through its result and its own EventSource
-    /// (OpenTelemetry-Exporter-Geneva), so this subclass also traces it to the Service Fabric trace.
-    /// It subclasses rather than wraps the exporter, so the reader still sets the exporter's ParentProvider.
+    /// Traces failed exports to the Service Fabric trace; the Geneva exporter reports them only through its result and its own
+    /// EventSource (OpenTelemetry-Exporter-Geneva). It subclasses rather than wraps the exporter, so the reader still sets the
+    /// exporter's ParentProvider.
     /// </summary>
     sealed class TracingGenevaMetricExporter(GenevaMetricExporterOptions options, string collector) : GenevaMetricExporter(options)
     {

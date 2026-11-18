@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
-[Collection(MetricsPipelineCollection.Name)]
 public abstract class MetricsBackendSelectorTest : IDisposable
 {
     const string TraceType = "ManagedMetricsBackend";
@@ -21,7 +20,7 @@ public abstract class MetricsBackendSelectorTest : IDisposable
 
     static readonly IFuzz fuzzy = new RandomFuzz(Environment.TickCount);
 
-    void IDisposable.Dispose() => scope.Dispose();
+    void IDisposable.Dispose() => ((IDisposable)scope).Dispose();
 
     public sealed class Backend : MetricsBackendSelectorTest
     {

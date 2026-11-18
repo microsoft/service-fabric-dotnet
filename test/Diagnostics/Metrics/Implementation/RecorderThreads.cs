@@ -10,7 +10,7 @@ using Xunit;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Dedicated threads that record concurrently in race tests.
+/// Starts and joins dedicated threads that record concurrently in race tests.
 /// </summary>
 static class RecorderThreads
 {

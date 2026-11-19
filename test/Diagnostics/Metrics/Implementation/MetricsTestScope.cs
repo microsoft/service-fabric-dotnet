@@ -13,8 +13,9 @@ using OpenTelemetry.Metrics;
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
-/// Makes the next meter provider choose the OpenTelemetry backend with fake settings, test exporters and an in-memory trace
-/// sink, and restores the process-wide state on dispose. It relies on the tests of this assembly running sequentially.
+/// Makes the next meter provider choose the OpenTelemetry backend with fake settings, an app built for .NET 10, test exporters and
+/// an in-memory trace sink, and restores the process-wide state on dispose. It relies on the tests of this assembly running
+/// sequentially.
 /// </summary>
 sealed class MetricsTestScope : IDisposable
 {
@@ -31,6 +32,7 @@ sealed class MetricsTestScope : IDisposable
 
     readonly Lazy<MetricsBackend> backend = typeof(MetricsBackendSelector).Field<Lazy<MetricsBackend>>().Value;
     readonly Func<IMetricsSettingsSource> createSettingsSource = MetricsBackendSelector.CreateSettingsSource;
+    readonly Func<string> readAppTargetFramework = MetricsBackendSelector.ReadAppTargetFramework;
     readonly Func<MetricsSettings> loadSettings = SfMetricsPipeline.LoadSettings;
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
     readonly Action<IDisposable> flushSdkProvider = SfMetricsPipeline.FlushSdkProvider;
@@ -56,6 +58,7 @@ sealed class MetricsTestScope : IDisposable
             _ = Source.SetCollectors(ValidConnectionString);
 
         MetricsBackendSelector.CreateSettingsSource = () => Source;
+        MetricsBackendSelector.ReadAppTargetFramework = () => ".NETCoreApp,Version=v10.0";
         MetricsBackendSelector.ResetForTesting();
         SfMetricsPipeline.LoadSettings = () => MetricsSettings.Load(Source);
         SfOpenTelemetrySdk.CreateExporter = (connectionString, dimensions) =>
@@ -114,6 +117,7 @@ sealed class MetricsTestScope : IDisposable
         SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
         SfOpenTelemetrySdk.LoadGenevaExporter = loadGenevaExporter;
         MetricsBackendSelector.CreateSettingsSource = createSettingsSource;
+        MetricsBackendSelector.ReadAppTargetFramework = readAppTargetFramework;
         typeof(MetricsBackendSelector).Field<Lazy<MetricsBackend>>().Set(backend);
         MetricsTrace.Sink = sink;
     }

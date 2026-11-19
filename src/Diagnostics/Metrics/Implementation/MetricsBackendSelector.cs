@@ -3,13 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
 /// Chooses the metrics backend of the process (AppDomain or load context) once, when the first meter provider is created, from
-/// the Telemetry/Metrics ManagedMetricsBackend cluster setting. The native Service Fabric runtime declares the setting with the
-/// same values and the same default.
+/// the Telemetry/Metrics ManagedMetricsBackend cluster setting and the framework the app was built for. The native Service
+/// Fabric runtime declares the setting with the same values and the same default.
 /// </summary>
 static class MetricsBackendSelector
 {
@@ -18,8 +20,16 @@ static class MetricsBackendSelector
     const string Setting = MetricsSettings.MetricsSection + "/" + SettingKey;
     const string TraceType = SettingKey;
 
+    // The OpenTelemetry backend supports apps built for .NET 10 or later, or for .NET Framework 4.6.2 or later, the oldest
+    // .NET Framework that OpenTelemetry supports.
+    static readonly Version minimumDotNetVersion = new(10, 0);
+    static readonly Version minimumDotNetFrameworkVersion = new(4, 6, 2);
+
     // Replaced by tests.
     internal static Func<IMetricsSettingsSource> CreateSettingsSource = static () => new RuntimeMetricsSettingsSource();
+
+    // Replaced by tests.
+    internal static Func<string> ReadAppTargetFramework = ReadEntryAssemblyTargetFramework;
 
     static Lazy<MetricsBackend> selected = new(Select);
 
@@ -64,6 +74,16 @@ static class MetricsBackendSelector
             return Choose(MetricsBackend.ComInterop, $"{Setting} has an unknown value '{value}'.");
         }
 
+        // Checked before anything loads OpenTelemetry, so apps built for an older framework never load it.
+        string appFramework = ReadAppTargetFramework();
+        if (!IsSupportedAppFramework(appFramework))
+        {
+            return Choose(
+                MetricsBackend.ComInterop,
+                $"{Setting} is '{value}', but the app is built for {(string.IsNullOrEmpty(appFramework) ? "an unknown framework" : appFramework)}, " +
+                $"and the OpenTelemetry backend needs .NET {minimumDotNetVersion} or later, or .NET Framework {minimumDotNetFrameworkVersion} or later.");
+        }
+
         try
         {
             SfMetricsPipeline.Start();
@@ -75,6 +95,40 @@ static class MetricsBackendSelector
         }
 
         return Choose(MetricsBackend.OpenTelemetry, $"{Setting} is '{value}'.");
+    }
+
+    /// <summary>
+    /// Returns the framework the app was built for, such as ".NETCoreApp,Version=v10.0", from the TargetFrameworkAttribute of its
+    /// entry assembly, or null when the process has no entry assembly, such as under a native host, or the attribute is missing.
+    /// </summary>
+    internal static string ReadEntryAssemblyTargetFramework() =>
+        Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+
+    /// <summary>
+    /// Whether the OpenTelemetry backend supports an app built for the framework. It is the framework the app was built for, not the
+    /// runtime it runs on, so an app built for .NET 8 that rolls forward to .NET 10 is not supported.
+    /// </summary>
+    static bool IsSupportedAppFramework(string appFramework)
+    {
+        if (string.IsNullOrEmpty(appFramework))
+            return false;
+
+        FrameworkName framework;
+        try
+        {
+            framework = new FrameworkName(appFramework);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+
+        return framework.Identifier switch
+        {
+            ".NETCoreApp" => framework.Version >= minimumDotNetVersion,
+            ".NETFramework" => framework.Version >= minimumDotNetFrameworkVersion,
+            _ => false,
+        };
     }
 
     static bool Is(string value, MetricsBackend backend) =>

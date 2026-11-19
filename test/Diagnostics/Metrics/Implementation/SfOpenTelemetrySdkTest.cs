@@ -182,11 +182,11 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         public void ThrowsWhenAnOpenTelemetryAssemblyIsOlderThanGenevaExporterRequires(string assemblyName)
         {
             SfOpenTelemetrySdk.ReadFileVersion = assembly =>
-                assembly.GetName().Name == assemblyName ? new Version(1, 15, 2, 9999) : new Version(1, 15, 3, 0);
+                assembly.GetName().Name == assemblyName ? new Version(1, 13, 1, 9999) : new Version(1, 14, 0, 0);
 
             NotSupportedException error = Assert.Throws<NotSupportedException>(SfOpenTelemetrySdk.EnsureSupportedVersion);
 
-            Assert.Contains($"{assemblyName} 1.15.2.9999 loaded from ", error.Message);
+            Assert.Contains($"{assemblyName} 1.13.1.9999 loaded from ", error.Message);
         }
 
         [Theory]
@@ -205,7 +205,7 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         }
 
         [Theory]
-        [InlineData("1.15.3.0")]
+        [InlineData("1.14.0.0")]
         [InlineData("1.20.1.1")]
         [InlineData(null)]
         public void AcceptsRequiredNewerOrUnknownVersions(string version)
@@ -229,7 +229,19 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         }
 
         [Fact]
-        public void ReturnsNullForAssemblyWithoutFile() =>
+        public void ReturnsAssemblyFileVersionOfAssemblyLoadedFromBytes()
+        {
+            // An assembly without a file stands in for one whose file FileVersionInfo cannot read, such as at a path of 260 or more
+            // characters.
+            Assembly openTelemetry = Assembly.Load(File.ReadAllBytes(typeof(Sdk).Assembly.Location));
+
+            Version version = SfOpenTelemetrySdk.ReadFileVersion(openTelemetry);
+
+            Assert.Equal(openTelemetry.GetCustomAttribute<AssemblyFileVersionAttribute>().Version, version?.ToString());
+        }
+
+        [Fact]
+        public void ReturnsNullForAssemblyWithoutFileVersion() =>
             Assert.Null(SfOpenTelemetrySdk.ReadFileVersion(AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("NoFile"), AssemblyBuilderAccess.Run)));
     }
 

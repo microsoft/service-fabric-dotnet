@@ -16,7 +16,8 @@ static class GenevaCollectorRules
 {
     const string TraceType = SfMetricsPipeline.TraceType;
 
-    // GenevaMetricExporter.MaxDimensionNameSize, MaxDimensionValueSize and reserved dimension keys (OpenTelemetry.Exporter.Geneva 1.15.2).
+    // GenevaMetricExporter.MaxDimensionNameSize, MaxDimensionValueSize and reserved dimension keys (the same in
+    // OpenTelemetry.Exporter.Geneva 1.14.0 through 1.21.0).
     internal const int MaxDimensionNameLength = 256;
     internal const int MaxDimensionValueLength = 1024;
     internal const string ReservedAccountDimension = "_microsoft_metrics_account";

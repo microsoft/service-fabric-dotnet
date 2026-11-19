@@ -29,9 +29,10 @@ static class SfOpenTelemetrySdk
     const int ExportIntervalMilliseconds = 60000;
     const int ExportTimeoutMilliseconds = 30000;
 
-    // The Geneva exporter requires OpenTelemetry 1.15.3 or later, but every OpenTelemetry 1.x assembly has version 1.0.0.0, so on
-    // .NET Framework an app's older copy can load instead; only the file version tells them apart.
-    static readonly Version minimumOpenTelemetryVersion = new(1, 15, 3);
+    // OpenTelemetry 1.14.0 is the first release built for .NET 10, and the oldest the Geneva exporter this class is compiled against
+    // requires. Every OpenTelemetry 1.x assembly has version 1.0.0.0, so an app's older copy can load instead; only the file version
+    // tells them apart.
+    static readonly Version minimumOpenTelemetryVersion = new(1, 14, 0);
 
     // An app's own OpenTelemetry or Geneva exporter with a newer major version, such as 2.x, can load instead too, and may have
     // removed or changed what this class uses.
@@ -200,12 +201,13 @@ static class SfOpenTelemetrySdk
     {
         try
         {
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
-            return new Version(info.FileMajorPart, info.FileMinorPart, info.FileBuildPart, info.FilePrivatePart);
+            // From the assembly rather than its file: FileVersionInfo returns no version for a path of 260 or more characters.
+            string version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+            return Version.TryParse(version, out Version parsed) ? parsed : null;
         }
         catch (Exception)
         {
-            // An assembly without a file, such as one loaded from bytes, is not checked.
+            // An assembly without a readable file version, such as a dynamic one, is not checked.
             return null;
         }
     }

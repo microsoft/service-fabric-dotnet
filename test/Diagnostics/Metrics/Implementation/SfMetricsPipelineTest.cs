@@ -2,6 +2,7 @@
 // Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -105,6 +106,49 @@ public abstract class SfMetricsPipelineTest : IDisposable
             Assert.Contains(
                 scope.TracesOfType("OpenTelemetryMetricsFactory"),
                 t => t.Level == MetricsTraceLevel.Info && t.Message.StartsWith("Building the OpenTelemetry SDK provider took ", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void SuppliesOpenTelemetryOnceBeforeAnythingLoadsIt()
+        {
+            List<string> steps = [];
+            SfMetricsPipeline.SupplyOpenTelemetry = () => steps.Add("supply");
+            Action loadDiagnosticSource = SfMetricsPipeline.LoadDiagnosticSource;
+            SfMetricsPipeline.LoadDiagnosticSource = () =>
+            {
+                steps.Add("load DiagnosticSource");
+                loadDiagnosticSource();
+            };
+            Action loadGenevaExporter = SfOpenTelemetrySdk.LoadGenevaExporter;
+            SfOpenTelemetrySdk.LoadGenevaExporter = () =>
+            {
+                steps.Add("load Geneva exporter");
+                loadGenevaExporter();
+            };
+            Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
+            SfMetricsPipeline.BuildSdkProvider = settings =>
+            {
+                steps.Add("build");
+                return buildSdkProvider(settings);
+            };
+
+            using (new Int64MeterProvider())
+            using (new TimeSpanMeterProvider())
+            {
+                Assert.Equal(["supply", "load DiagnosticSource", "load Geneva exporter", "build"], steps);
+            }
+        }
+
+        [Fact]
+        public void DoesNotSupplyOpenTelemetryWhenMetricsAreDisabled()
+        {
+            int supplies = 0;
+            SfMetricsPipeline.SupplyOpenTelemetry = () => supplies++;
+            _ = scope.Source.Set("Telemetry/Metrics", "IsEnabled", "false");
+
+            using Int64MeterProvider provider = new();
+
+            Assert.Equal(0, supplies);
         }
     }
 }

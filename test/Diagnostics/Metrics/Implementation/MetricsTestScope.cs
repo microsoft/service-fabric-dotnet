@@ -36,6 +36,12 @@ sealed class MetricsTestScope : IDisposable
     readonly Func<MetricsSettings> loadSettings = SfMetricsPipeline.LoadSettings;
     readonly Func<MetricsSettings, IDisposable> buildSdkProvider = SfMetricsPipeline.BuildSdkProvider;
     readonly Action<IDisposable> flushSdkProvider = SfMetricsPipeline.FlushSdkProvider;
+    readonly Action supplyOpenTelemetry = SfMetricsPipeline.SupplyOpenTelemetry;
+    readonly Action loadDiagnosticSource = SfMetricsPipeline.LoadDiagnosticSource;
+    readonly Func<string> readFabricCodePath = OpenTelemetryAssemblyResolver.ReadFabricCodePath;
+    readonly Func<IEnumerable<string>> readAppProbingDirectories = OpenTelemetryAssemblyResolver.ReadAppProbingDirectories;
+    readonly Func<IEnumerable<Assembly>> readLoadedAssemblies = OpenTelemetryAssemblyResolver.ReadLoadedAssemblies;
+    readonly Action<ResolveEventHandler> subscribe = OpenTelemetryAssemblyResolver.Subscribe;
     readonly Func<string, IReadOnlyDictionary<string, object>, BaseExporter<Metric>> createExporter = SfOpenTelemetrySdk.CreateExporter;
     readonly Func<Assembly, Version> readFileVersion = SfOpenTelemetrySdk.ReadFileVersion;
     readonly Action loadGenevaExporter = SfOpenTelemetrySdk.LoadGenevaExporter;
@@ -52,6 +58,11 @@ sealed class MetricsTestScope : IDisposable
         };
 
         SfMetricsPipeline.ResetForTesting();
+        OpenTelemetryAssemblyResolver.ResetForTesting();
+
+        // Tests never handle the AppDomain's AssemblyResolve event; resolver tests replace these with fakes.
+        SfMetricsPipeline.SupplyOpenTelemetry = static () => { };
+        OpenTelemetryAssemblyResolver.Subscribe = static _ => throw new InvalidOperationException("Tests must not handle AssemblyResolve.");
 
         _ = Source.Set(MetricsSettings.MetricsSection, MetricsBackendSelector.SettingKey, nameof(MetricsBackend.OpenTelemetry));
         if (withCollector)
@@ -107,12 +118,24 @@ sealed class MetricsTestScope : IDisposable
 
     internal IReadOnlyList<TraceRecord> TracesOfType(string type) => Traces.Where(t => t.Type == type).ToArray();
 
+    /// <summary>
+    /// Gets the pipeline's step that supplies OpenTelemetry assemblies, as it was before this scope replaced it.
+    /// </summary>
+    internal Action OriginalSupplyOpenTelemetry => supplyOpenTelemetry;
+
     void IDisposable.Dispose()
     {
         SfMetricsPipeline.ResetForTesting();
+        OpenTelemetryAssemblyResolver.ResetForTesting();
         SfMetricsPipeline.LoadSettings = loadSettings;
         SfMetricsPipeline.BuildSdkProvider = buildSdkProvider;
         SfMetricsPipeline.FlushSdkProvider = flushSdkProvider;
+        SfMetricsPipeline.SupplyOpenTelemetry = supplyOpenTelemetry;
+        SfMetricsPipeline.LoadDiagnosticSource = loadDiagnosticSource;
+        OpenTelemetryAssemblyResolver.ReadFabricCodePath = readFabricCodePath;
+        OpenTelemetryAssemblyResolver.ReadAppProbingDirectories = readAppProbingDirectories;
+        OpenTelemetryAssemblyResolver.ReadLoadedAssemblies = readLoadedAssemblies;
+        OpenTelemetryAssemblyResolver.Subscribe = subscribe;
         SfOpenTelemetrySdk.CreateExporter = createExporter;
         SfOpenTelemetrySdk.ReadFileVersion = readFileVersion;
         SfOpenTelemetrySdk.LoadGenevaExporter = loadGenevaExporter;

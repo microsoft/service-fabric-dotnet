@@ -25,14 +25,25 @@ static class SfMetricsPipeline
     internal static Func<MetricsSettings, IDisposable> BuildSdkProvider = static settings => SfOpenTelemetrySdk.Build(settings);
     internal static Action<IDisposable> FlushSdkProvider = static provider => SfOpenTelemetrySdk.ForceFlush(provider);
 
+    // Replaced by tests. Only .NET Framework apps are supplied from the Service Fabric code folder, which holds .NET Framework builds.
+#if NETFRAMEWORK
+    internal static Action SupplyOpenTelemetry = OpenTelemetryAssemblyResolver.Install;
+#else
+    internal static Action SupplyOpenTelemetry = static () => { };
+#endif
+
+    // Replaced by tests to observe when System.Diagnostics.DiagnosticSource is loaded.
+    internal static Action LoadDiagnosticSource = SfMeterRegistry.EnsureLoaded;
+
     /// <summary>
     /// Gets a value that indicates whether the configuration enables managed metrics (the gate).
     /// </summary>
     internal static bool MetricsEnabled => Volatile.Read(ref state)?.MetricsEnabled == true;
 
     /// <summary>
-    /// Reads the settings and, when they enable managed metrics, loads System.Diagnostics.DiagnosticSource and builds the SDK
-    /// provider. Throws when the backend cannot start.
+    /// Reads the settings and, when they enable managed metrics, supplies Service Fabric's OpenTelemetry assemblies to a .NET Framework
+    /// app that ships none, loads System.Diagnostics.DiagnosticSource and builds the SDK provider. Throws when the backend cannot
+    /// start.
     /// </summary>
     internal static void Start()
     {
@@ -99,8 +110,11 @@ static class SfMetricsPipeline
             return new State(metricsEnabled: false, sdkProvider: null);
         }
 
+        // Before anything loads System.Diagnostics.DiagnosticSource or OpenTelemetry.
+        SupplyOpenTelemetry();
+
         // Throws when System.Diagnostics.DiagnosticSource cannot be loaded, so the backend falls back to COM interop.
-        SfMeterRegistry.EnsureLoaded();
+        LoadDiagnosticSource();
 
         IDisposable sdkProvider = null;
         if (settings.GenevaConnectionStrings.Count > 0)

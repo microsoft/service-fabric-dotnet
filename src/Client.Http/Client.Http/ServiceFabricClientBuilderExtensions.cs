@@ -4,8 +4,11 @@
 // ------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.ServiceFabric.Client.Http
 {
@@ -14,6 +17,27 @@ namespace Microsoft.ServiceFabric.Client.Http
     /// </summary>
     public static class ServiceFabricClientBuilderExtensions
     {
+        /// <summary>Configures additional server certificate validation.</summary>
+        /// <param name="builder">The client builder.</param>
+        /// <param name="callback">A callback returning true to accept, false to reject, or null to use the existing validator.</param>
+        /// <returns>The client builder.</returns>
+        /// <remarks>The callback receives the current configured server common names as a read-only snapshot.
+        /// Calls can run concurrently. The callback must not dispose or retain the certificate or chain.
+        /// Exceptions fail validation without invoking the existing validator.</remarks>
+        /// <exception cref="ArgumentNullException">The builder or callback is null.</exception>
+        public static ServiceFabricClientBuilder UseExtendedServerValidation(
+            this ServiceFabricClientBuilder builder,
+            Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?> callback)
+        {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            builder.Container[typeof(Func<X509Certificate2, X509Chain, SslPolicyErrors, IReadOnlyCollection<string>, bool?>)] = callback;
+            return builder;
+        }
+
         /// <summary>
         /// Configure IServiceFabricClientBuilder to create IServiceFabricClient implementation which communicates with Service Fabric cluster via the REST http gateway using the provided HttpClientHandler and DelegatingHandlers.
         /// </summary>

@@ -29,10 +29,10 @@ static class SfOpenTelemetrySdk
     const int ExportIntervalMilliseconds = 60000;
     const int ExportTimeoutMilliseconds = 30000;
 
-    // OpenTelemetry 1.14.0 is the first release built for .NET 10, and the oldest the Geneva exporter this class is compiled against
-    // requires. Every OpenTelemetry 1.x assembly has version 1.0.0.0, so an app's older copy can load instead; only the file version
-    // tells them apart.
-    static readonly Version minimumOpenTelemetryVersion = new(1, 14, 0);
+    // OpenTelemetry 1.15.3 is the first release whose API has the fix for CVE-2026-40894, so Service Fabric's metrics never run on a
+    // vulnerable API. Every OpenTelemetry 1.x assembly has version 1.0.0.0, so an app's older copy can load instead; only the file
+    // version tells them apart.
+    static readonly Version minimumOpenTelemetryVersion = new(1, 15, 3);
 
     // An app's own OpenTelemetry or Geneva exporter with a newer major version, such as 2.x, can load instead too, and may have
     // removed or changed what this class uses.
@@ -50,7 +50,7 @@ static class SfOpenTelemetrySdk
     static readonly FailureTraceThrottle flushFailures = new();
 
     /// <summary>
-    /// Throws when the Geneva exporter cannot be loaded, a loaded OpenTelemetry assembly is older than the exporter requires, or a
+    /// Throws when the Geneva exporter cannot be loaded, a loaded OpenTelemetry assembly is older than Service Fabric supports, or a
     /// loaded OpenTelemetry assembly or Geneva exporter has a newer major version than this class supports. Call before
     /// <see cref="Build"/>, which may not even compile against such versions.
     /// </summary>
@@ -69,7 +69,7 @@ static class SfOpenTelemetrySdk
             if (version != null && version < minimumOpenTelemetryVersion)
             {
                 throw new NotSupportedException(
-                    $"{assembly.GetName().Name} {version} loaded from '{assembly.Location}' is older than OpenTelemetry {minimumOpenTelemetryVersion}, which the Geneva exporter requires.");
+                    $"{assembly.GetName().Name} {version} loaded from '{assembly.Location}' is older than OpenTelemetry {minimumOpenTelemetryVersion}, the oldest version Service Fabric supports.");
             }
 
             EnsureSupportedMajorVersion(assembly, version);

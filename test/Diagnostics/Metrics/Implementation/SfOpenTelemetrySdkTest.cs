@@ -179,14 +179,15 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         [InlineData("OpenTelemetry")]
         [InlineData("OpenTelemetry.Api")]
         [InlineData("OpenTelemetry.Api.ProviderBuilderExtensions")]
-        public void ThrowsWhenAnOpenTelemetryAssemblyIsOlderThanGenevaExporterRequires(string assemblyName)
+        public void ThrowsWhenAnOpenTelemetryAssemblyIsOlderThanSupported(string assemblyName)
         {
             SfOpenTelemetrySdk.ReadFileVersion = assembly =>
-                assembly.GetName().Name == assemblyName ? new Version(1, 13, 1, 9999) : new Version(1, 14, 0, 0);
+                assembly.GetName().Name == assemblyName ? new Version(1, 15, 2, 2002) : new Version(1, 15, 3, 0);
 
             NotSupportedException error = Assert.Throws<NotSupportedException>(SfOpenTelemetrySdk.EnsureSupportedVersion);
 
-            Assert.Contains($"{assemblyName} 1.13.1.9999 loaded from ", error.Message);
+            Assert.Contains($"{assemblyName} 1.15.2.2002 loaded from ", error.Message);
+            Assert.Contains("is older than OpenTelemetry 1.15.3,", error.Message);
         }
 
         [Theory]
@@ -205,7 +206,7 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
         }
 
         [Theory]
-        [InlineData("1.14.0.0")]
+        [InlineData("1.15.3.0")]
         [InlineData("1.20.1.1")]
         [InlineData(null)]
         public void AcceptsRequiredNewerOrUnknownVersions(string version)

@@ -10,6 +10,8 @@
     <PackageReference Include="Inspector" />
     <PackageReference Include="Microsoft.ServiceFabric" />
     <PackageReference Include="Moq" />
+    <!-- Diagnostics keeps OpenTelemetry private; this brings the System.Diagnostics.DiagnosticSource version it references. -->
+    <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="xunit.v3.assert" />
     <PackageReference Include="xunit.v3.extensibility.core" /> 
   </ItemGroup>

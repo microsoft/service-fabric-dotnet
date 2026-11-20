@@ -9,8 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ServiceFabric" />
     <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
-    <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="OpenTelemetry.Exporter.Geneva" />
+    <!-- Not passed on to apps: Service Fabric supplies OpenTelemetry at run time to apps that have none, through the .NET startup
+         hook and OpenTelemetryAssemblyResolver on .NET Framework. -->
+    <PackageReference Include="OpenTelemetry" PrivateAssets="all" />
+    <PackageReference Include="OpenTelemetry.Exporter.Geneva" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Constants\Microsoft.ServiceFabric.Constants.csproj" PrivateAssets="All" />

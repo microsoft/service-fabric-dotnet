@@ -2,6 +2,9 @@
   <PropertyGroup>
     <RootNamespace>Microsoft.ServiceFabric.Services.Communication.AspNetCore</RootNamespace>
     <TargetFrameworks>net462;net8.0</TargetFrameworks>
+    <!-- MSB3277: this build finds the newer System.Diagnostics.DiagnosticSource and Microsoft.Extensions that Diagnostics keeps
+         private next to Microsoft.ServiceFabric.Diagnostics.dll. Builds of apps that use the packages don't, so they don't warn. -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
     <Description>HTTP.sys-based communication listener for ASP.NET Core applications on Service Fabric.</Description>
   </PropertyGroup>
   <Import Project="..\..\properties\service_fabric_managed_common.props" />

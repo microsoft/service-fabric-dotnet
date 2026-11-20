@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -149,6 +150,50 @@ public abstract class SfMetricsPipelineTest : IDisposable
             using Int64MeterProvider provider = new();
 
             Assert.Equal(0, supplies);
+        }
+
+        [Theory]
+        [InlineData("load DiagnosticSource")]
+        [InlineData("load Geneva exporter")]
+        [InlineData("build")]
+        public void StopsResolvingOpenTelemetryWhenStartFails(string failingStep)
+        {
+            string[] order = ["load DiagnosticSource", "load Geneva exporter", "build"];
+            List<string> steps = [];
+            SfMetricsPipeline.SupplyOpenTelemetry = () => steps.Add("supply");
+            SfMetricsPipeline.WithdrawOpenTelemetry = () => steps.Add("withdraw");
+            SfMetricsPipeline.LoadDiagnosticSource = () => Step("load DiagnosticSource");
+            SfOpenTelemetrySdk.LoadGenevaExporter = () => Step("load Geneva exporter");
+            SfMetricsPipeline.BuildSdkProvider = _ =>
+            {
+                Step("build");
+                return null;
+            };
+
+            InvalidOperationException e = Assert.Throws<InvalidOperationException>(SfMetricsPipeline.Start);
+
+            Assert.Equal(failingStep, e.Message);
+            Assert.Equal(["supply", .. order.TakeWhile(step => step != failingStep), failingStep, "withdraw"], steps);
+            Assert.False(SfMetricsPipeline.MetricsEnabled);
+
+            void Step(string step)
+            {
+                steps.Add(step);
+                if (step == failingStep)
+                    throw new InvalidOperationException(step);
+            }
+        }
+
+        [Fact]
+        public void KeepsResolvingOpenTelemetryWhenStartSucceeds()
+        {
+            int withdrawals = 0;
+            SfMetricsPipeline.WithdrawOpenTelemetry = () => withdrawals++;
+
+            using Int64MeterProvider provider = new();
+
+            Assert.True(SfMetricsPipeline.MetricsEnabled);
+            Assert.Equal(0, withdrawals);
         }
     }
 }

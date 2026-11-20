@@ -28,8 +28,10 @@ static class SfMetricsPipeline
     // Replaced by tests. Only .NET Framework apps are supplied from the Service Fabric code folder, which holds .NET Framework builds.
 #if NETFRAMEWORK
     internal static Action SupplyOpenTelemetry = OpenTelemetryAssemblyResolver.Install;
+    internal static Action WithdrawOpenTelemetry = OpenTelemetryAssemblyResolver.Uninstall;
 #else
     internal static Action SupplyOpenTelemetry = static () => { };
+    internal static Action WithdrawOpenTelemetry = static () => { };
 #endif
 
     // Replaced by tests to observe when System.Diagnostics.DiagnosticSource is loaded.
@@ -41,14 +43,25 @@ static class SfMetricsPipeline
     internal static bool MetricsEnabled => Volatile.Read(ref state)?.MetricsEnabled == true;
 
     /// <summary>
-    /// Reads the settings and, when they enable managed metrics, supplies Service Fabric's OpenTelemetry assemblies to a .NET Framework
-    /// app that ships none, loads System.Diagnostics.DiagnosticSource and builds the SDK provider. Throws when the backend cannot
-    /// start.
+    /// Reads the settings and, when they enable managed metrics, resolves OpenTelemetry assemblies for a .NET Framework app, loads
+    /// System.Diagnostics.DiagnosticSource and builds the SDK provider. Throws when the backend cannot start, after it stops resolving
+    /// OpenTelemetry assemblies for the app.
     /// </summary>
     internal static void Start()
     {
         lock (syncRoot)
-            Volatile.Write(ref state, Initialize());
+        {
+            try
+            {
+                Volatile.Write(ref state, Initialize());
+            }
+            catch
+            {
+                // The backend falls back to COM interop, which needs none of the assemblies resolved for it.
+                WithdrawOpenTelemetry();
+                throw;
+            }
+        }
     }
 
     /// <summary>

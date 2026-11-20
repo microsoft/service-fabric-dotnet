@@ -65,6 +65,23 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
         return path;
     }
 
+    protected sealed class FakeAssembly(string location, bool isDynamic = false, AssemblyName[] references = null, string fullName = null) : Assembly
+    {
+        public override string Location => location;
+
+        public override bool IsDynamic => isDynamic;
+
+#if NETFRAMEWORK
+        public override bool GlobalAssemblyCache => false;
+#endif
+
+        public override string FullName => fullName ?? "Fake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+
+        public override AssemblyName GetName() => new(FullName);
+
+        public override AssemblyName[] GetReferencedAssemblies() => references ?? [];
+    }
+
     public sealed class Install : OpenTelemetryAssemblyResolverTest
     {
         [Fact]
@@ -88,20 +105,24 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
         [InlineData("opentelemetry.exporter.geneva.dll")]
         [InlineData("OPENTELEMETRY.API.DLL")]
         [InlineData("OpenTelemetry.Instrumentation.Http.dll")]
-        public void SuppliesNothingWhenAppShipsAnyOpenTelemetryAssembly(string fileName)
+        public void ResolvesWithAppAssembliesWhenAppShipsAnyOpenTelemetryAssembly(string fileName)
         {
             CreateFile(codeFolder, "OpenTelemetry.dll");
             CreateFile(appDirectory, fileName);
 
             OpenTelemetryAssemblyResolver.Install();
 
-            Assert.Empty(handlers);
+            _ = Assert.Single(handlers);
             TraceRecord trace = AssertSingleTrace(MetricsTraceLevel.Info, "The app provides OpenTelemetry (");
             Assert.Contains(Path.Combine(appDirectory, fileName), trace.Message, StringComparison.Ordinal);
+            Assert.EndsWith(
+                $"a newer app copy of an assembly they reference stands in for it, and assemblies the app lacks are supplied from '{Path.Combine(codeFolder, OpenTelemetryAssemblyResolver.FillInFolderName)}'.",
+                trace.Message,
+                StringComparison.Ordinal);
         }
 
         [Fact]
-        public void SuppliesNothingWhenAnyProbingDirectoryHasOpenTelemetryAssembly()
+        public void ResolvesWithAppAssembliesWhenAnyProbingDirectoryHasOpenTelemetryAssembly()
         {
             CreateFile(codeFolder, "OpenTelemetry.dll");
             string privateDirectory = Directory.CreateDirectory(Path.Combine(appDirectory, "lib")).FullName;
@@ -110,20 +131,36 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
 
             OpenTelemetryAssemblyResolver.Install();
 
-            Assert.Empty(handlers);
-            _ = AssertSingleTrace(MetricsTraceLevel.Info, "The app provides OpenTelemetry (");
+            _ = Assert.Single(handlers);
+            TraceRecord trace = AssertSingleTrace(MetricsTraceLevel.Info, "The app provides OpenTelemetry (");
+            Assert.Contains(Path.Combine(privateDirectory, "OpenTelemetry.Api.dll"), trace.Message, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void SuppliesNothingWhenOpenTelemetryAssemblyIsLoaded()
+        public void ResolvesWithAppAssembliesWhenOpenTelemetryAssemblyIsLoaded()
         {
             CreateFile(codeFolder, "OpenTelemetry.dll");
             OpenTelemetryAssemblyResolver.ReadLoadedAssemblies = () => [typeof(object).Assembly, typeof(Baggage).Assembly];
 
             OpenTelemetryAssemblyResolver.Install();
 
-            Assert.Empty(handlers);
+            _ = Assert.Single(handlers);
             _ = AssertSingleTrace(MetricsTraceLevel.Info, $"The app provides OpenTelemetry (loaded assembly {typeof(Baggage).Assembly.FullName}),");
+        }
+
+        [Fact]
+        public void ResolvesWithAppAssembliesButSuppliesNoneWhenAppShipsOpenTelemetryAndCodeFolderCannotBeRead()
+        {
+            CreateFile(appDirectory, "OpenTelemetry.dll");
+            OpenTelemetryAssemblyResolver.ReadFabricCodePath = () => throw new COMException("FabricCodePathNotFound");
+
+            OpenTelemetryAssemblyResolver.Install();
+
+            _ = Assert.Single(handlers);
+            _ = AssertSingleTrace(MetricsTraceLevel.Info, "Service Fabric's code folder could not be read.");
+            TraceRecord trace = AssertSingleTrace(MetricsTraceLevel.Info, "The app provides OpenTelemetry (");
+            Assert.EndsWith(
+                "and none of the assemblies the app lacks are supplied, because Service Fabric's code folder is unknown.", trace.Message, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -169,6 +206,61 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
             OpenTelemetryAssemblyResolver.Install();
 
             _ = Assert.Single(handlers);
+        }
+
+        [Fact]
+        public void UninstallStopsHandlingAssemblyResolveForGood()
+        {
+            CreateFile(codeFolder, "OpenTelemetry.dll");
+            List<ResolveEventHandler> removed = [];
+            OpenTelemetryAssemblyResolver.Unsubscribe = removed.Add;
+            OpenTelemetryAssemblyResolver.Install();
+
+            OpenTelemetryAssemblyResolver.Uninstall();
+            OpenTelemetryAssemblyResolver.Install();
+            OpenTelemetryAssemblyResolver.Uninstall();
+
+            Assert.Equal(handlers, removed);
+            _ = AssertSingleTrace(
+                MetricsTraceLevel.Info, "The OpenTelemetry backend did not start, so Service Fabric stopped resolving OpenTelemetry assemblies for the app.");
+        }
+
+        [Fact]
+        public void UninstallDoesNothingWithoutHandler()
+        {
+            List<ResolveEventHandler> removed = [];
+            OpenTelemetryAssemblyResolver.Unsubscribe = removed.Add;
+
+            OpenTelemetryAssemblyResolver.Uninstall();
+            OpenTelemetryAssemblyResolver.Install();
+            OpenTelemetryAssemblyResolver.Uninstall();
+
+            Assert.Empty(handlers);
+            Assert.Empty(removed);
+            Assert.DoesNotContain(scope.TracesOfType(TraceType), t => t.Message.StartsWith("The OpenTelemetry backend did not start", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void UninstallTracesWarningWhenUnsubscribingThrows()
+        {
+            CreateFile(codeFolder, "OpenTelemetry.dll");
+            OpenTelemetryAssemblyResolver.Unsubscribe = _ => throw new InvalidOperationException("Unsubscribing failed.");
+            OpenTelemetryAssemblyResolver.Install();
+
+            OpenTelemetryAssemblyResolver.Uninstall();
+
+            _ = AssertSingleTrace(MetricsTraceLevel.Warning, "Failed to stop resolving OpenTelemetry assemblies for the app.");
+        }
+
+        [Fact]
+        public void PipelineUninstallsResolverOnlyOnDotNetFramework()
+        {
+#if NETFRAMEWORK
+            Assert.Equal(typeof(OpenTelemetryAssemblyResolver), scope.OriginalWithdrawOpenTelemetry.Method.DeclaringType);
+            Assert.Equal(nameof(OpenTelemetryAssemblyResolver.Uninstall), scope.OriginalWithdrawOpenTelemetry.Method.Name);
+#else
+            Assert.NotEqual(typeof(OpenTelemetryAssemblyResolver), scope.OriginalWithdrawOpenTelemetry.Method.DeclaringType);
+#endif
         }
 
         [Fact]
@@ -386,24 +478,295 @@ public abstract class OpenTelemetryAssemblyResolverTest : IDisposable
 
             _ = AssertSingleTrace(MetricsTraceLevel.Warning, $"Service Fabric failed to supply {OpenTelemetryRequest} from '{codeFolder}'.");
         }
+    }
 
-        sealed class FakeAssembly(string location, bool isDynamic = false, AssemblyName[] references = null) : Assembly
+    /// <summary>
+    /// Tests resolving in an app that ships OpenTelemetry: the app's newer copies stand in for the exact versions Service Fabric's
+    /// metrics reference, and only assemblies the app lacks come from the fill-in folder. Empty files stand in for the app's copies,
+    /// with the assembly names the tests give them.
+    /// </summary>
+    public sealed class ResolveForAppOpenTelemetry : OpenTelemetryAssemblyResolverTest
+    {
+        readonly Dictionary<string, AssemblyName> fileNames = new(StringComparer.OrdinalIgnoreCase);
+        readonly List<string> appLoads = [];
+        readonly List<string> folderLoads = [];
+        readonly Assembly appAssembly = typeof(object).Assembly;
+        readonly Assembly folderAssembly = typeof(Assert).Assembly;
+        readonly string fillInFolder;
+        readonly AssemblyName genevaReference =
+            typeof(OpenTelemetryAssemblyResolver).Assembly.GetReferencedAssemblies().Single(r => r.Name == "OpenTelemetry.Exporter.Geneva");
+
+        public ResolveForAppOpenTelemetry() =>
+            fillInFolder = Directory.CreateDirectory(Path.Combine(codeFolder, OpenTelemetryAssemblyResolver.FillInFolderName)).FullName;
+
+        Version Newer => new(genevaReference.Version.Major, genevaReference.Version.Minor + 1, 2, 1008);
+
+        string Request => genevaReference.FullName;
+
+        OpenTelemetryAssemblyResolver CreateResolver(string folder, Func<AssemblyName, Assembly> load = null) => new(
+            folder,
+            typeof(OpenTelemetryAssemblyResolver).Assembly,
+            path => fileNames.TryGetValue(path, out AssemblyName name) ? name : AssemblyName.GetAssemblyName(path),
+            path =>
+            {
+                folderLoads.Add(path);
+                return folderAssembly;
+            },
+            [appDirectory],
+            load ?? (name =>
+            {
+                appLoads.Add(name.FullName);
+                return appAssembly;
+            }));
+
+        AssemblyName GenevaName(Version version, byte[] publicKeyToken = null)
         {
-            public override string Location => location;
+            AssemblyName name = new(genevaReference.FullName) { Version = version };
+            if (publicKeyToken != null)
+                name.SetPublicKeyToken(publicKeyToken);
 
-            public override bool IsDynamic => isDynamic;
+            return name;
+        }
 
-#if NETFRAMEWORK
-            public override bool GlobalAssemblyCache => false;
-#endif
+        AssemblyName CreateAppGeneva(string directory, AssemblyName name)
+        {
+            string path = Path.Combine(directory, genevaReference.Name + ".dll");
+            CreateFile(directory, genevaReference.Name + ".dll");
+            fileNames[path] = name;
+            return name;
+        }
 
-            public override string FullName => "Fake, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+        static AssemblyName Reference(string name) =>
+            typeof(OpenTelemetryAssemblyResolver).Assembly.GetReferencedAssemblies().Single(r => r.Name == name);
 
-            public override AssemblyName GetName() => new(FullName);
+        AssemblyName CreateAppCopy(AssemblyName reference, int majorVersionChange)
+        {
+            AssemblyName name = new(reference.FullName) { Version = new Version(reference.Version.Major + majorVersionChange, 0, 0, 0) };
+            CreateFile(appDirectory, name.Name + ".dll");
+            fileNames[Path.Combine(appDirectory, name.Name + ".dll")] = name;
+            return name;
+        }
 
-            public override AssemblyName[] GetReferencedAssemblies() => references ?? [];
+        [Fact]
+        public void LetsNewerAppCopyStandInForReferencedVersion()
+        {
+            AssemblyName app = CreateAppGeneva(appDirectory, GenevaName(Newer));
+            _ = CopyAssembly(typeof(GenevaMetricExporter).Assembly, fillInFolder);
+
+            Assembly assembly = CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request));
+
+            Assert.Same(appAssembly, assembly);
+            Assert.Equal([app.FullName], appLoads);
+            Assert.Empty(folderLoads);
+            _ = AssertSingleTrace(
+                MetricsTraceLevel.Info, $"The app's {appAssembly.FullName} stands in for {Request}, which Service Fabric's metrics reference, as a binding redirect would.");
+        }
+
+        [Fact]
+        public void UsesNewestLoadedAppCopyWithoutLoading()
+        {
+            _ = CreateAppGeneva(appDirectory, GenevaName(new Version(genevaReference.Version.Major, 0, 0, 1)));
+            FakeAssembly older = new(Path.Combine(appDirectory, "older", "Geneva.dll"), fullName: GenevaName(Newer).FullName);
+            FakeAssembly newest = new(Path.Combine(appDirectory, "newest", "Geneva.dll"), fullName: GenevaName(new Version(genevaReference.Version.Major, 99, 0, 0)).FullName);
+            OpenTelemetryAssemblyResolver.ReadLoadedAssemblies = () => [typeof(object).Assembly, older, newest];
+
+            Assert.Same(newest, CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Empty(appLoads);
+            Assert.Empty(folderLoads);
+        }
+
+        [Fact]
+        public void LetsLoadedAppCopyOfReferencedVersionStandIn()
+        {
+            FakeAssembly loaded = new(Path.Combine(appDirectory, "plugins", "Geneva.dll"), fullName: Request);
+            OpenTelemetryAssemblyResolver.ReadLoadedAssemblies = () => [typeof(object).Assembly, loaded];
+
+            Assert.Same(loaded, CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Empty(appLoads);
+        }
+
+        [Fact]
+        public void IgnoresCopiesLoadedFromFillInFolder()
+        {
+            FakeAssembly suppliedEarlier = new(Path.Combine(fillInFolder, "OpenTelemetry.Exporter.Geneva.dll"), fullName: GenevaName(Newer).FullName);
+            OpenTelemetryAssemblyResolver.ReadLoadedAssemblies = () => [typeof(object).Assembly, suppliedEarlier];
+            string path = CopyAssembly(typeof(GenevaMetricExporter).Assembly, fillInFolder);
+
+            Assert.Same(folderAssembly, CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Equal([path], folderLoads);
+        }
+
+        [Theory]
+        [InlineData("older")]
+        [InlineData("next major")]
+        [InlineData("referenced version")]
+        [InlineData("other public key token")]
+        public void DeclinesAppCopyThatCannotStandInAndSuppliesNothing(string appCopy)
+        {
+            Version referenced = genevaReference.Version;
+            AssemblyName name = appCopy switch
+            {
+                "older" => GenevaName(new Version(referenced.Major, 0, 0, 1)),
+                "next major" => GenevaName(new Version(referenced.Major + 1, 0, 0, 0)),
+                "referenced version" => GenevaName(referenced),
+                _ => GenevaName(Newer, [1, 2, 3, 4, 5, 6, 7, 8]),
+            };
+            _ = CreateAppGeneva(appDirectory, name);
+            _ = CopyAssembly(typeof(GenevaMetricExporter).Assembly, fillInFolder);
+            OpenTelemetryAssemblyResolver resolver = CreateResolver(fillInFolder);
+
+            Assert.Null(resolver.Resolve(null, new ResolveEventArgs(Request)));
+            Assert.Null(resolver.Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Empty(appLoads);
+            Assert.Empty(folderLoads);
+            _ = AssertSingleTrace(MetricsTraceLevel.Warning, $"The app's {name.FullName} does not stand in for {Request}, which Service Fabric's metrics reference,");
+        }
+
+        [Theory]
+        [InlineData("System.Diagnostics.DiagnosticSource")]
+        [InlineData("Microsoft.Extensions.Configuration")]
+        [InlineData("Microsoft.Extensions.Configuration.Abstractions")]
+        [InlineData("Microsoft.Extensions.DependencyInjection.Abstractions")]
+        public void LetsNewerMajorVersionOfDiagnosticSourceAndMicrosoftExtensionsStandIn(string assemblyName)
+        {
+            AssemblyName reference = Reference(assemblyName);
+            AssemblyName app = CreateAppCopy(reference, majorVersionChange: 1);
+
+            Assert.Same(appAssembly, CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(reference.FullName)));
+
+            Assert.Equal([app.FullName], appLoads);
+            Assert.Empty(folderLoads);
+        }
+
+        [Theory]
+        [InlineData("System.Diagnostics.DiagnosticSource")]
+        [InlineData("Microsoft.Extensions.Configuration")]
+        public void DeclinesOlderMajorVersionOfDiagnosticSourceAndMicrosoftExtensions(string assemblyName)
+        {
+            AssemblyName reference = Reference(assemblyName);
+            AssemblyName app = CreateAppCopy(reference, majorVersionChange: -1);
+
+            Assert.Null(CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(reference.FullName)));
+
+            Assert.Empty(appLoads);
+            Assert.Empty(folderLoads);
+            _ = AssertSingleTrace(MetricsTraceLevel.Warning, $"The app's {app.FullName} does not stand in for {reference.FullName},");
+        }
+
+        [Fact]
+        public void FindsAppCopyInProbingOrder()
+        {
+            string first = Directory.CreateDirectory(Path.Combine(appDirectory, "first")).FullName;
+            string second = Directory.CreateDirectory(Path.Combine(appDirectory, "second")).FullName;
+            AssemblyName older = CreateAppGeneva(first, GenevaName(new Version(genevaReference.Version.Major, 0, 0, 1)));
+            _ = CreateAppGeneva(second, GenevaName(Newer));
+            OpenTelemetryAssemblyResolver resolver = new(
+                fillInFolder,
+                typeof(OpenTelemetryAssemblyResolver).Assembly,
+                path => fileNames[path],
+                path =>
+                {
+                    folderLoads.Add(path);
+                    return folderAssembly;
+                },
+                [Path.Combine(root, "missing"), first, second],
+                name =>
+                {
+                    appLoads.Add(name.FullName);
+                    return appAssembly;
+                });
+
+            Assert.Null(resolver.Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Empty(appLoads);
+            Assert.Empty(folderLoads);
+            _ = AssertSingleTrace(MetricsTraceLevel.Warning, $"The app's {older.FullName} does not stand in for {Request},");
+        }
+
+        [Theory]
+        [InlineData("other version")]
+        [InlineData("other public key token")]
+        [InlineData("no version")]
+        [InlineData("not referenced")]
+        public void DeclinesRequestThatIsNotAnExactReference(string request)
+        {
+            _ = CreateAppGeneva(appDirectory, GenevaName(Newer));
+            CreateFile(appDirectory, "Moq.dll");
+            fileNames[Path.Combine(appDirectory, "Moq.dll")] = new(typeof(Mock).Assembly.GetName().FullName) { Version = new Version(99, 0) };
+            string name = request switch
+            {
+                "other version" => GenevaName(new Version(genevaReference.Version.Major, genevaReference.Version.Minor, genevaReference.Version.Build, genevaReference.Version.Revision + 1)).FullName,
+                "other public key token" => GenevaName(genevaReference.Version, [1, 2, 3, 4, 5, 6, 7, 8]).FullName,
+                "no version" => genevaReference.Name,
+                _ => typeof(Mock).Assembly.GetName().FullName,
+            };
+
+            Assert.Null(CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(name)));
+
+            Assert.Empty(appLoads);
+            Assert.Empty(folderLoads);
+            Assert.Empty(scope.TracesOfType(TraceType));
+        }
+
+        [Fact]
+        public void DeclinesRequestsOfAppCode()
+        {
+            _ = CreateAppGeneva(appDirectory, GenevaName(Newer));
+
+            Assert.Null(CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request, new FakeAssembly(Path.Combine(appDirectory, "App.dll")))));
+
+            Assert.Empty(appLoads);
+        }
+
+        [Fact]
+        public void DeclinesCultureSpecificRequest()
+        {
+            _ = CreateAppGeneva(appDirectory, GenevaName(Newer));
+            AssemblyName request = new(Request) { CultureName = "de" };
+
+            Assert.Null(CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(request.FullName)));
+
+            Assert.Empty(appLoads);
+        }
+
+        [Fact]
+        public void SuppliesAssemblyTheAppLacksFromFillInFolder()
+        {
+            string path = CopyAssembly(typeof(GenevaMetricExporter).Assembly, fillInFolder);
+
+            Assert.Same(folderAssembly, CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Equal([path], folderLoads);
+            Assert.Empty(appLoads);
+            _ = AssertSingleTrace(MetricsTraceLevel.Info, $"Service Fabric supplied '{path}' ({folderAssembly.FullName}) for {Request}.");
+        }
+
+        [Fact]
+        public void SuppliesNothingTheAppLacksWithoutFillInFolderOrFile()
+        {
+            Assert.Null(CreateResolver(null).Resolve(null, new ResolveEventArgs(Request)));
+            Assert.Null(CreateResolver(fillInFolder).Resolve(null, new ResolveEventArgs(Request)));
+
+            Assert.Empty(folderLoads);
+            Assert.Empty(scope.TracesOfType(TraceType));
+        }
+
+        [Fact]
+        public void ReturnsNullAndTracesWarningWhenLoadingAppCopyThrows()
+        {
+            _ = CreateAppGeneva(appDirectory, GenevaName(Newer));
+            OpenTelemetryAssemblyResolver failing = CreateResolver(fillInFolder, _ => throw new FileLoadException());
+
+            Assert.Null(failing.Resolve(null, new ResolveEventArgs(Request)));
+
+            _ = AssertSingleTrace(MetricsTraceLevel.Warning, $"Service Fabric failed to resolve {Request} from the app's assemblies or '{fillInFolder}'.");
         }
     }
+
     public sealed class ReadConfigurationPrivatePath : OpenTelemetryAssemblyResolverTest
     {
         string WriteConfiguration(string content)

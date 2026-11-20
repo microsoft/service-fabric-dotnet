@@ -173,6 +173,9 @@
   <data name="ErrorEmptyList" xml:space="preserve">
     <value>{0} cannot be an empty list.</value>
   </data>
+  <data name="ErrorExtendedCertificateHandlerType" xml:space="preserve">
+    <value>Type '{0}' must be a public class to provide extended server certificate validation.</value>
+  </data>
   <data name="ErrorExpectedObjectOfTypeFormatString" xml:space="preserve">
     <value>Expected an object of type '{0}'.</value>
     <comment>ExpectedType</comment>

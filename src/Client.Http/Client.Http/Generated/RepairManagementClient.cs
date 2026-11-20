@@ -44,7 +44,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -79,7 +79,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -114,7 +114,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -153,7 +153,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             taskIdFilter?.AddToQueryParameters(queryParams, $"TaskIdFilter={taskIdFilter}");
             stateFilter?.AddToQueryParameters(queryParams, $"StateFilter={stateFilter}");
             executorFilter?.AddToQueryParameters(queryParams, $"ExecutorFilter={executorFilter}");
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             HttpRequestMessage RequestFunc()
@@ -179,7 +179,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -214,7 +214,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;
@@ -249,7 +249,7 @@ namespace Microsoft.ServiceFabric.Client.Http
             var queryParams = new List<string>();
             
             // Append to queryParams if not null.
-            queryParams.Add("api-version=6.0");
+            this.AddApiVersionAndServiceId(queryParams);
             url += "?" + string.Join("&", queryParams);
             
             string content;

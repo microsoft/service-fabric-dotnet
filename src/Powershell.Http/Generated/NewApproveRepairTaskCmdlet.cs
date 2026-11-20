@@ -14,7 +14,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// Forces the approval of the given repair task.
     /// </summary>
     [Cmdlet(VerbsCommon.New, "SFApproveRepairTask")]
-    public partial class NewApproveRepairTaskCmdlet : CommonCmdletBase
+    public partial class NewApproveRepairTaskCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets TaskId. The ID of the repair task.
@@ -37,7 +37,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             taskId: this.TaskId,
             version: this.Version);
 
-            var result = this.ServiceFabricClient.Repairs.ForceApproveRepairTaskAsync(
+            var result = this.RepairClient.ForceApproveRepairTaskAsync(
                 repairTaskApproveDescription: repairTaskApproveDescription,
                 cancellationToken: this.CancellationToken).GetAwaiter().GetResult();
 

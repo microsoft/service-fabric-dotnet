@@ -79,6 +79,54 @@ dotnet pack
 ```
 NuGet packages and PowerShell modules are produced in `out/packages`.
 
+## Internal Repair Manager support
+
+Named External Repair Manager routing is an internal platform feature. It does not add REST paths or change
+`IRepairManagementClient` signatures. The internal `RepairManagementClient.ForService` factory returns an immutable
+client bound to one Repair Manager `ServiceId` for the HTTP PowerShell friend assembly; arbitrary .NET applications
+cannot call this factory. The cluster connection's `Repairs` client always retains its original default target.
+
+The seven HTTP repair cmdlets accept a hidden, optional **string** parameter, `-ServiceId`:
+`Get-SFRepairTaskList`, `New-SFRepairTask`, `Stop-SFRepairTask`, `New-SFApproveRepairTask`, `Remove-SFRepairTask`,
+`Update-SFRepairExecutionState`, and `Update-SFRepairTaskHealthPolicy`. These are not the runtime's
+`*-ServiceFabricRepairTask` cmdlets.
+
+```powershell
+$rm = 'System~RepairManagerService~ext01'
+New-SFRepairTask -ServiceId $rm -External `
+    -TaskId 'platform-repair-example' -State Created -Action 'External.RestartNode' -Version '0'
+Get-SFRepairTaskList -ServiceId $rm -TaskIdFilter 'platform-repair-example'
+```
+
+The value is the Repair Manager's service name without `fabric:/`, with `~` in place of `/`, as for the `ServiceId` of
+the Infrastructure Service operations: `System~RepairManagerService~ext01` selects the named External Repair Manager
+whose configured `ServiceName` is `fabric:/System/RepairManagerService/ext01`, and `System~RepairManagerService`
+selects the default RM. The name is case-sensitive ASCII letters, digits and hyphens, and does not start with a
+hyphen. Do not URL-encode the value. Omitting the parameter targets the original RM with an unchanged request; an
+explicitly empty or invalid value fails rather than falling back.
+
+Service selection and task kind are independent. `-External` selects the internal External payload parameter set on
+create/update; `-ExternalImpactLevel RestartNode` supplies its impact when appropriate. Existing `-Node` parameters
+still work with either service target. The internal External models and converters preserve those tasks on read/update.
+The public kind enums have additive, IntelliSense-hidden `External` values; existing enum values are unchanged.
+
+A targeted request sends `ServiceId` with `api-version=12.0`; requests without it keep `api-version=6.0`. Gateways
+older than 12.0 reject api-version 12.0, but a 12.0 gateway without named Repair Manager support does not recognize
+`ServiceId` and can execute against the default RM, so all receiving HTTP gateways must support named routing before
+it is used. Neither the selector nor `DontShow` grants authorization. Requests retain their existing authentication
+and task-state requirements.
+Deletion remains `POST /$/DeleteRepairTask` and removes a completed task, not the service. There is no cross-instance
+fallback or task search. Carry the selector through every operation, even when task IDs match between instances.
+
+When regenerating the HTTP client or cmdlets, retain the seven query hooks, repair-only base class, External
+converter branches, and create/update parameter sets. The normal public Swagger inputs and generated public help
+remain unchanged; the named selector is specified by the opt-in private SF-Swagger augmentation.
+
+Run the `test/Client.Http` xUnit project in Release and the PowerShell regression script in
+`test/Powershell.Http/RepairManagement.Tests.ps1` against both module target frameworks before publishing.
+The CI workflow runs the xUnit project through the solution, PowerShell Core checks on Windows and Linux, and
+Windows PowerShell checks on Windows.
+
 ## Integrate
 
 You can build and test both Runtime and SDK packages locally.

@@ -13,14 +13,27 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// <summary>
     /// Creates a new repair task.
     /// </summary>
-    [Cmdlet(VerbsCommon.New, "SFRepairTask")]
-    public partial class NewRepairTaskCmdlet : CommonCmdletBase
+    [Cmdlet(VerbsCommon.New, "SFRepairTask", DefaultParameterSetName = "_Node__Node_")]
+    public partial class NewRepairTaskCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets Node flag
         /// </summary>
         [Parameter(Mandatory = false, Position = 0, ParameterSetName = "_Node__Node_")]
         public SwitchParameter Node { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that indicates whether this internal task has an External target.
+        /// </summary>
+        [Parameter(Mandatory = true, ParameterSetName = "External", DontShow = true)]
+        public SwitchParameter External { get; set; }
+
+        /// <summary>
+        /// Gets or sets the internal task's External impact level. Omission leaves the impact unspecified.
+        /// </summary>
+        [Parameter(ParameterSetName = "External", DontShow = true)]
+        [ValidateSet("None", "RestartNode", "RemoveNode", "RemoveNodeData", "FabricUpgrade", "ApplicationUpgrade", "Partition")]
+        public string ExternalImpactLevel { get; set; }
 
         /// <summary>
         /// Gets or sets TaskId. The ID of the repair task.
@@ -231,12 +244,20 @@ namespace Microsoft.ServiceFabric.Powershell.Http
                 repairTargetDescriptionBase = new NodeRepairTargetDescription(
                     nodeNames: this.NodeNames);
             }
+            else if (this.External.IsPresent)
+            {
+                repairTargetDescriptionBase = new ExternalRepairTargetDescription();
+            }
 
             RepairImpactDescriptionBase repairImpactDescriptionBase = null;
             if (this.Node.IsPresent)
             {
                 repairImpactDescriptionBase = new NodeRepairImpactDescription(
                     nodeImpactList: this.NodeImpactList);
+            }
+            else if (this.External.IsPresent && this.ExternalImpactLevel != null)
+            {
+                repairImpactDescriptionBase = new ExternalRepairImpactDescription(this.ExternalImpactLevel);
             }
 
             var repairTaskHistory = new RepairTaskHistory(
@@ -272,7 +293,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
             performPreparingHealthCheck: this.PerformPreparingHealthCheck,
             performRestoringHealthCheck: this.PerformRestoringHealthCheck);
 
-            var result = this.ServiceFabricClient.Repairs.CreateRepairTaskAsync(
+            var result = this.RepairClient.CreateRepairTaskAsync(
                 repairTask: repairTask,
                 cancellationToken: this.CancellationToken).GetAwaiter().GetResult();
 

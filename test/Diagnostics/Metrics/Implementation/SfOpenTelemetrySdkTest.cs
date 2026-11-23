@@ -190,6 +190,27 @@ public abstract class SfOpenTelemetrySdkTest : IDisposable
             Assert.Contains("is older than OpenTelemetry 1.15.3,", error.Message);
         }
 
+        [Fact]
+        public void ThrowsWhenGenevaExporterIsOlderThanSupported()
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = assembly =>
+                assembly.GetName().Name == "OpenTelemetry.Exporter.Geneva" ? new Version(1, 13, 1, 737) : new Version(1, 15, 3, 0);
+
+            NotSupportedException error = Assert.Throws<NotSupportedException>(SfOpenTelemetrySdk.EnsureSupportedVersion);
+
+            Assert.Contains("OpenTelemetry.Exporter.Geneva 1.13.1.737 loaded from ", error.Message);
+            Assert.Contains("is older than Geneva exporter 1.14.0,", error.Message);
+        }
+
+        [Fact]
+        public void AcceptsGenevaExporterAtOldestSupportedVersion()
+        {
+            SfOpenTelemetrySdk.ReadFileVersion = assembly =>
+                assembly.GetName().Name == "OpenTelemetry.Exporter.Geneva" ? new Version(1, 14, 0, 0) : new Version(1, 15, 3, 0);
+
+            SfOpenTelemetrySdk.EnsureSupportedVersion();
+        }
+
         [Theory]
         [InlineData("OpenTelemetry")]
         [InlineData("OpenTelemetry.Api")]

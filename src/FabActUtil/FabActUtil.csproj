@@ -2,9 +2,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net8.0;net462</TargetFrameworks>
-    <!-- MSB3277: this build finds the newer System.Diagnostics.DiagnosticSource and Microsoft.Extensions that Diagnostics keeps
-         private next to Microsoft.ServiceFabric.Diagnostics.dll. Builds of apps that use the packages don't, so they don't warn. -->
-    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <!-- MSB3277 on net8.0: this build finds the System.Diagnostics.DiagnosticSource 10 that Diagnostics keeps private next to
+         Microsoft.ServiceFabric.Diagnostics.dll, newer than .NET 8's. Builds of apps that use the packages don't, so they don't warn. -->
+    <NoWarn Condition="'$(TargetFramework)' == 'net8.0'">$(NoWarn);MSB3277</NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <Import Project="..\..\properties\service_fabric_managed_common.props" />

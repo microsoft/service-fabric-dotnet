@@ -14,7 +14,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
     /// Gets a list of repair tasks matching the given filters.
     /// </summary>
     [Cmdlet(VerbsCommon.Get, "SFRepairTaskList")]
-    public partial class GetRepairTaskListCmdlet : CommonCmdletBase
+    public partial class GetRepairTaskListCmdlet : RepairCmdletBase
     {
         /// <summary>
         /// Gets or sets TaskIdFilter. The repair task ID prefix to be matched.
@@ -46,7 +46,7 @@ namespace Microsoft.ServiceFabric.Powershell.Http
         /// <inheritdoc/>
         protected override void ProcessRecordInternal()
         {
-            var result = this.ServiceFabricClient.Repairs.GetRepairTaskListAsync(
+            var result = this.RepairClient.GetRepairTaskListAsync(
                 taskIdFilter: this.TaskIdFilter,
                 stateFilter: this.StateFilter,
                 executorFilter: this.ExecutorFilter,

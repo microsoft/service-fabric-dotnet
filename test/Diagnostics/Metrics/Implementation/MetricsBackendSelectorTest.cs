@@ -29,12 +29,31 @@ public abstract class MetricsBackendSelectorTest : IDisposable
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void IsComInteropWhenSettingIsNotSet(string value)
+        public void IsOpenTelemetryWithStartedPipelineWhenSettingIsNotSet(string value)
         {
             SetBackend(value);
 
+            Assert.Equal(MetricsBackend.OpenTelemetry, MetricsBackendSelector.Backend);
+            Assert.Contains("is not set, so the default OpenTelemetry applies.", AssertInfoTrace(MetricsBackend.OpenTelemetry).Message);
+            Assert.True(SfMetricsPipeline.MetricsEnabled);
+            _ = Assert.Single(scope.Exporters);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void IsComInteropWithoutStartingOpenTelemetryWhenSettingIsNotSetAndAppIsBuiltForOlderFramework(string value)
+        {
+            SetBackend(value);
+            MetricsBackendSelector.ReadAppTargetFramework = () => ".NETCoreApp,Version=v8.0";
+            SfMetricsPipeline.LoadSettings = () => throw new InvalidOperationException("OpenTelemetry started.");
+
             Assert.Equal(MetricsBackend.ComInterop, MetricsBackendSelector.Backend);
-            _ = AssertInfoTrace(MetricsBackend.ComInterop);
+            Assert.Contains(
+                "is not set, so the default OpenTelemetry applies, but the app is built for .NETCoreApp,Version=v8.0,",
+                AssertInfoTrace(MetricsBackend.ComInterop).Message);
+            Assert.DoesNotContain(scope.Traces, t => t.Level == MetricsTraceLevel.Warning);
+            Assert.False(SfMetricsPipeline.MetricsEnabled);
         }
 
         [Theory]

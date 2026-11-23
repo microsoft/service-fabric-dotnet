@@ -10,8 +10,9 @@ namespace Microsoft.ServiceFabric.Diagnostics.Metrics.Implementation;
 
 /// <summary>
 /// Chooses the metrics backend of the process (AppDomain or load context) once, when the first meter provider is created, from
-/// the Telemetry/Metrics ManagedMetricsBackend cluster setting and the framework the app was built for. The native Service
-/// Fabric runtime declares the setting with the same values and the same default.
+/// the Telemetry/Metrics ManagedMetricsBackend cluster setting and the framework the app was built for. OpenTelemetry is the
+/// default, so a cluster sets ComInterop to opt out. The native Service Fabric runtime declares the setting with the same values
+/// and the same default.
 /// </summary>
 static class MetricsBackendSelector
 {
@@ -62,14 +63,22 @@ static class MetricsBackendSelector
             return Choose(MetricsBackend.ComInterop, $"{Setting} could not be read: {e.Message}");
         }
 
+        string setting;
         if (string.IsNullOrEmpty(value))
-            return Choose(MetricsBackend.ComInterop, $"{Setting} is not set.");
-
-        if (Is(value, MetricsBackend.ComInterop))
-            return Choose(MetricsBackend.ComInterop, $"{Setting} is '{value}'.");
-
-        if (!Is(value, MetricsBackend.OpenTelemetry))
         {
+            setting = $"{Setting} is not set, so the default {MetricsBackend.OpenTelemetry} applies";
+        }
+        else if (Is(value, MetricsBackend.OpenTelemetry))
+        {
+            setting = $"{Setting} is '{value}'";
+        }
+        else if (Is(value, MetricsBackend.ComInterop))
+        {
+            return Choose(MetricsBackend.ComInterop, $"{Setting} is '{value}'.");
+        }
+        else
+        {
+            // A cluster sets a value only to opt out of the default, so an unknown one uses COM interop too.
             MetricsTrace.Warning(TraceType, $"{Setting} has an unknown value '{value}'; using {MetricsBackend.ComInterop}.");
             return Choose(MetricsBackend.ComInterop, $"{Setting} has an unknown value '{value}'.");
         }
@@ -80,7 +89,7 @@ static class MetricsBackendSelector
         {
             return Choose(
                 MetricsBackend.ComInterop,
-                $"{Setting} is '{value}', but the app is built for {(string.IsNullOrEmpty(appFramework) ? "an unknown framework" : appFramework)}, " +
+                $"{setting}, but the app is built for {(string.IsNullOrEmpty(appFramework) ? "an unknown framework" : appFramework)}, " +
                 $"and the OpenTelemetry backend needs .NET {minimumDotNetVersion} or later, or .NET Framework {minimumDotNetFrameworkVersion} or later.");
         }
 
@@ -90,11 +99,11 @@ static class MetricsBackendSelector
         }
         catch (Exception e)
         {
-            MetricsTrace.Warning(TraceType, $"{Setting} is '{value}', but OpenTelemetry could not start; using {MetricsBackend.ComInterop}. Error: {e}");
+            MetricsTrace.Warning(TraceType, $"{setting}, but OpenTelemetry could not start; using {MetricsBackend.ComInterop}. Error: {e}");
             return Choose(MetricsBackend.ComInterop, "OpenTelemetry could not start.");
         }
 
-        return Choose(MetricsBackend.OpenTelemetry, $"{Setting} is '{value}'.");
+        return Choose(MetricsBackend.OpenTelemetry, $"{setting}.");
     }
 
     /// <summary>

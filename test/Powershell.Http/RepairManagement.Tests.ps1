@@ -128,8 +128,8 @@ function TestRequests([object] $recorder) {
         AssertEqual ('/$/' + $case.Path) $named.AbsolutePath "$($case.Path): unchanged path"
         AssertEqual $case.Method $recorder.Methods[$before + 1] "$($case.Path): HTTP method"
         AssertEqual $recorder.Bodies[$before] $recorder.Bodies[$before + 1] "$($case.Path): unchanged body"
-        AssertEqual ($original.Query.Replace('api-version=6.0', 'api-version=12.0&ServiceId=' + $service)) `
-            $named.Query "$($case.Path): api-version 12.0 and one ServiceId"
+        AssertEqual ($original.Query.Replace('api-version=6.0', 'api-version=12.1&ServiceId=' + $service)) `
+            $named.Query "$($case.Path): api-version 12.1 and one ServiceId"
         if ($case.Method -eq 'POST') {
             [object] $body = ConvertFrom-Json $recorder.Bodies[$before + 1]
             AssertEqual $taskId $body.TaskId "$($case.Path): task ID"

@@ -36,8 +36,8 @@ partial class RepairManagementClient
         return new RepairManagementClient(http, serviceId);
     }
 
-    // The gateway honors ServiceId only at api-version 12.0 or later, and released 11.x and older gateways reject
-    // api-version 12.0, so a targeted request fails there instead of reaching the Default Repair Manager.
+    // The gateway honors ServiceId only at api-version 12.1 or later, and released 12.0 and older gateways reject
+    // api-version 12.1, so a targeted request fails there instead of reaching the Default Repair Manager.
     // Requests without ServiceId keep api-version 6.0.
     void AddApiVersionAndServiceId(List<string> queryParams)
     {
@@ -47,7 +47,7 @@ partial class RepairManagementClient
             return;
         }
 
-        queryParams.Add("api-version=12.0");
+        queryParams.Add("api-version=12.1");
         queryParams.Add("ServiceId=" + serviceId);
     }
 }

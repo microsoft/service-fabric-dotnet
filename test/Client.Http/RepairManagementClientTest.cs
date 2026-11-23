@@ -56,7 +56,7 @@ public abstract class RepairManagementClientTest : IDisposable
             _ = await named.GetRepairTaskListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
             Request request = Assert.Single(recorder.Requests);
-            Assert.Equal("/$/GetRepairTaskList?api-version=12.0&ServiceId=" + serviceId, request.Uri.PathAndQuery);
+            Assert.Equal("/$/GetRepairTaskList?api-version=12.1&ServiceId=" + serviceId, request.Uri.PathAndQuery);
         }
 
         [Fact]
@@ -134,9 +134,9 @@ public abstract class RepairManagementClientTest : IDisposable
             Assert.Equal(3, recorder.Requests.Count);
             Assert.Contains(recorder.Requests, request => request.Uri.Query == "?api-version=6.0");
             Assert.Contains(recorder.Requests, request => request.Uri.Query ==
-                "?api-version=12.0&ServiceId=System~RepairManagerService~public-a");
+                "?api-version=12.1&ServiceId=System~RepairManagerService~public-a");
             Assert.Contains(recorder.Requests, request => request.Uri.Query ==
-                "?api-version=12.0&ServiceId=System~RepairManagerService~RM2");
+                "?api-version=12.1&ServiceId=System~RepairManagerService~RM2");
         }
     }
 
@@ -166,7 +166,7 @@ public abstract class RepairManagementClientTest : IDisposable
                 ? "?TaskIdFilter=prefix&StateFilter=2&ExecutorFilter=executor&api-version=6.0"
                 : "?api-version=6.0", requests[0].Uri.Query);
             Assert.DoesNotContain("ServiceId", requests[0].Uri.Query);
-            Assert.Equal(requests[0].Uri.Query.Replace("api-version=6.0", "api-version=12.0&ServiceId=" + ServiceId),
+            Assert.Equal(requests[0].Uri.Query.Replace("api-version=6.0", "api-version=12.1&ServiceId=" + ServiceId),
                 requests[1].Uri.Query);
             Assert.DoesNotContain("%7E", requests[1].Uri.Query);
             if (operation != "GetRepairTaskList")

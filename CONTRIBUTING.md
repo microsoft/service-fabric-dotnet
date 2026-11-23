@@ -110,11 +110,11 @@ create/update; `-ExternalImpactLevel RestartNode` supplies its impact when appro
 still work with either service target. The internal External models and converters preserve those tasks on read/update.
 The public kind enums have additive, IntelliSense-hidden `External` values; existing enum values are unchanged.
 
-A targeted request sends `ServiceId` with `api-version=12.0`; requests without it keep `api-version=6.0`. Gateways
-older than 12.0 reject api-version 12.0, but a 12.0 gateway without named Repair Manager support does not recognize
-`ServiceId` and can execute against the default RM, so all receiving HTTP gateways must support named routing before
-it is used. Neither the selector nor `DontShow` grants authorization. Requests retain their existing authentication
-and task-state requirements.
+A targeted request sends `ServiceId` with `api-version=12.1`; requests without it keep `api-version=6.0`. Gateways
+older than 12.1 reject api-version 12.1, but a pre-release 12.1 gateway without named Repair Manager support does not
+recognize `ServiceId` and can execute against the default RM, so all receiving HTTP gateways must support named
+routing before it is used. Neither the selector nor `DontShow` grants authorization. Requests retain their existing
+authentication and task-state requirements.
 Deletion remains `POST /$/DeleteRepairTask` and removes a completed task, not the service. There is no cross-instance
 fallback or task search. Carry the selector through every operation, even when task IDs match between instances.
 

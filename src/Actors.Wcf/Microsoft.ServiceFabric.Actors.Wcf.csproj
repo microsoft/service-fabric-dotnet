@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFrameworks>net462</TargetFrameworks>
     <Description>WCF-based remoting for Service Fabric Reliable Actors.</Description>
   </PropertyGroup>
   <Import Project="..\..\properties\service_fabric_managed_common.props" />

@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net462</TargetFrameworks>
     <RootNamespace>Microsoft.ServiceFabric.Data</RootNamespace>
     <Description>Core abstractions for Service Fabric Reliable Collections — transactional, replicated, persistent data structures.</Description>
   </PropertyGroup>

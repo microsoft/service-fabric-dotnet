@@ -18,6 +18,7 @@ namespace Microsoft.ServiceFabric.AspNetCore.Tests
     /// <summary>
     /// Test class for WebHostBuilderServiceFabricExtension.
     /// </summary>
+    [Obsolete] // Test obsolete IWebHost APIs until they are removed
     public class WebHostBuilderServiceFabricExtensionTests
     {
         private readonly Dictionary<string, string> settings;

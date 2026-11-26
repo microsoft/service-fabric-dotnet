@@ -27,7 +27,8 @@ This repository requires unique knowledge you don't possess; you won't know what
   - After the `coder` is done, proceed to step 2 of the iteration loop.
 
 2. **Prepare prompt for the `reviewer`**.
-  - Extract a file path to be reviewed from your prompt.
+  - _Extract a file path to be reviewed from your prompt_.
+    For test prompts, file path means test code, not the product code in the prompt.
   - Use this prompt template; replace the `{file path}` and `{your prompt}` placeholders.
     ```md
     Execute /review skill with argument `{file path}`.

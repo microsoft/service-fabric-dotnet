@@ -1,6 +1,8 @@
 ---
 name: test
-description: "Test public and internal types in a given scope."
+description: |
+  Test public and internal types in a given scope.
+  Don't use from a sub-agent.
 argument-hint: "(type|namespace|project)"
 ---
 

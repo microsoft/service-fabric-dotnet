@@ -43,6 +43,8 @@ a sharing mechanism. -->
     Replace `- [x] {target}: ...` lines with `- [ ] {target}` when they have no recorded `{blob}`, when their recorded `{blob}`
     differs from the current one, or when they end with ` ⚠️ No longer modified.`, i.e. modified again after being reverted
     or deleted.
+    Also reopen them when `{target}-needs-human-review.md` exists and has a `**Human decision:**` other than `_pending_`.
+    The `iterator` implements such decisions and removes them or resets them to `_pending_`, so they reopen the entry once.
   - _Flag unflagged entries for files missing from target files_, i.e. reverted or deleted.
     Replace `- [ ] {target}` with `- [x] {target}: ⚠️ No longer modified.` Append ` ⚠️ No longer modified.` to
     `- [x] {target}: ...` lines not already ending with it.

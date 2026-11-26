@@ -1,6 +1,6 @@
 ---
 description: Implements and tests code changes.
-tools: [execute, read, search, web]
+tools: [edit, execute, read, search, web]
 model: "Claude Opus 5.5"
 modelPolicy: "required"
 include-custom-instructions: true

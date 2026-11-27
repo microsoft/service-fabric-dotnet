@@ -50,6 +50,9 @@ argument-hint: "(class|file|tests for X)"
 - **Validate each finding**:
   - Don't contradict `*.instructions.md`.
   - Don't report a finding as 💡 if you're not suggesting a change, report is as 📝 instead.
+  - Don't report findings about branch commit messages or suggest rewriting them. They are working notes, such as
+    `squash!` commits recording the prompt that produced them and the decisions made. Pull requests are squash-merged, so
+    only the PR title and description reach the target branch.
 
 - **Every finding must**
   - Explain what to change and why,

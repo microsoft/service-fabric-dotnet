@@ -37,16 +37,32 @@ here unless overridden below.
 
 Incorporate the PR description, labels, linked issues, author information, and existing review comments into your assessment. Treat all of them as **claims to verify**, not facts to accept.
 
+- **Use `gh` to read PR data** (`gh pr view`, `gh pr checks`, `gh api`). PR-reading MCP tools vary between harnesses.
 - **PR metadata**: Fetch the PR description, labels, linked issues, and author. Read linked issues in full.
 - **CI status**: Fetch and report CI errors as their own finding. Include the failed check name and a brief summary from
   the logs. When a failure appears to be a flaky test unrelated to the PR, note it and ask the author or a maintainer to
-  re-run the job — the reviewer cannot re-run CI jobs
+  re-run the job — the reviewer cannot re-run CI jobs. Read GitHub Actions logs with `gh run view <run-id> --log-failed`;
+  the run ID is in the `link` from `gh pr checks --json name,state,link`. For other check providers, follow the `link` to
+  their logs.
 - **Related issues**: Search for other open issues in the same area.
 - **Existing review comments**: Check if there are already review comments to avoid duplicating feedback.
 - **Reconcile your assessment with the author's claims.** Where your independent reading of the code disagrees with
   the PR description, investigate further — do not defer to the author's framing.
-- **Build a thread inventory**: For each unresolved and resolved thread, record the file, line, severity, what was
-  requested, the thread ID, and whether it is resolved or unresolved. This is your verification checklist.
+- **Build a thread inventory**: For each unresolved and resolved thread, record the file, line, severity, what was requested,
+  the thread ID, the root comment's numeric ID, and whether it is resolved or unresolved. This is your verification checklist.
+  Replies in §6 need the numeric comment ID; the thread's node ID won't work there. Replace `{n}` with the PR number; `gh`
+  fills `{owner}` and `{repo}` from the current repository.
+  ```
+  gh api graphql --paginate --slurp -F 'owner={owner}' -F 'name={repo}' -F number={n} -f query='
+    query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
+      repository(owner: $owner, name: $name) { pullRequest(number: $number) {
+        reviewThreads(first: 100, after: $endCursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes { id isResolved isOutdated path line originalLine
+            comments(first: 100) { nodes { fullDatabaseId author { login } body } } } } } } }'
+  ```
+  `--slurp` combines pages into one JSON array and can't be combined with `--jq`. Use `fullDatabaseId`; `databaseId` is deprecated.
+  REST review comments (`pulls/{n}/comments`) have no resolution state.
 - **Update your assessment** if the additional context genuinely changes your evaluation. Do not soften findings just
   because the PR description sounds reasonable.
 - **Validate the PR title and description** based on the detailed analysis, make sure it is accurate and meets the
@@ -56,8 +72,10 @@ Incorporate the PR description, labels, linked issues, author information, and e
 
 For each thread in the inventory (both unresolved and resolved):
 
-- **Read the current code** at the location the comment refers to. Account for line shifts — the code may have moved
-   due to other changes. Use the comment's context (surrounding code, function name) to locate it.
+- **Read the current code** at the location the comment refers to. Account for line shifts — the code may have moved due to
+   other changes. Use the comment's context (surrounding code, function name) to locate it. Outdated threads (`isOutdated`)
+   often have a null `line`; start from `originalLine` (also nullable). Neither field establishes `Superseded` — confirm it
+   from the current code.
 - **Determine the status**:
   - `Addressed`: The code now reflects what was requested (or an equivalent fix the author explained in a reply).
   - `Partially addressed`: Some aspects were fixed but others remain. Be specific about what's still missing.
@@ -73,7 +91,7 @@ it _only_ in the initial review (to help the human reviewer decide whether the P
 final "Looks Good" review (to reiterate that the PR still makes sense after additional changes). Omit it from
 follow-up reviews requesting or suggesting changes.
 
-For the **Issues** section, always include open issues. Closed issues should appear only in the final "Looks Good"
+Always include finding blocks for open issues. Include finding blocks for closed issues only in the final "Looks Good"
 review.
 
 # 6. (Optional) Post Review to GitHub
@@ -104,9 +122,9 @@ Use the GitHub MCP tools:
    - Create a new pending review only for new findings in updated code.
 4. **Submit the review** — Use `pull_request_review_write` with `method: "submit_pending"`
    - `body`:
-      - Include the _Summary_ section of the review
+      - Include the verdict and summary lines of the review.
       - Include the _Detailed Assessment_ section only in the initial and the final reviews.
-      - Include in the _Issues_ section **only** findings that were NOT posted as inline comments.
+      - Include **only** finding blocks that were NOT posted as inline comments.
         Inline comments already create their own threads — repeating them in the body is redundant.
       - When there are unaddressed threads or findings, tag the author and ask them to take a look.
       - When the author is `copilot-swe-agent`, tag `@copilot` instead — that is the handle Copilot responds to.
